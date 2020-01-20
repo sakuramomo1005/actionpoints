@@ -10,3 +10,5 @@ solutions:
 1. use ridge penalty, seems not very well
 2. pull the D1 = D2
 3. let the concavity out. 
+
+
