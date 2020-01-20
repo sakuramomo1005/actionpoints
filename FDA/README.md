@@ -11,4 +11,6 @@ solutions:
 2. pull the D1 = D2
 3. let the concavity out. 
 
-
+results pdf names: 
+1. plot with penalty on the covariance matrix debug
+2. variance dominate
