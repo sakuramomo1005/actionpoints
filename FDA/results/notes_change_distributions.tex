@@ -1,0 +1,198 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+
+\title{Notes}
+%\author{ly1192 }
+%\date{November 2019}
+
+\usepackage{gensymb}
+\usepackage{adjustbox}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{longtable, tabularx}
+\usepackage{epsfig}
+\usepackage{natbib}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{lscape}
+\usepackage{amsmath}
+\usepackage{array,longtable}
+
+
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\usepackage{biblatex} %Imports biblatex package
+\addbibresource{cite.bib}
+
+\newcommand{\argmin}{\arg\!\min}
+
+\usepackage{geometry}
+\geometry{a4paper,left=2cm,right=2cm,top=1cm,bottom=2cm}
+
+
+\renewcommand{\baselinestretch}{1.2}
+
+\setlength{\parindent}{4em}
+\setlength{\parskip}{1em}
+
+
+\begin{document}
+
+Notes 
+
+2020-01-18
+
+\noindent
+In previous results, we fit the outcome variable with a linear mixed model 
+$$Y = S(\beta + b + \Gamma(\alpha^\prime x)) + \epsilon$$
+and treat the coefficient 
+$z = \beta + b + \Gamma(\alpha^\prime x)$ as a MVN, that is, 
+$z| w \sim MVN(\beta + \Gamma(\alpha^\prime x), D)$. 
+
+\noindent
+We may also calculate the Kullback-Leibler divergence by using the outcome variables directly, by assuming
+$$Y = X(\beta +\Gamma(\alpha^\prime x)) + Z b +  \epsilon$$
+$$Y \sim MVN(S(\beta +\Gamma(\alpha^\prime x)) , Z D Z ^\prime)$$
+Let's see whether they can return similar results. 
+
+
+\section{Kullback-Leibler divergence and Purity}
+
+To measure how much the differences are between the treatment group and the placebo group, we apply the Kullback-Leibler (KL) divergence, which measures how one probability distribution $F_1$ is different from another probability distribution $F_2$. 
+\begin{equation} \label{eq0}
+D_{KL}(F_1 || F_2) = \int_{-\infty}^{+\infty} f_1(x) \log(\frac{f_1(x)}{f_2(x)})dx
+\end{equation}
+where $f_1$ and $f_2$ denote the probability density functions (pdf) of $F_1$ and $F_2$, separately. The larger the KL divergence between distributions is, the more "pure" the distributions are. 
+Besides, $D_{KL}(F_1 || F_2) \geq 0$. Similarly, the $D_{KL}(F_2 || F_1)$ is also always larger than or equals to 0.
+
+\noindent
+Based on the Kullback-Leibler divergence, we define the $purity$, which represent how much the differences between the treatment group distribution $F_1$ and the placebo group distribution $F_2$. 
+\noindent
+We define the puirty function of the summation of two Kullback-Leibuler divergence as 
+\begin{equation} \label{eq4}
+\begin{aligned}
+purity = & D_{KL}(F_1 || F_2) + D_{KL}(F_2 || F_1) \\
+ = &\int_{-\infty}^{+\infty} f_1(x) \log(\frac{f_1(x)}{f_2(x)})dx +  \int_{-\infty}^{+\infty} f_2(x) \log(\frac{f_2(x)}{f_1(x)})dx
+\end{aligned}
+\end{equation}
+where 
+$$f_1(x) \sim MVN(\bm \mu_1, \bm \Sigma_1)$$
+$$f_2(x) \sim MVN(\bm \mu_2, \bm \Sigma_2)$$
+Let's calculate the purity value by calculating
+$\int f_1 \log f_1, \int f_2 \log f_2, \int f_1 \log f_2$, and $\int f_2 \log f_1$.
+
+\subsubsection*{Part $\int f_1 \log f_1$}
+
+\begin{equation*}
+    \begin{aligned}
+\int  f_1 \log f_1 = & E_1\big\{ -\frac{n}{2} \log(2\pi) - \frac{1}{2} \log(|\bm \Sigma_1 |) - 
+\frac{1}{2}( \bm x - \bm \mu_1 )^{\prime}(\bm \Sigma_1)^{-1}(\bm x - \bm \mu_1)\big \} \\
+=&-\frac{n}{2} \log(2\pi) - \frac{1}{2} \log(|\bm \Sigma_1 |)  -\frac{1}{2}E_1[( \bm x - \bm \mu_1 )^{\prime}(\bm \Sigma_1)^{-1}(\bm x - \bm \mu_1)]
+\end{aligned}
+\end{equation*}
+And
+$$\begin{aligned}
+E_1[( \bm x - \bm \mu_1 )^{\prime}(\bm \Sigma_1)^{-1}(\bm x - \bm \mu_1)] = & E_1 [tr(( \bm x - \bm \mu_1 )^{\prime}(\bm \Sigma_1)^{-1}(\bm x - \bm \mu_1))] \\
+= & E_1 [tr \big( (\bm \Sigma_1)^{-1} (\bm x - \bm \mu_1)(\bm x - \bm \mu_1)^\prime \big) ] \\
+= & tr \big(E_1[ (\bm \Sigma_1)^{-1} (\bm x - \bm \mu_1)(\bm x - \bm \mu_1)^\prime \big) ] \big) \\
+= & tr \big(\Sigma_1^{-1} E_1[(\bm x - \bm \mu_1)(\bm x - \bm \mu_1)^\prime] \big) \\
+= & tr \big(\Sigma_1^{-1} \Sigma_1 \big) = tr(\bm I_n) = n
+\end{aligned}$$
+\noindent
+Therefore, 
+\begin{equation} \label{eq 5}
+    \int f_1 \log f_1 =-\frac{n}{2} \log(2\pi) - \frac{1}{2} \log(|\bm \Sigma_1|) -\frac{n}{2}
+\end{equation}
+
+\noindent
+Similarly,
+\begin{equation} \label{eq 5}
+    \int f_2 \log f_2 =-\frac{n}{2} \log(2\pi) - \frac{1}{2} \log(|\bm \Sigma_2|) -\frac{n}{2}
+\end{equation}
+
+\subsubsection*{Part $\int f_1 \log f_2$}
+
+$$\begin{aligned}
+\int f_1 \log f_2 =  & E_1(-\frac{n}{2} \log(2\pi) - \frac{1}{2}\log(| \bm \Sigma_2 |)  -\frac{1}{2}(\bm x - \mu_2)^\prime \Sigma_2^{-1} (\bm x - \mu_2) )\\
+= & -\frac{n}{2} \log(2\pi) - \frac{1}{2}\log(| \bm \Sigma_2 |) - \frac{1}{2} E_1 [(\bm x - \mu_2)^\prime \Sigma_2^{-1} (\bm x - \mu_2)]
+\end{aligned}$$
+And
+$$\begin{aligned} 
+& E_1[(\bm x - \bm \mu_2)^{\prime} \bm \Sigma_2^{-1}(x - \bm \mu_2)] \\
+= & E_1[(\bm x - \bm \mu_1 + \bm \mu_1 - \bm \mu_2)^{\prime} \bm \Sigma_2^{-1}(\bm x - \bm \mu_1 + \bm \mu_1 - \bm \mu_2)] \\
+=& E_1[(\bm x - \bm \mu_1)^{\prime} \bm \Sigma_2^{-1}(\bm x - \bm \mu_1) + (\bm \mu_1 - \bm \mu_2)^{\prime} \bm \Sigma_2^{-1}(\bm x - \bm \mu_1) \\
+       & + (\bm x - \bm \mu_1) \bm \Sigma_2^{-1} ( \bm \mu_1 -\bm \mu_2) + (\bm \mu_1 -\bm \mu_2)^{\prime}\bm \Sigma_2^{-1}(\bm \mu_1 - \bm \mu_2)] \\
+=& E_1[(\bm x - \bm \mu_1)^{\prime}\bm \Sigma_2^{-1}(\bm x - \bm \mu_1)] + (\bm \mu_1 -\bm \mu_2)^{\prime}\bm \Sigma_2^{-1}E_1(\bm x - \bm \mu_1) + \\
+       & E_1(\bm x - \bm \mu_1)^{\prime})\Sigma_2^{-1} (\bm \mu_1 -\bm \mu_2) +  (\bm \mu_1 -\bm \mu_2)^{\prime}\bm \Sigma_2^{-1}(\bm \mu_1 -\bm \mu_2)\\
+=&E_1[(\bm x - \bm \mu_1)^{\prime}\bm \Sigma_2^{-1}(\bm x - \bm \mu_1)]  + 0 + 0 +  (\bm \mu_1 - \bm \mu_2)^{\prime}\bm \Sigma_2^{-1}(\bm \mu_1 - \bm \mu_2) \\
+       =&  E_1[tr(\bm x - \bm \mu_1)^{\prime}\bm \Sigma_2^{-1}(\bm x - \bm \mu_1))] + (\bm \mu_1 - \bm \mu_2)^{\prime}\bm \Sigma_2^{-1}(\bm \mu_1 - \bm \mu_2)  \\
+=& E_1[tr(\bm \Sigma_2^{-1}(\bm x - \bm \mu_1)^{\prime}(\bm x - \bm \mu_1))] + (\bm \mu_1 - \bm \mu_2)^{\prime}\bm \Sigma_2^{-1}(\bm \mu_1 - \bm \mu_2) \\
+       =& tr(E_1[\bm \Sigma_2^{-1}(\bm x - \bm \mu_1)^{\prime}(\bm x - \bm \mu_1)]) + (\bm \mu_1 - \bm \mu_2)^{\prime}\bm \Sigma_2^{-1}(\bm \mu_1 - \bm \mu_2) \\
+=& tr(\bm \Sigma_2^{-1} E_1[(x - \bm \mu_1)^{\prime}(\bm x - \bm \mu_1)]) + (\bm \mu_1 - \bm \mu_2)^{\prime}\bm \Sigma_2^{-1}(\bm \mu_1 - \bm \mu_2) \\
+       =& tr(\bm \Sigma_2^{-1} \bm \Sigma_1) + (\bm \mu_1 - \bm \mu_2)^{\prime}\bm \Sigma_2^{-1}(\bm \mu_1 - \bm \mu_2) 
+\end{aligned}$$
+Therefore, 
+\begin{equation}
+    \int f_1 \log f_2 = -\frac{n}{2} \log(2\pi) - \frac{1}{2}\log(| \bm \Sigma_2 |) - \frac{1}{2} \big\{ tr(\bm \Sigma_2^{-1} \bm \Sigma_1) + (\bm \mu_1 - \bm \mu_2)^{\prime}\bm \Sigma_2^{-1}(\bm \mu_1 - \bm \mu_2) \big\}
+\end{equation}
+Similarly,
+\begin{equation}
+    \int f_2 \log f_1 = -\frac{n}{2} \log(2\pi) - \frac{1}{2}\log(| \bm \Sigma_1 |) - \frac{1}{2} \big\{ tr(\bm \Sigma_1^{-1} \bm \Sigma_2) + (\bm \mu_1 - \bm \mu_2)^{\prime}\bm \Sigma_1^{-1}(\bm \mu_1 - \bm \mu_2) \big\}
+\end{equation}
+Then the purity is 
+\begin{equation}
+\begin{aligned}
+& \int f_1 \log f_1  + \int f_2 \log f_2  - \int f_2 \log f_1 -\int f_1 \log f_2 \\
+= & -\frac{n}{2} \log(2\pi) - \frac{1}{2} \log(|\bm \Sigma_1|) -\frac{n}{2} \\
+ - & \frac{n}{2} \log(2\pi) - \frac{1}{2} \log(|\bm \Sigma_2|) -\frac{n}{2}\\
+- & (-\frac{n}{2} \log(2\pi) - \frac{1}{2}\log(| \bm \Sigma_2 |) - \frac{1}{2} \big\{ tr(\bm \Sigma_2^{-1} \bm \Sigma_1) + (\bm \mu_1 - \bm \mu_2)^{\prime}\bm \Sigma_2^{-1}(\bm \mu_1 - \bm \mu_2) \big\}) \\
+- & (-\frac{n}{2} \log(2\pi) - \frac{1}{2}\log(| \bm \Sigma_1 |) - \frac{1}{2} \big\{ tr(\bm \Sigma_1^{-1} \bm \Sigma_2) + (\bm \mu_1 - \bm \mu_2)^{\prime}\bm \Sigma_1^{-1}(\bm \mu_1 - \bm \mu_2) \big\}) \\
+= &  -n + \frac{1}{2} tr(\bm \Sigma_1^{-1} \bm \Sigma_2) + \frac{1}{2} tr(\bm \Sigma_2^{-1} \bm \Sigma_1) \\+ & \frac{1}{2} [(\bm \mu_1 - \bm \mu_2)^{\prime}\bm \Sigma_1^{-1}(\bm \mu_1 - \bm \mu_2)] + \frac{1}{2} [(\bm \mu_1 - \bm \mu_2)^{\prime}\bm \Sigma_2^{-1}(\bm \mu_1 - \bm \mu_2)] 
+\end{aligned}
+\end{equation}
+
+\noindent
+Then the purity is defined as 
+$-n + \frac{1}{2} tr(\bm \Sigma_1^{-1} \bm \Sigma_2) + \frac{1}{2} tr(\bm \Sigma_2^{-1} \bm \Sigma_1)+  \frac{1}{2} [(\bm \mu_1 - \bm \mu_2)^{\prime}\bm \Sigma_1^{-1}(\bm \mu_1 - \bm \mu_2)] + \frac{1}{2} [(\bm \mu_1 - \bm \mu_2)^{\prime}\bm \Sigma_2^{-1}(\bm \mu_1 - \bm \mu_2)]$ for two normal distributions $f_1$, $f_2$ with mean $\mu_1, \mu_2$ respectively and covariance matrix $\Sigma_1, \Sigma_2$ respectively. 
+
+
+
+\noindent
+Back to our model, when 
+we fit the coefficients of the LME, i,e, 
+$$z = \bm \beta + \bm b + \bm \Gamma (\bm {\alpha^\prime x})$$ as multivariate normal distributions and plug in equation (7), we can get our purity function: 
+\begin{equation} \label{eq7}
+    Purity( \alpha)=  A_0 + A_1 \bm \mu_x ^\prime \bm \alpha + \frac{A_2}{2} \big[\bm \alpha^\prime \bm \Sigma_x \bm \alpha + \bm \alpha^\prime \bm \mu_x \bm \mu_x^\prime \bm \alpha \big]
+\end{equation}
+where $$A_0 = -q + \frac{1}{2}tr(\bm D_2^{-1} \bm D_1) +\frac{1}{2}tr(\bm D_1^{-1} \bm D_2)+ \frac{1}{2} (\bm \beta_1 - \bm \beta_2) ^{\prime}  (\bm D_1^{-1} + \bm D_2^{-1}) (\bm \beta_1 - \bm \beta_2)$$
+$$A_1 = (\bm \beta_1 - \bm \beta_2) ^{\prime}  (\bm D_1^{-1} + \bm D_2^{-1}) (\bm \Gamma_1 - \bm \Gamma_2)$$
+$$A_2 = (\bm \Gamma_1 - \bm \Gamma_2)  \big) ^{\prime}(\bm D_1^{-1} + \bm D_2^{-1}) \big((\bm \Gamma_1 - \bm \Gamma_2)$$
+
+\noindent
+When we fit  the outcome as normal distribution and plug in the equation (7), we can simply replace the $\bm \beta$ in equation (8) as $\bm S \bm \beta$; replace $\bm \Gamma$ as $\bm S \bm \Gamma$; replace $\bm D$ as $\bm Z \bm D \bm Z^\prime$
+
+
+\noindent
+Replace $\bm \mu_1$, $\bm \mu_2$ with $\bm X (\bm \beta_1+ \bm \Gamma_1 (\bm \alpha^\prime \bm x))$, and $\bm X (\bm \beta_2+ \bm \Gamma_2 (\bm \alpha^\prime \bm x))$. Replace $\bm D_1, \bm D_2$ with $Z \bm D_1 \bm Z^\prime$, $Z \bm D_2 \bm Z^\prime$. Then the purity function is 
+\begin{equation}
+    Purity( \alpha)=  B_0 + B_1 \bm \mu_x ^\prime \bm \alpha + \frac{B_2}{2} \big[\bm \alpha^\prime \bm \Sigma_x \bm \alpha + \bm \alpha^\prime \bm \mu_x \bm \mu_x^\prime \bm \alpha \big]
+\end{equation}
+where 
+$$\begin{aligned}
+B_0 = & -q + \frac{1}{2}tr(\bm (Z \bm D_2 \bm Z^\prime)^{-1} \bm ( \bm Z \bm D_1 \bm Z^\prime)) +\frac{1}{2}tr(\bm (\bm  Z \bm D_1 \bm Z^\prime)^{-1} \bm ( \bm  Z \bm D_2 \bm Z^\prime)) \\+ & \frac{1}{2} (\bm S \bm \beta_1 - \bm S \bm \beta_2) ^{\prime}  (\bm ( \bm  Z \bm D_1 \bm Z^\prime)^{-1} + \bm ( \bm  Z \bm D_2 \bm Z^\prime)^{-1}) (\bm S \bm \beta_1 - \bm S \bm \beta_2)\end{aligned}$$
+$$B_1 = (\bm S \bm \beta_1 - \bm S \bm \beta_2) ^{\prime}  (\bm (\bm  Z \bm D_1 \bm Z^\prime)^{-1} + \bm (\bm  Z \bm D_2 \bm Z^\prime)^{-1}) (\bm S \bm \Gamma_1 - \bm S \bm \Gamma_2)$$
+$$B_2 = (\bm S \bm \Gamma_1 - \bm S \bm \Gamma_2)  \big) ^{\prime}(\bm (\bm  Z \bm D_1 \bm Z^\prime)^{-1} + \bm (\bm  Z \bm D_2 \bm Z^\prime)^{-1}) \big((\bm S \bm \Gamma_1 - \bm S\bm \Gamma_2)$$
+
+
+
+%\subsection{Linear Mixed Model with Linear Combination of Baseline Biosignatures}
+
+%\subsubsection{Purity Calculation}
+
+%\subsection{Optimization of $\alpha$}
+
+
+
+
+\end{document}

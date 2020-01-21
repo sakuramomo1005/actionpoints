@@ -1,0 +1,223 @@
+---
+title: "change the normal distribution"
+output: pdf_document
+date: 2020-01-20
+---
+
+
+Previously, we looked at coefficients of the lme model: $z= (\beta + \Gamma (\alpha^\prime x) + b) \sim MVN (\beta + \Gamma (\alpha^\prime x), D)$, and used these normal distributions to calculate the purity. 
+
+We may also treat the outcome $Y$ as normal distributions and fit $Y = X(\beta + \Gamma (\alpha^\prime x)) + Zb \sim MVN (X(\beta + \Gamma (\alpha^\prime x)), Z D Z ^\prime)$ to calculate the purity. 
+
+However, this method has some problem, since in our example, the covariance matrix $Z D Z ^\prime$ is non-inversable. 
+
+```{R include = FALSE}
+setwd('/Users/yaolanqiu/Desktop/NYU/Research/FDA/1.2 lambda_I and theta 20191216')
+load('EMBARC_parameter.RData')
+library(knitr)
+```
+
+The true D matrix is 
+```{R echo = FALSE}
+kable(result$D1[1:2, 1:2])
+d1  = result$D1[1:2, 1:2]
+```
+
+The $Z$ matrix is 
+```{R echo = FALSE}
+z = cbind(rep(1,7), 1:7)
+z
+```
+
+Then 
+```{R}
+z %*% d1 %*% t(z)
+```
+
+```{R}
+eigen(z %*% d1 %*% t(z))$values
+```
+
+it is not inversable. I then calculate the following simulations by using its generalized inverse. 
+
+
+# Simulation with one dataset
+
+simulate one data set, check whether the two method can return the same estimated $\alpha$. 
+
+set the true $\alpha = [\cos(\frac{\pi}{4}), \sin(\frac{\pi}{4})]$
+
+```{R include = FALSE}
+library(knitr)
+library(lme4)
+library(lsa)
+
+setwd('~/Desktop/NYU/Research/FDA/3. change covariates')
+load('demo_generation1.RData')
+
+```
+
+
+```{R fig.width=5, fig.height=4,echo=FALSE,  fig.align = "center"}
+purity1 = result$purity1
+purity2 = result$purity2
+plot(seq(0,360,1) / 180 * 3.14, purity2, type = 'l', ylim = c(0,200), ylab = 'purity', xlab ='theta')
+lines(seq(0,360,1)/ 180 * 3.14, purity1, col = 2)
+abline(v = 45/ 180 * 3.14, col = 2, lwd = 2, lty = 2)
+abline(v = 225/ 180 * 3.14, col = 2, lwd = 2, lty = 2)
+legend('topright',legend = c('coeff', 'outcome'), col = c(2,1), lty = 1)
+```
+
+The true $\theta$ value is $\frac{\pi}{4} \approx 0.785$. 
+The estimated $\theta$ that maximizes the purity by fiting the coefficients as normal distributions: 
+
+```{R echo= FALSE}
+seq(0,360,1)[which(purity1 == max(purity1))][1] / 180 * 3.1415926
+```
+
+The estimated $\theta$ that maximizes the purity by fiting the outcome as normal distributions: 
+
+```{R echo= FALSE}
+seq(0,360,1)[which(purity2 == max(purity2))][1] / 180 *  3.1415926
+```
+
+
+
+# Simulation with 1000 repetitions 
+
+```{R include = FALSE}
+#### covariates use the x beta
+#### 2020-01-18
+
+setwd('~/Desktop/NYU/Research/FDA/3. change covariates')
+
+load('EMBARC_parameter.RData')
+theta = c(0, 60, 120, 180)
+
+setwd('~/Desktop/NYU/Research/FDA/3. change covariates/')
+
+truekl = c()
+for(i in 1:length(theta)){
+  names = paste('sim_coeff_20200118_g_', theta[i], '.RData', sep='')
+  load(names)
+  truekl = c(truekl, -result$trueKL)
+}
+  
+Purity = c()
+sdp = c()
+cossim = c()
+theta_est = c()
+coverage = c()
+
+for(i in 1:length(theta)){
+  names = paste('sim_coeff_20200118_g_', theta[i], '.RData', sep='')
+  load(names)
+  # purity
+  purity = -result$purity
+  Purity = c(Purity, mean(purity))
+  sdp = c(sdp, sd(purity))
+  hist(purity, breaks = 50)
+
+  coverage= c(coverage, sum((purity - 1.96 * sd(purity) < truekl[i]) & 
+                              (purity + 1.96 * sd(purity) > truekl[i]))/ length(purity))
+  
+  # alpha
+  costemp = c()
+  theta_temp = c()
+  for(j in 1:length(purity)){
+    vec1 = c(1,1)
+    vec2 = result$alphas[[j]]
+    vec2 = vec2 / sqrt(sum(vec2^2))
+    theta_temp = c(theta_temp, acos(vec2[1]))
+    costemp = c(costemp, cosine(vec1, vec2))
+  }
+  
+  theta_est = c(theta_est, mean(theta_temp))
+  cossim = c(cossim, mean(costemp))
+}
+
+res1 = data.frame(truekl = truekl, Purity = Purity, sdp = sdp,
+                  coverage =  coverage, theta_est = theta_est, 
+                  cossim = cossim)
+
+## compare the results with the coefficient normal
+
+setwd('~/Desktop/NYU/Research/FDA/2. leave one out/alpha')
+theta = c(0, 60, 120, 180)
+Purity = c()
+sdp = c()
+cossim = c()
+theta_est = c()
+truekl = c()
+coverage = c()
+
+for(i in 1:length(theta)){
+  names = paste('sim_202001172_', theta[i], '.RData', sep='')
+  load(names)
+  # purity
+  purity = -result$purity
+  Purity = c(Purity, mean(purity))
+  sdp = c(sdp, sd(purity))
+  hist(purity, breaks = 50)
+  
+  coverage= c(coverage, sum((purity - 1.96 * sd(purity) < - result$trueKM) & 
+  (purity + 1.96 * sd(purity) > - result$trueKM))/ length(purity))
+  
+  truekl = c(truekl, - result$trueKM)
+  # alpha
+  costemp = c()
+  theta_temp = c()
+  for(j in 1:length(purity)){
+    vec1 = c(1,1)
+    vec2 = result$alphas[[j]]
+    vec2 = vec2 / sqrt(sum(vec2^2))
+    theta_temp = c(theta_temp, acos(vec2[1]))
+    costemp = c(costemp, cosine(vec1, vec2))
+  }
+  
+  theta_est = c(theta_est, mean(theta_temp))
+  cossim = c(cossim, mean(costemp))
+}
+res2 = data.frame(truekl = truekl, Purity = Purity, sdp = sdp,
+                  coverage =  coverage, theta_est = theta_est, 
+                  cossim = cossim)
+
+```
+
+
+#### Estimate the coefficient as $z= (\beta + \Gamma (\alpha^\prime x) + b) \sim MVN (\beta + \Gamma (\alpha^\prime x), D)$ and then calculate the purity
+
+```{R echo = FALSE}
+res2 = round(res2, 3)
+kable(res2)
+```
+
+The columns contain: 
+
+* truekl: the true purity
+* Purity: the mean estimated  purity
+* sdp: the standard deviation of the estimated purity
+* coverage: how many times the true purity is contained in the estimated confidence interval
+* theta_est: the estimated $\theta$, where $\alpha = [\cos(\theta), \sin(\theta)]$
+* cossim: the cosine similarity of the estimated $\hat \alpha$ and $\alpha$
+
+
+
+#### Estimate the outcomes as $Y = X(\beta + \Gamma (\alpha^\prime x)) + Zb \sim MVN (X(\beta + \Gamma (\alpha^\prime x)), Z D Z ^\prime)$ and then calculate the purity
+
+```{R echo = FALSE}
+res1 = round(res1, 3)
+kable(res1)
+```
+
+The columns contain: 
+
+* truekl: the true purity
+* Purity: the mean estimated  purity
+* sdp: the standard deviation of the estimated purity
+* coverage: how many times the true purity is contained in the estimated confidence interval
+* theta_est: the estimated $\theta$, where $\alpha = [\cos(\theta), \sin(\theta)]$
+* cossim: the cosine similarity of the estimated $\hat \alpha$ and $\alpha$
+
+
+By using this method, the standard deviation of estimated puirty get much smaller. But the cosine similarity get worse than using our pervious method. 
