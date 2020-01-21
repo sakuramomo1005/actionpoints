@@ -4,3 +4,5 @@
 2. real data analysis and time dependent ROC
     + try real data, separate to training and testing dataset, fit the model and estimate the auc, roc, other metrics
 
+
+## 2020-01-20
