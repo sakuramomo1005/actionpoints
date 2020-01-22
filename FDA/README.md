@@ -1,5 +1,15 @@
 
-## 2020-01-20
+## 2020-01-21
+
+to do list
+
+1. the variance, has something wrong, use ZDZ + R instead of ZDZ, cos not invertable. 
+    + change the name of the theta, to sth else, cos may be mixed up with the theta of alpha,
+2. prediction:
+    + think about the performance measure. 
+    + think about the decision rule
+3. read the paper. why beta = hat sigma / hat sigma has a smaller varaince than beta = hat sigma / sigma
+    
 
 ## 2020-01-16
 
