@@ -10,6 +10,7 @@ to do list
     + think about the decision rule
 3. read the paper. why beta = hat sigma / hat sigma has a smaller varaince than beta = hat sigma / sigma
     
+    
 
 ## 2020-01-16
 
