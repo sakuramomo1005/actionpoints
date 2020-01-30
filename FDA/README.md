@@ -1,3 +1,13 @@
+## 2020-01-30
+
+to do list
+
+1. draw the true points on the trajectory plots 
+2. prediction: generate training set. generate testing set, calculate counterfactor outcome. 
+3. use the average tangent slope as the measure
+4. ask for the paper
+5. try different scenario, change the sigma I larger, make the variance of concavnity smaller
+
 
 ## 2020-01-28
 
