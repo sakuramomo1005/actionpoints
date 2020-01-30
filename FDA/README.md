@@ -1,4 +1,11 @@
 
+## 2020-01-28
+
+to do list
+
+1. draw the bar plots
+2. different metrics for performance measure
+    
 ## 2020-01-21
 
 to do list
