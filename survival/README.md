@@ -1,4 +1,15 @@
 
+## 2020-02-03
+
+1. goodness fit (check whether the model fit correctly), or parametric goodness fit, model sepecified test
+2. book, applied logistic regression Hosmer, (goodness fit of logistic regression)
+3. model diagnosis 
+4. prediction, live longer than 3 years or not 
+5. try male female
+6. relaxed assumption 
+7. find covariates, significant for m function, not significant for cox model
+8. lasso, variable selection, glmnet, fit cox model with variable selection, adaptive lasso, glmnet + binary regression
+
 ## 2020-01-21
 
 1. the proof of the relationship, has some problem, check the book, counting process, page 26, 27 the formula
