@@ -1,3 +1,15 @@
+
+
+## 2020-02-06
+
+to do list
+
+1. more scenario, change random error value, make it bigger  
+2. more scenario, change the gamma values, make it larger 
+3. repor the score, the difference, instead of just report the signa 
+
+
+
 ## 2020-01-30
 
 to do list
