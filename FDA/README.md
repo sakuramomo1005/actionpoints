@@ -8,7 +8,7 @@ to do list
 2. more scenario, change the gamma values, make it larger 
 3. repor the score, the difference, instead of just report the signa 
 
-
+random error: pbo 14, drg: 11
 
 ## 2020-01-30
 
