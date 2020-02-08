@@ -1,0 +1,9 @@
+ROC 
+
+sens <- NULL
+speci <- NULL
+for (i in seq(0,1,by = 0.01)) {
+  tar <- ifelse(aSAH$s100b < i, yes = 'Poor', no = 'Good')
+  sens <- c(sens,sum((aSAH$outcome == tar)[aSAH$outcome == 'Good'])/length(aSAH$outcome == 'Good'))
+  speci <- c(speci,sum((aSAH$outcome == tar)[aSAH$outcome == 'Poor'])/length(aSAH$outcome == 'Poor'))
+}
