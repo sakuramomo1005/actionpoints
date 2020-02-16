@@ -1,4 +1,13 @@
 
+## 2020-02-15
+
+we still need to construct example to let cox model mis-specify the model, otherwise, the KM can still work. 
+
+## 2020-02-12
+
+
+
+
 ## 2020-02-03
 
 1. goodness fit (check whether the model fit correctly), or parametric goodness fit, model sepecified test
