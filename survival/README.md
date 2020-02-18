@@ -5,7 +5,11 @@ we still need to construct example to let cox model mis-specify the model, other
 
 ## 2020-02-12
 
-
+1. previous results, make it more clear
+2. for the table, report the confidence interval, show that the true value is not in the confidence interval,
+3. true exp(beta x)
+4. look for joint model
+5. read yuan ming's paper again, how he did the simulation 
 
 
 ## 2020-02-03
