@@ -1,4 +1,14 @@
 
+
+
+## 2020-02-19
+
+Begin from simple cox ph model
+
+1. beta0 is big, but drop beta0. the model is misspecified
+2. beta0 is not only one, it is a vector, each of them are small but the summation is big
+3. 
+
 ## 2020-02-15
 
 we still need to construct example to let cox model mis-specify the model, otherwise, the KM can still work. 
