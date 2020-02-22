@@ -9,6 +9,14 @@ Begin from simple cox ph model
 2. beta0 is not only one, it is a vector, each of them are small but the summation is big
 3. 
 
+#### questions 
+
+1. why under independent censoring, cox model doesn't fit well? 
+2. why logistic model doesnt't fit well? 
+3. how to evaluate the cox model, precision of estimation 
+4. how to pull out the S0t function
+
+
 ## 2020-02-15
 
 we still need to construct example to let cox model mis-specify the model, otherwise, the KM can still work. 
