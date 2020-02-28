@@ -4,12 +4,29 @@
 
 ## 2020-02-27
 
+1. name of agreement? percentage of correct decision. concordance 
+2. derive the variance of beta
+3. test the similar between beta, use chi square 
+
+4. whether lower the sample size, there will be a trend that larger sigma will affect the concordance? 
+5. try different parameter settings since the intercept dominate the value. 
 
 ## 2020-02-20
+
+to do list
+
+1. we will call the linear regression method as change score method 
+2. draw the tables of agreements into grahps
+3. as dimension increasing, two vectors tend to be orthogonal
+
 
 
 ## 2020-02-13
 
+1. measure the agreement
+  + the alpha method, considers the longitutinal effect of the data 
+  + try linear regresssion
+  + to make decision functions: prediction the group assignment
 
 
 ## 2020-02-06
