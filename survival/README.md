@@ -4,6 +4,23 @@
 
 begin with the simpleset scenarios. 
 
+independent does not mean non informative
+
+need to know or derive the expression and then do simulation, 
+
+How to evaluate the method? 
+
+  + AUC, draw roc curve
+  + median covariates's kaplan meier 
+  + predict the survival probabiltiy 
+
+
+later: 
+  + other glm link may also work.  or time dependent logistic regression
+  + may also separate the time and covariates related to early death and late death 
+  + find some famous real dataset, about 3-5, check the prediction effect, i.e. the dataset in mstate package. 
+  + try independent first. 
+
 
 ## 2020-02-19
 
