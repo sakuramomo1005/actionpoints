@@ -1,5 +1,11 @@
 
 
+## 2020-03-12 
+
+1. The true group decision rule should be the same in the longitudinal method and change score method
+2. need analysis of application, the EMBARC data 
+cross validation 
+
 
 
 ## 2020-02-27
