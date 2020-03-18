@@ -1,3 +1,9 @@
+
+# 2020-03-17
+
+change formula
+add true group, true proportion 
+
 # 2020-01-18
 
 Find a bug in code. The true alpha value is changed during the replacation. 
