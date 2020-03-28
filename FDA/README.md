@@ -1,5 +1,18 @@
 
 
+
+## 2020-03-26
+
+1. Since the simulation result is affect a lot by the covariance of the concavity term. Try to fit the LME withtout the random effect of concavity term 
+2. Try to calculate the model with outcome directly instead of using coefficnet 
+3. For the longitudinal method, try to compare with the fixed effect + random effct, without random error. change the code in data generation. 
+4. inverse probablity weighting (IPW) estimation. everybody's change score is the weight. 
+
+## 2020-03-19
+
+emergency　
+
+
 ## 2020-03-12 
 
 1. The true group decision rule should be the same in the longitudinal method and change score method
