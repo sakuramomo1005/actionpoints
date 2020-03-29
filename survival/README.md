@@ -1,5 +1,22 @@
 
 
+
+## 2020-03-24
+
+* increase the sample size, since the censoring has a big proportion 
+* vary the correlation rho, whether when rho = 0 the error can be smaller
+* calculate MSE
+* check the estimation method 
+* baseline: breslow profile likelihood 
+
+* likelihood! 
+
+
+
+## 2020-03-18
+
+
+
 ## 2020-02-26
 
 begin with the simpleset scenarios. 
