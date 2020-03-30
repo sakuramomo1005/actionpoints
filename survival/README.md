@@ -9,6 +9,8 @@
 * check the estimation method 
 * baseline: breslow profile likelihood 
 
+* double robust 
+
 * likelihood! 
 
 
