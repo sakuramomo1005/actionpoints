@@ -8,6 +8,10 @@
 3. For the longitudinal method, try to compare with the fixed effect + random effct, without random error. change the code in data generation. 
 4. inverse probablity weighting (IPW) estimation. everybody's change score is the weight. 
 
+* tables in one file
+* figures in one file, with different ylim
+* write up 
+
 ## 2020-03-19
 
 emergency　
