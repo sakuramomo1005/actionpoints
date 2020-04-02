@@ -1,6 +1,10 @@
 
 
 
+## 2020-04-01
+
+* 
+
 ## 2020-03-24
 
 * increase the sample size, since the censoring has a big proportion 
