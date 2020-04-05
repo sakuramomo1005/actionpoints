@@ -1,5 +1,10 @@
 
 
+## 2020-04-02
+
+* IPWE for both decision method, which one is better. 
+* double check the comparisons. make sure we are comparing apple to apple. 
+
 
 ## 2020-03-26
 
