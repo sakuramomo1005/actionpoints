@@ -3,7 +3,12 @@
 
 ## 2020-04-01
 
-* 
+* unbiased \rightarrow consistency (Harvard causal inference)
+* find an example, just like Thsiatia's example, to show a big bias in Cox ph model. 
+* draw survival curves, real survival curves! 
+* bias: unmeasured confounder
+* Thsiatia's paper, Yuan ming' paper 
+
 
 ## 2020-03-24
 
