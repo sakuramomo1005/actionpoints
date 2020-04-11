@@ -1,4 +1,14 @@
 
+
+# 2020-04-10
+
+I forget seed when generating the train dataset in file "sim_kl.R" and "sim_linear.R"
+
+
+# 2020-04-08
+
+
+
 # 2020-03-17
 
 change formula
