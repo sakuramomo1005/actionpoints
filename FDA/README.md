@@ -1,5 +1,14 @@
 
 
+
+## 2020-04-09
+
+* Read park's paper
+* Double check the EMBARC results with simulation
+* Get the EMBARC dataset with more subjects 
+* Double check the code 
+* Wrap up 
+
 ## 2020-04-02
 
 * IPWE for both decision method, which one is better. 
