@@ -7,6 +7,7 @@
 * sim_kl.R: generates sim_cv_kl_set1.RData
 * sim_kl2.R: generates sim_cv_kl_set2.RData
 * those 2 used cv_kl_sharecode2.R
+     + cv_kl_sharecode.R for real data analysis, cv_kl_sharecode2.R for simulated data analysis
 
 * sim_linear.R: generates sim_cv_linear_set1.RData
 * sim_linear2.R: generates sim_cv_linear_set2.RData
