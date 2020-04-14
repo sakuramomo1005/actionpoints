@@ -1,0 +1,168 @@
+---
+title: "Untitled"
+output: pdf_document
+---
+
+
+```{R include = FALSE}
+
+library(ggplot2)
+kl_m = kl_s = kl_agree_m = kl_agree_s = c()
+l_m = l_s = l_agree_m = l_agree_s = c()
+pp = ss = aa = c()
+
+for(p in c(2,4,8,16)){
+  for(sigma0 in c(1,2,10)){
+    for(angles in c(0,60,120,180)){
+      
+      names = paste('~/Desktop/NYU/Research/FDA/10. embarc changescore/simulated/sim_embarc_set_',
+                    1,'_s_',sigma0,'_p_', p, '_angles_',angles,'.RData', sep='')
+      load(names)
+      
+      print(names)
+     
+      ######## 
+      res = c()
+      agreement = c()
+      for(j in 1:length(Result$Result_kl)){
+        temp = c(); temp2 = c()
+        for(i in 1:10){
+          restable = Result$Result_kl[[j]]$Restable[[i]]
+          restable$realtrue = ifelse(restable$truedrg < restable$truepbo, 2, 1)
+          temp2 = c(temp2, sum(restable$realtrue == restable$estgroup)/ dim(restable)[1])
+          temp = c(temp, mean(restable[restable$truegroup == restable$estgroup,]$changescore))
+        }
+        res = rbind(res, temp)
+        agreement = rbind(agreement, temp2)
+      }
+      
+      pp = c(pp, rep(p, length(apply(res,1,mean, na.rm =TRUE)))); 
+      aa = c(aa, rep(angles, length(apply(res,1,mean, na.rm =TRUE)))); 
+      ss = c(ss, rep(sigma0, length(apply(res,1,mean, na.rm =TRUE))))
+      
+      kl_m = c(kl_m, apply(res,1,mean, na.rm =TRUE))
+      # kl_s = c(kl_s, sd(apply(res,1,mean, na.rm =TRUE)))
+      kl_agree_m = c(kl_agree_m, apply(agreement,1,mean))
+      # kl_agree_s = c(kl_agree_s, sd(apply(agreement,1,mean)))
+      
+      ########  
+      res = c(); agreement = c()
+      for(j in 1:length(Result$Result_linear)){
+        temp = c(); temp2 = c()
+        for(i in 1:10){
+          restable = Result$Result_linear[[j]]$Restable[[i]]
+          restable$realtrue = ifelse(restable$drg < restable$pbo, 2, 1)
+          temp2 = c(temp2, sum(restable$realtrue == restable$estgroup)/ dim(restable)[1])
+          temp = c(temp, mean(restable[restable$truegroup == restable$estgroup,]$changescore))
+        }
+        res = rbind(res, temp)
+        agreement = rbind(agreement, temp2)
+      }
+      
+      l_m = c(l_m, apply(res,1,mean, na.rm =TRUE))
+      # l_s = c(l_s, sd(apply(res,1,mean, na.rm =TRUE)))
+      l_agree_m = c(l_agree_m, apply(agreement,1,mean))
+      # l_agree_s = c(l_agree_s, sd(apply(agreement,1,mean)))
+      
+    }
+  }
+}
+
+t1 = data.frame(p = pp, sigma = ss, angle = aa, m = kl_m, group = 'kl')
+t2 = data.frame(p = pp, sigma = ss, angle = aa, m = l_m, group = 'l')
+tables = rbind(t1, t2)
+
+
+library(gridExtra) 
+library(grid) 
+library(ggplot2) 
+library(lattice)
+
+```
+
+
+
+```{R fig.width=6, fig.height=6, echo=FALSE,  fig.align = "center"}
+
+
+par(oma=c(0,0,2,0))  
+par(mfrow=c(3,4))
+par(mar=c(4,4,2,1))
+m <- matrix(c(1:12,13,13,13,13),nrow = 4,ncol = 4,byrow = TRUE)
+layout(mat=m,heights = c(2,2,2,0.8))
+count=0
+
+
+for(sigma0 in c(1,2,10)){
+  for(p in c(2,4,8, 16)){
+    count = count + 1
+    if(count %% 4 == 1){
+      yy = paste('sigma =', sigma0)
+    }else{
+      yy = ' '
+    }
+    if(count < 5){
+      mains = paste('p =', p)
+    }else{
+      mains = ' '
+    }
+    
+    temp = tables[tables$p == p & tables$sigma == sigma0, ]
+    boxplot( m ~ group,data = temp, col = c(2,4))
+    # fix
+  
+  }
+}
+
+
+oldmar<-par(mar=c(1,1,1,1))
+plot.new()
+legend(x = "top",inset = 0,
+       legend = c("Fix only", "Fix+Random",'Fix+Random+Error','Change Score'), 
+       col=c(1,2,4,'darkgreen'), 
+       pch=c(20),lty=c(1),
+       horiz = TRUE)
+par(oldmar)
+title(main='Assignment comparison, coefficient, setting 2',outer=T)
+
+
+```
+
+
+```{R fig.width=6, fig.height=6, echo=FALSE,  fig.align = "center"}
+
+par(oma=c(0,0,2,0))
+par(mfrow=c(3,4))
+par(mar=c(4,4,2,1))
+m <- matrix(c(1:12,13,13,13,13),nrow = 4,ncol = 4,byrow = TRUE)
+layout(mat=m,heights = c(2,2,2,0.8))
+count=0
+
+ppp = list()
+for(p in c(2,4,8,16)){
+  for(sigma0 in c(1,2,10)){
+    print(p)
+    count = count + 1
+    temp = tables[tables$p == p & tables$sigma == sigma0, ]
+    # boxplot( m ~ group,data = temp, col = 1:2)
+    ppp[[count]] = ggplot(temp, aes(x=factor(angle), y=m, color=group)) +
+    geom_boxplot() + labs(x = "angle", y = 'change score') + theme(legend.position = "none") + ggtitle(paste(p, sigma0))
+  }
+}
+
+grid.arrange(ppp[[1]], ppp[[2]], ppp[[3]], ppp[[4]],
+             ppp[[5]], ppp[[6]], ppp[[7]], ppp[[8]],
+             ppp[[9]], ppp[[10]], ppp[[11]], ppp[[12]],
+             nrow = 3, ncol = 4)
+
+oldmar<-par(mar=c(1,1,1,1))
+plot.new()
+legend(x = "top",inset = 0,
+       legend = c("Fix only", "Fix+Random",'Fix+Random+Error','Change Score'),
+       col=c(1,2,4,'darkgreen'),
+       pch=c(20),lty=c(1),
+       horiz = TRUE)
+par(oldmar)
+title(main='Assignment comparison, coefficient, setting 2',outer=T)
+
+```
