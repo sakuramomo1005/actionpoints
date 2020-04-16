@@ -1,0 +1,362 @@
+---
+title: "IPWE for EMBARC"
+date: 2020-04-08
+output: pdf_document
+fontsize: 12pt 
+---
+
+
+
+### Covariates in the EMBARC dataset 
+
+|Covariate name| Description | 
+|:----------------|--------------------------------------------------:|
+|w0_4165|	A not B Interference Reaction Time in negative trials|
+|w0_4167|	A not B Interference Reaction Time in non-negative trials|
+|w0_4163|	A not B Interference Reaction Time in all trials|
+|w0_4162|	A not B Itotal number of correct trials|
+|w0_4169|	Median Reaction time for correct trials in the Choice reaction time task |
+|w0_1844|	Number of valid recalled words in the Word Fluency task|
+|w0_1916|	Flanker Accuracy, an  Accuracy effect is a measure of interference effects; Higher scores are indicative of increased interference effects (i.e., reduced cognitive control). |
+|w0_1915|	Flanker Reaction Time, a  measure of interference effects; Higher scores are indicative of increased interference effects (i.e., reduced cognitive control).|
+|w0_1920|	Accuracy effect, it measures post-conflict behavioral adjustments; Higher values indicate better cognitive control|
+|age_evaluation|	Age at baseline|
+|sex | Sex|
+|hamd17_baseline |	Severity of depression at baseline|
+|dur_MDE |	Duration of current major depressive episode|
+|age_MDE  |	Age of first major depressive episode|
+|Greg_FH	|  Family history of psychotic and depressive disorder (4 ordered levels) |
+|fatigue	| level of fatigue at baseline |
+|hypersomnia |	presence/absence of hypersomnia at baseline|
+|axis2 |	Severity of the most severy Axis II diagnosis at baseline|
+|anger_attack |	Severity of anger attacks at baseline|
+|anxious	| Severity of anxiety at baseline|
+
+### Change score 
+
+For each subject in the data, we have their outcome score at week 0,1,2,3,4,6,8 week. The change score in the dataset is calculated as the difference between the score at the week 8 and the score at the week 0.
+$$\text{change score: } Y(8) - Y(0)$$
+(160 subjects in total, 87 in placebo group and 73 in drug group. All of them have scores at week 8). 
+
+### IPWE
+
+We estimate the overall outcome, e.g., change score for EMBARC data by using the inverse probablity weighted estimator, following the Zhang's paper. 
+
+In the paper, the IPWE is the estimator of $E(Y^*)$, defined as 
+$$IPWE(\eta) = \frac{1}{n}\sum_{i = 1}^n \frac{C_{\eta, i} Y_i}{\pi(X_i; \eta,\gamma)}$$
+where 
+
+* $C = A  g(X,\eta) + (1 - A)(1-g(X,\eta)$
+* $A$ is the observed received treatment, $A = 0$ or 1; 
+* $g()$ function projecting covariates $X$ to treatment assignment, $g(X) = 1$ or 0. 
+* $\eta$ is the parameter; $\pi(X_i; \eta,\gamma)$
+* $\pi(X_i; \eta,\gamma)$ is the propensity score. Since we look at randomized trials, it is a constant. 
+
+Therefore, $C=$
+\begin{center}
+\begin{tabular}{ c|c|c }
+  Subject i & True drug group & True placebo group \\ 
+ \hline
+ Estimated drug group &  1 & 0 \\ 
+ \hline
+ Estimated placebo group & 0 & 1 \\ 
+ \hline
+\end{tabular}
+\end{center}
+
+That is, when $C = 1$, the counterfacutal outcome is observed; $C = 0$ otherwise. 
+
+He also defined AIPWE to avoid the misspecification of $\pi(X_i; \eta,\gamma)$, since our data is from a randomized trial, we do not need to use AIPWE. 
+
+However, in the formula, which $n$ should we use to estimate the outcome mean? 
+
+$\begin{cases}
+n =  & \text{total number of subjects} \\
+n = n^{*} = \sum_{i = 1}^n C_i & \text{subjects whose  counterfacutal outcomes are observed} \\
+\end{cases}$
+
+
+In our previous simulation study, since 1) we know the true counterfactual outcomes (drug and placebo group) and 2) we only looked at the direction of group assignement instead of the exact value of the change scores, we did not meet the problem proposed by Dr Frank Harrell.
+
+However, when we analyze the EMBARC data, that problem pops up, i.e. we may need to consider the association between the change score and baseline score. In other words, a larger change score doesn not always imply a better treatment effect, since outcome of people with low baseline score will not change a lot. 
+
+Also, another problem pops up, that is, the shapes of the trajectories are different, i.e. some are concave, some are convex. 
+
+For example: 
+
+```{R include = FALSE}
+
+library(kableExtra)
+library(knitr)
+library(MASS)
+library(lme4)
+
+load("~/Desktop/NYU/Research/FDA/10. embarc changescore/embarc.RData")
+```
+
+```{R echo = FALSE, fig.height = 3, fig.width = 8, fig.align = "center"}
+dat_temp = dat
+dat_pbo_est = dat_temp[dat_temp$trt == 1, ]
+dat_drg_est = dat_temp[dat_temp$trt == 2, ]
+fit_pbo_est = lmer(y ~ tt + I(tt^2) + 
+                      (tt + I(tt^2)|subj),
+                    data = dat_pbo_est, REML = FALSE)
+fit_drg_est = lmer(y ~ tt + I(tt^2)  + 
+                      (tt + I(tt^2)|subj),
+                    data = dat_drg_est, REML = FALSE)
+
+tt = seq(0,8,0.5) # as.matrix(0:6) # pt = the order of time points
+X = cbind(matrix(1, length(tt), 1), tt, tt^2)
+temp = coef(fit_pbo_est)$subj
+temp = unlist(temp)
+temp = matrix(temp, length(temp)/3,3)
+temp = temp %*% t(X)
+```
+
+### Baseline score affect 
+
+```{R echo = FALSE, fig.height = 4, fig.width = 5, fig.align = "center"}
+
+temp = coef(fit_pbo_est)$subj
+temp = unlist(temp)
+temp = matrix(temp, length(temp)/3,3)
+temp = temp %*% t(X)
+
+plot(tt, temp[1,], col = 2, type = 'l', ylim= c(0,35),
+     xlab = 'Week', ylab = 'HRSD',
+     main = 'EMBARC study quadratic trajecories')
+for(i in 2:dim(temp)[1]){
+  lines(tt, temp[i,], col = 2)
+}
+temp = coef(fit_drg_est)$subj
+temp = unlist(temp)
+temp = matrix(temp, length(temp)/3,3)
+temp = temp %*% t(X)
+for(i in 1:dim(temp)[1]){
+  lines(tt, temp[i,], col = 4)
+}
+
+```
+
+### Trajectories affect 
+
+```{R echo = FALSE, fig.height = 3, fig.width = 8, fig.align = "center"}
+
+temp = coef(fit_pbo_est)$subj
+temp = unlist(temp)
+temp = matrix(temp, length(temp)/3,3)
+temp = temp %*% t(X)
+
+
+par(mfrow = c(1,3))
+plot(tt, temp[60,], col = 2, type = 'l', ylim= c(0,35), main = 'pbo: subj- 60', xlab = 'Week', ylab = 'HRSD')
+legend('bottomright',legend = c('increase'))
+plot(tt, temp[61,], col = 2, type = 'l', ylim= c(0,35), main = 'pbo: subj- 61', xlab = 'Week', ylab = 'HRSD')
+legend('bottomright',legend = c('flat'))
+plot(tt, temp[71,], col = 2, type = 'l', ylim= c(0,35), main = 'pbo: subj- 71', xlab = 'Week', ylab = 'HRSD')
+legend('bottomright',legend = c('decrease'))
+
+```
+
+
+```{R echo = FALSE, fig.height = 3, fig.width = 7, fig.align = "center"}
+
+par(mfrow = c(1,2))
+plot(tt, matrix(c(1,-2,1),1,3) %*% t(X), type = 'l', col = 2,
+     xlab = 'Week', ylab = 'HRSD', main = 'scenario 1: increase')
+lines(tt, matrix(c(1,-2,0.5),1,3) %*% t(X), col = 4)
+legend('topleft', legend = c('drg','pbo'), col = c(4,2), lty = 1)
+plot(tt, matrix(c(1,2,-1),1,3) %*% t(X), type = 'l', col = 4,
+     xlab = 'Week', ylab = 'HRSD', main = 'scenario 2: decrease')
+lines(tt, matrix(c(1,2,-0.5),1,3) %*% t(X), col = 2)
+legend('bottomleft', legend = c('drg','pbo'), col = c(4,2), lty = 1)
+
+```
+
+And therefore, since the trajectories are different, we may include some increased outcomes and then may bring problem. For example, in the following table, 
+
+```{R echo = FALSE}
+
+temp = data.frame(id = 1:4, csdrg = c(40, -3, -10, -5),
+           cspbo = c(45, -2, -17,-7),
+           truegroup = c(2,2,1,1),
+           assign = c(2,1,2,1),
+           changescore = c(40, -2,-10,-7),
+           group1 = c(2,2,1,1),
+           group2 = c(1,1,2,2))
+temp$cs1 = ifelse(temp$group1 == temp$assign, temp$changescore, 0)
+temp$cs2 = ifelse(temp$group2 == temp$assign, temp$changescore, 0)
+kable(temp, "latex", align="c", booktabs=TRUE, escape = F, longtable = TRUE)
+```
+
+
+# Calculate the IPWE for EMBARC data
+
+
+To predict the group assignment on the EMBARC, we conduct a 10 fold cross validation. The EMBARC dataset is separated into 10 parts (each part have the same proprotion of treatment, e.g. 50$\%$ drug, 50$\%$ placebo). 
+Each time we use 9 out of 10 parts as the training set and then rest 1 part as the testing set. 
+
+To train the data, we conduct:
+
+* the change score method (linear regression)
+* the longitudinal method applied with Kullback Leibler divergence 
+* all the baseline covariates in the EMBARC are included. 
+
+For the test dataset,  after training the data, we can predict the outcomes for subjects in the test dataset, if they are taking drug or if they are taking placebo ($\hat Y_{drg}, \hat Y_{pbo}$). The associated estimated change score can be calculated. Then we may evaluate which subject should be assigned into drug group or which one should be in placebo group.   
+
+The we can calculate the IPWE 
+$$IPWE = \frac{1}{n}\sum_{i = 1}^n C_{\eta, i} Y_i$$
+where $C_i = 1$ if the estimated assigned group  = observed assigned group; $C_i  = 0$ otherwise. 
+$Y_i$ is the observed change score in the test dataset. 
+
+After 10 times of CV, we get 10 IPWEs. And we then calculte the mean value of IPWE over the 10 fold CV. 
+
+The above procedures are repeted for 100 times. 
+
+##### Results
+
+```{R include = FALSE}
+load("~/Desktop/NYU/Research/FDA/10. embarc changescore/embarc.RData")
+
+changescore = c(); assignment = c(); id = c()
+for(i in unique(dat$subj)){
+  temp = dat[dat$subj == i,]; rownames(temp) = NULL
+  id = c(id, temp$subj[1])
+  assignment = c(assignment, temp$trt[1])
+  changescore = c(changescore, temp[temp$week == max(temp$tt),'y'] - 
+                    temp[temp$week == min(temp$tt),'y'])
+}
+dat_subj = data.frame(subj = id, changescore = changescore, assignment = assignment)
+dat = merge(dat, dat_subj, by = 'subj')
+
+load("~/Desktop/NYU/Research/FDA/10. embarc changescore/linear method 0404/embarc_cv_linear_set2.RData")
+res = c()
+for(j in 1:length(Result)){
+  temp = c()
+  for(i in 1:10){
+    restable = Result[[j]]$Restable[[i]]
+    temp = c(temp, mean(restable[restable$truegroup == restable$estgroup,]$changescore))
+  }
+  res = rbind(res, temp)
+}
+# # round(res)
+# as.vector(round(apply(res,1,mean),2))
+# mean(as.vector(round(apply(res,1,mean),2)))
+# sd(as.vector(round(apply(res,1,mean),2)))
+a1 = apply(res,1,mean)
+
+
+### 
+load("~/Desktop/NYU/Research/FDA/10. embarc changescore/longitudinal/embarc_cv_kl_set2.RData")
+res = c()
+for(j in 1:length(Result)){
+  temp = c()
+  for(i in 1:10){
+    restable = Result[[j]]$Restable[[i]]
+    temp = c(temp, mean(restable[restable$truegroup == restable$estgroup,]$changescore))
+  }
+  res = rbind(res, temp)
+}
+# # round(res)
+# as.vector(round(apply(res,1,mean),2))
+# mean(as.vector(round(apply(res,1,mean),2)))
+# sd(as.vector(round(apply(res,1,mean),2)))
+
+a2 = apply(res,1,mean)
+p1 <- hist(a1[1:78], breaks = 20, freq = FALSE)                      # centered at 4
+p2 <- hist(a2, breaks = 20, freq = FALSE) 
+```
+
+
+```{R echo = FALSE, fig.height = 3, fig.width = 7, fig.align = "center" }
+par(mfrow = c(1,2))
+hist(dat$changescore, breaks = 40, xlim = c(-20,10), xlab = 'change score', main = 'Histogram of change score')
+plot( p1, col=rgb(1,0,1,1/4), xlim=c(-8,-6), xlab = 'change score', main = 'IPWE')  # first histogram
+plot( p2, col=rgb(0,0,0,1/4), xlim=c(-8,-6), add=T) 
+```
+
+```{R echo = FALSE}
+
+temp = cbind( c(mean(dat$changescore), sd(dat$changescore)),
+       c(mean(a2),sd(a2)),
+       c(mean(a1), sd(a1)))
+temp = round(temp,3)
+temp = cbind(c('mean','sd'),temp)
+colnames(temp) = c('','change score',
+                   'KL-LME',
+                   "linear")
+
+kable(temp, "latex", align="c", booktabs=TRUE, escape = F, longtable = TRUE)
+
+```
+
+
+##### Simulation 
+
+```{R include = FALSE}
+# load("~/Desktop/NYU/Research/FDA/10. embarc changescore/simulated/sim_cv_kl_set2.RData")
+ load("~/Desktop/NYU/Research/FDA/10. embarc changescore/simulated/sim_cv_linear_set2.RData")
+
+res = c()
+for(j in 1:length(Result)){
+  temp = c()
+  for(i in 1:10){
+    restable = Result[[j]]$Restable[[i]]
+    temp = c(temp, mean(restable[restable$truegroup == restable$estgroup,]$changescore))
+  }
+  res = rbind(res, temp)
+}
+# # round(res)
+# as.vector(round(apply(res,1,mean),2))
+# mean(as.vector(round(apply(res,1,mean),2)))
+# sd(as.vector(round(apply(res,1,mean),2)))
+a1 = apply(res,1,mean)
+
+
+### 
+
+load("~/Desktop/NYU/Research/FDA/10. embarc changescore/simulated/sim_cv_kl_set2.RData")
+# load("~/Desktop/NYU/Research/FDA/10. embarc changescore/simulated/sim_cv_linear_set2.RData")
+
+res = c()
+for(j in 1:length(Result)){
+  temp = c()
+  for(i in 1:10){
+    restable = Result[[j]]$Restable[[i]]
+    temp = c(temp, mean(restable[restable$truegroup == restable$estgroup,]$changescore))
+  }
+  res = rbind(res, temp)
+}
+# # round(res)
+# as.vector(round(apply(res,1,mean),2))
+# mean(as.vector(round(apply(res,1,mean),2)))
+# sd(as.vector(round(apply(res,1,mean),2)))
+
+a2 = apply(res,1,mean)
+p1 <- hist(a1, breaks = 20, freq = FALSE)                      # centered at 4
+p2 <- hist(a2, breaks = 20, freq = FALSE) 
+```
+
+
+```{R echo = FALSE, fig.height = 3, fig.width = 7, fig.align = "center" }
+# hist(dat$changescore, breaks = 40, xlim = c(-20,10), xlab = 'change score', main = 'Histogram of change score')
+plot( p1, col=rgb(1,0,1,1/4), xlim=c(-30,-26), xlab = 'change score', main = 'IPWE')  # first histogram
+plot( p2, col=rgb(0,0,0,1/4), xlim=c(-30,-26), add=T) 
+```
+
+
+
+```{R echo = FALSE}
+
+temp = cbind( 
+       c(mean(a1),sd(a1)),
+       c(mean(a2), sd(a2)))
+temp = round(temp,3)
+temp = cbind(c('mean','sd'),temp)
+colnames(temp) = c("",
+                   'KL-LME',
+                   "linear")
+
+kable(temp, "latex", align="c", booktabs=TRUE, escape = F, longtable = TRUE)
+
+```

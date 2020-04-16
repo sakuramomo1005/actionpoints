@@ -1,0 +1,298 @@
+---
+title: "IPWE-EMBARC"
+date: 2020-04-15
+output: pdf_document
+---
+
+
+
+|Covariate name| Description | 
+|:----------------|--------------------------------------------------:|
+|w0_4165|	A not B Interference Reaction Time in negative trials|
+|w0_4167|	A not B Interference Reaction Time in non-negative trials|
+|w0_4163|	A not B Interference Reaction Time in all trials|
+|w0_4162|	A not B Itotal number of correct trials|
+|w0_4169|	Median Reaction time for correct trials in the Choice reaction time task |
+|w0_1844|	Number of valid recalled words in the Word Fluency task|
+|w0_1916|	Flanker Accuracy, an  Accuracy effect is a measure of interference effects; Higher scores are indicative of increased interference effects (i.e., reduced cognitive control). |
+|w0_1915|	Flanker Reaction Time, a  measure of interference effects; Higher scores are indicative of increased interference effects (i.e., reduced cognitive control).|
+|w0_1920|	Accuracy effect, it measures post-conflict behavioral adjustments; Higher values indicate better cognitive control|
+|age_evaluation|	Age at baseline|
+|sex | Sex|
+|hamd17_baseline |	Severity of depression at baseline|
+|dur_MDE |	Duration of current major depressive episode|
+|age_MDE  |	Age of first major depressive episode|
+|Greg_FH	|  Family history of psychotic and depressive disorder (4 ordered levels) |
+|fatigue	| level of fatigue at baseline |
+|hypersomnia |	presence/absence q789of hypersomnia at baseline|
+|axis2 |	Severity of the most severy Axis II diagnosis at baseline|
+|anger_attack |	Severity of anger attacks at baseline|
+|anxious	| Severity of anxiety at baseline|
+l;op2
+
+
+placebo 88; drug 78
+placebo 87; drug 73
+
+```{R include = FALSE}
+
+library(knitr)
+library(kableExtra)
+# length(unique(dat[dat$trt == 1, ]$subj))
+# length(unique(dat[dat$trt == 2, ]$subj))
+load("~/Desktop/NYU/Research/FDA/10. embarc changescore/embarcna.RData")
+
+```
+
+```{R}
+sapply(dat, function(x) sum(is.na(x)))
+```
+
+**setting 1**
+
+(17 covariates)
+
+set1: c(dur_MDE,age_MDE, Greg_FH,fatigue,
+                 hypersomnia, axis2, anger_attack, anxious,
+                 w0_4165, w0_4167, w0_4163, w0_4162, w0_4169, w0_1844,
+                 w0_1916, w0_1915, w0_1920)
+
+**setting 2**
+
+(9 covariates)
+
+set2: c(hamd17_baseline, age_evaluation,dur_MDE, age_MDE, 
+                  axis2, w0_1844,w0_1916, w0_1915, w0_1920)
+
+(baseline biosignatures combination in Parks paper)
+
+**setting 3**
+
+(19 covariates)
+
+set3 = set1 $\cup$ set2 = c(hamd17_baseline, age_evaluation, age_MDE,  axis2,
+                 dur_MDE, Greg_FH,fatigue,
+                 hypersomnia,  anger_attack, anxious,
+                 w0_4165, w0_4167, w0_4163, w0_4162, w0_4169, w0_1844,
+                 w0_1916, w0_1915, w0_1920)
+
+**setting 4**
+
+(8 covariates)
+
+set4 = c(age_evaluation, dur_MDE, age_MDE,  axis2, w0_1844,w0_1916, w0_1915, w0_1920)
+
+(covariates without NAs)
+
+
+
+# Setting1 
+
+```{R include = FALSE}
+
+
+load("~/Desktop/NYU/Research/FDA/10. embarc changescore/simulated/embarc_cv_kl_linear_set2.RData")
+
+length(Result)
+tt1 = tt2 = c()
+for(iters in 1:length(Result)){
+  t1 = c(); t2 = c()
+  for(j in 1:10){
+    
+    temp1 = Result[[iters]]$result_kl$Restable[[j]]
+    temp2 = Result[[iters]]$result_linear$Restable[[j]]
+    
+    t1 = c(t1, mean(temp1[temp1$truegroup == temp1$estgroup, ]$changescore))
+    t2 = c(t2, mean(temp2[temp2$truegroup == temp2$estgroup, ]$changescore) )             
+  }
+  
+  tt1 = rbind(tt1, t1)
+  tt2 = rbind(tt2, t2)
+}
+
+# apply(tt1,1,mean) - apply(tt2,1,mean)
+
+temp = cbind(c("longitudinal single index","linear change score"), 
+            round(rbind(c(mean(apply(tt1,1,mean)), sd(apply(tt1,1,mean))),
+            c(mean(apply(tt2,1,mean)), sd(apply(tt2,1,mean)))),4))
+colnames(temp) = c("method","mean","sd")
+```
+
+```{R echo = FALSE}
+
+kable(temp, "latex", align="c", booktabs=TRUE, escape = F, 
+      row.names=FALSE, longtable = T)
+
+```
+
+```{R echo = FALSE, fig.height = 5, fig.width = 6, fig.align = "center"}
+
+c2 = rainbow(10, alpha=0.2)[c(1,7)]
+df = cbind(rep(1:2, each = length(apply(tt1,1,mean))), c(apply(tt1,1,mean), apply(tt2,1,mean)))
+colnames(df) = c("group","res")
+boxplot(res~group, data = df, col = c2, ylab = "IPWE",
+        names = c("longitudinal single index", "change score"))
+legend("topleft", fill = c2, legend = c("longitudinal single index", "change score"), horiz = FALSE)
+
+```
+
+
+
+# Setting2
+
+```{R include = FALSE}
+
+
+load("~/Desktop/NYU/Research/FDA/10. embarc changescore/simulated/embarc_cv_kl_linear_set3.RData")
+
+length(Result)
+tt1 = tt2 = c()
+for(iters in 1:length(Result)){
+  t1 = c(); t2 = c()
+  for(j in 1:10){
+    
+    temp1 = Result[[iters]]$result_kl$Restable[[j]]
+    temp2 = Result[[iters]]$result_linear$Restable[[j]]
+    
+    t1 = c(t1, mean(temp1[temp1$truegroup == temp1$estgroup, ]$changescore))
+    t2 = c(t2, mean(temp2[temp2$truegroup == temp2$estgroup, ]$changescore) )             
+  }
+  
+  tt1 = rbind(tt1, t1)
+  tt2 = rbind(tt2, t2)
+}
+
+# apply(tt1,1,mean) - apply(tt2,1,mean)
+
+temp = cbind(c("longitudinal single index","linear change score"), 
+            round(rbind(c(mean(apply(tt1,1,mean)), sd(apply(tt1,1,mean))),
+            c(mean(apply(tt2,1,mean)), sd(apply(tt2,1,mean)))),4))
+colnames(temp) = c("method","mean","sd")
+```
+
+```{R echo = FALSE}
+
+kable(temp, "latex", align="c", booktabs=TRUE, escape = F, 
+      row.names=FALSE, longtable = T)
+
+```
+
+```{R echo = FALSE, fig.height = 5, fig.width = 6, fig.align = "center"}
+
+c2 = rainbow(10, alpha=0.2)[c(1,7)]
+df = cbind(rep(1:2, each = length(apply(tt1,1,mean))), c(apply(tt1,1,mean), apply(tt2,1,mean)))
+colnames(df) = c("group","res")
+boxplot(res~group, data = df, col = c2, ylab = "IPWE",
+        names = c("longitudinal single index", "change score"))
+legend("bottomleft", fill = c2, legend = c("longitudinal single index", "change score"), horiz = FALSE)
+
+```
+
+
+
+
+# Setting3
+
+```{R include = FALSE}
+
+
+load("~/Desktop/NYU/Research/FDA/10. embarc changescore/simulated/embarc_cv_kl_linear_set4.RData")
+
+length(Result)
+tt1 = tt2 = c()
+for(iters in 1:length(Result)){
+  t1 = c(); t2 = c()
+  for(j in 1:10){
+    
+    temp1 = Result[[iters]]$result_kl$Restable[[j]]
+    temp2 = Result[[iters]]$result_linear$Restable[[j]]
+    
+    t1 = c(t1, mean(temp1[temp1$truegroup == temp1$estgroup, ]$changescore))
+    t2 = c(t2, mean(temp2[temp2$truegroup == temp2$estgroup, ]$changescore) )             
+  }
+  
+  tt1 = rbind(tt1, t1)
+  tt2 = rbind(tt2, t2)
+}
+
+# apply(tt1,1,mean) - apply(tt2,1,mean)
+
+temp = cbind(c("longitudinal single index","linear change score"), 
+            round(rbind(c(mean(apply(tt1,1,mean)), sd(apply(tt1,1,mean))),
+            c(mean(apply(tt2,1,mean)), sd(apply(tt2,1,mean)))),4))
+colnames(temp) = c("method","mean","sd")
+```
+
+```{R echo = FALSE}
+
+kable(temp, "latex", align="c", booktabs=TRUE, escape = F, 
+      row.names=FALSE, longtable = T)
+
+```
+
+```{R echo = FALSE, fig.height = 5, fig.width = 6, fig.align = "center"}
+
+c2 = rainbow(10, alpha=0.2)[c(1,7)]
+df = cbind(rep(1:2, each = length(apply(tt1,1,mean))), c(apply(tt1,1,mean), apply(tt2,1,mean)))
+colnames(df) = c("group","res")
+boxplot(res~group, data = df, col = c2, ylab = "IPWE",
+        names = c("longitudinal single index", "change score"))
+legend("bottomleft", fill = c2, legend = c("longitudinal single index", "change score"), horiz = FALSE)
+
+```
+
+
+
+
+# Setting4
+
+```{R include = FALSE}
+
+
+load("~/Desktop/NYU/Research/FDA/10. embarc changescore/simulated/embarc_cv_kl_linear_set7.RData")
+
+length(Result)
+tt1 = tt2 = c()
+for(iters in 1:length(Result)){
+  t1 = c(); t2 = c()
+  for(j in 1:10){
+    
+    temp1 = Result[[iters]]$result_kl$Restable[[j]]
+    temp2 = Result[[iters]]$result_linear$Restable[[j]]
+    
+    t1 = c(t1, mean(temp1[temp1$truegroup == temp1$estgroup, ]$changescore))
+    t2 = c(t2, mean(temp2[temp2$truegroup == temp2$estgroup, ]$changescore) )             
+  }
+  
+  tt1 = rbind(tt1, t1)
+  tt2 = rbind(tt2, t2)
+}
+
+# apply(tt1,1,mean) - apply(tt2,1,mean)
+
+temp = cbind(c("longitudinal single index","linear change score"), 
+            round(rbind(c(mean(apply(tt1,1,mean)), sd(apply(tt1,1,mean))),
+            c(mean(apply(tt2,1,mean)), sd(apply(tt2,1,mean)))),4))
+colnames(temp) = c("method","mean","sd")
+```
+
+```{R echo = FALSE}
+
+kable(temp, "latex", align="c", booktabs=TRUE, escape = F, 
+      row.names=FALSE, longtable = T)
+
+```
+
+```{R echo = FALSE, fig.height = 5, fig.width = 6, fig.align = "center"}
+
+c2 = rainbow(10, alpha=0.2)[c(1,7)]
+df = cbind(rep(1:2, each = length(apply(tt1,1,mean))), c(apply(tt1,1,mean), apply(tt2,1,mean)))
+colnames(df) = c("group","res")
+boxplot(res~group, data = df, col = c2, ylab = "IPWE",
+        names = c("longitudinal single index", "change score"))
+legend("bottomleft", fill = c2, legend = c("longitudinal single index", "change score"), horiz = FALSE)
+
+```
+
+
+
