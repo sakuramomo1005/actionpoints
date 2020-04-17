@@ -1,0 +1,2181 @@
+---
+title: "Cox example"
+date: 2020-04-08
+output: pdf_document
+---
+
+
+```{R include = FALSE}
+
+library(survival)
+library(MASS)
+library(lme4)
+
+St = function(t){
+    return((S0(t))^exp(temp))
+  }
+  S0 = function(t){return(exp(-t))}
+  Ri = function(t,data){
+    return(sum(data$time <= t))
+  }
+  inverse = function(x,Funs){
+    res1 = c()
+    for(i in seq(0.00000001, 20, 1)){
+      res1 = c(res1, Funs(i))
+    }
+    temp = seq(0.00000001, 100, 1)[which(abs(res1 - x) == min(abs(res1 - x)))[1]]
+    
+    res2 = c()
+    for(i in seq((temp - 1), (temp+1), 0.1)){
+      res2 = c(res2, Funs(i))
+    }
+    temp = seq((temp - 1), (temp+1), 0.1)[which(abs(res2 - x) == min(abs(res2 - x)))[1]]
+    
+    res3 = c()
+    for(i in seq((temp - 0.1), (temp+0.1), 0.01)){
+      res3 = c(res3, Funs(i))
+    }
+    temp = seq((temp - 0.1), (temp + 0.1), 0.01)[which(abs(res3 - x) == min(abs(res3 - x)))[1]]
+    
+    res4 = c()
+    for(i in seq((temp - 0.01), (temp + 0.01), 0.001)){
+      res4 = c(res4, Funs(i))
+    }
+    temp =seq((temp - 0.01), (temp + 0.01), 0.001)[which(abs(res4 - x) == min(abs(res4 - x)))[1]]
+    
+    res5 = c()
+    for(i in seq((temp - 0.001), (temp + 0.001), 0.0001)){
+      res5 = c(res5, Funs(i))
+    }
+    temp = seq((temp - 0.001), (temp + 0.001), 0.0001)[which(abs(res5 - x) == min(abs(res5 - x)))[1]]
+    
+    res6 = c()
+    for(i in seq((temp - 0.0001), (temp + 0.0001), 0.00001)){
+      res6 = c(res6, Funs(i))
+    }
+    temp = seq((temp - 0.0001), (temp + 0.0001), 0.00001)[which(abs(res6 - x) == min(abs(res6 - x)))[1]]
+    
+    return(temp)
+  }
+  
+```
+
+
+
+## Step 1: the consistency of Cox PH model v.s. confounder/non-controled covariates 
+
+### Example 1 (Independent censoring)
+
+
+We denote $T_i, i = 1, ..., N$ are the independent, identically, distributed (iid) lifetimes, whose CDF and PDF are denoted as $F, f$, respectively, and corresponding survival function $S_T(t) = P(T > t)$; the censoring time is defined as $C_i, i = 1,..., N$. $C_i$s are also iid, with CDF denoted as $G$ and PDF denoted as $g$ and $S_C(t) = P(C > t)$. We set the censors happen on the right and the ovserved time is $Z_i = T_i \wedge C_i$, whose CDF is $H$ and PDF is $h$. The $\delta_i = I_{[T_i \leq C_i]}$ is the status indicator, which shows whether subject $i$ is censored ($\delta_i = 0$) or not ($\delta_i = 0$). The corresponding hazard function of lifetime is $\lambda_F$ and cumulative hazard function is $\Lambda_F$. 
+
+Let's just consider a two dimension covariates scenario, i.e. the $S_T(t)$ and $S_C(t)$ are associated with $x_1, x_2$. Suppose the death time and censoring time follow Cox PH models, then, 
+ 
+* The hazard function, cumulative hazard function and survival function for death time $T$:
+$$\lambda_T(t | x) = \lambda_0(t) \exp(\beta_1 x_1 + \beta_2 x_2)$$
+$$\Lambda_T(t | x) = \Lambda_0(t) \exp(\beta_1 x_1 + \beta_2 x_2)$$
+$$S(t | x) = S_0(t)^{\exp(\beta_1 x_1 + \beta_2 x_2)}$$
+
+* The hazard function, cumulative hazard function and survival function for censoring time $C$:
+$$\lambda_C(t | x) = \lambda_0(t) \exp(\gamma_1 x_1 + \gamma_2 x_2)$$
+$$\Lambda_C(t | x) = \Lambda_0(t) \exp(\gamma_1 x_1 + \gamma_2 x_2)$$
+$$S_C(t | x) = S_0(t)^{\exp(\gamma_1 x_1 + \gamma_2 x_2)}$$
+where the survival time and censoring time functions share the same baseline function and both associate with two covariates $x_1,x_2$. 
+
+Denote the $m()$ function as: 
+$$m(t,x) = E(\delta  | Z = t, X = x) = P(\delta = 1 | Z = t, X = x)=\frac{\lambda_T(t | x)}{\lambda_Z(t|x)} = \frac{\lambda_T(t | x)}{\lambda_T(t|x) + \lambda_C(t|x)}$$
+
+#### Data set generation
+
+* 1. Simulate the covariates for n subjects: $X = (x1, x2) \sim MVN(\mu, \Sigma)$, where $X$ is $n$ by 2 matrix and $x1, x2$ are $n$ by 1 vectors. For each subject, the covariates is $x_{i1}, x_{i2}$. 
+    + $X = (x1, x2) \sim MVN(\mu, \Sigma)$, $\mu = (1,2)$, $\Sigma = \left(\begin{array}
+{cc}
+1 & \rho \\
+\rho & 1 
+\end{array}\right)$, where $\rho = 0, 0.2, 0.5, 0.9$. 
+    + (1) $\beta = (\beta_1, \beta_2) = (2,0.1), \gamma = (\gamma_1, \gamma_2) = (0.1, 0.2)$
+    + (2) $\beta = (\beta_1, \beta_2) = (0.2,0.1), \gamma = (\gamma_1, \gamma_2) = (0.1, 0.2)$
+    
+* 2. For subject $i$, calculate the $\beta X_i$. Simulate the survival time $T_i$ from below CDF by using the inverse probablity sampling. 
+$$S_{T,i}(t) = S_{0,i}(t)^{\exp(\beta X_i)} = \exp(-t \times \exp(\beta X_i))$$
+* 3. Simulate the censoring time $C_i$ from below CDF by using the inverse probablity sampling. 
+$$S_{C,i}(t) = S_{0,i}(t)^{\exp(\gamma X_i)} = \exp(-t \times \exp(\gamma X_i))$$
+* 4. Calculate observed time $Z_i = T_i \wedge C_i$ and indicator $\delta_i = I(T_i < C_i)$. 
+* Then we get the dataset with death time, censoring time, observed time, censoring indicator, and covariates. The times are calculated one by one based on the subject's covariates values.
+
+Data size: $n = 1000$; Censoringship proportion: 
+
+##### Models
+
+* Model 1: Fit the Cox PH model with both $x_1$ and $x_2$
+* Model 2: Fit the Cox PH model with only $x_1$ ($x_2$ is unobserved)
+* Model 3: Fit the Cox PH model with only $x_2$ ($x_1$ is unobserved)
+
+Whether model 2 and model 3 can consistently estimate the survival function? Let's show it from several survival curves. 
+
+<!-- Covariates table  -->
+
+
+<!-- survival plot  -->
+
+##### Survival plot 
+
+$\beta = (\beta_1, \beta_2) = (2,0.1), \gamma = (\gamma_1, \gamma_2) = (0.1, 0.2)$
+
+Survival function $S(T > t | X) = \exp(-t)^{\exp(\beta X)}$
+Observed time function $S(Z > t | X) = S(T > t | X) S(C > t | X) = \exp(-t)^{\exp(\beta X)} \exp(-t)^{\exp(\gamma X)}$
+
+Draw the survival plots at the point (-1, 0.5): 
+
+```{R fig.height = 3.5, fig.width = 9, fig.align = "center", echo = FALSE}
+
+set.seed(321)
+S0 = function(t){return(exp(-1*t))}
+rho = 0.9
+sigma = matrix(0.2,2,2)
+diag(sigma) = 1
+n = 1000
+seqs = seq(0,5,0.1)
+beta = matrix(c(2,0.1), 2, 1)
+gamma = matrix(c(0.1,0.2), 2, 1)
+
+# generate covariates
+X = mvrnorm(n, c(1,2), sigma)
+covs = X %*% beta
+covs2 = X %*% gamma
+
+# training set 
+for(training in 1){
+  death = c(); U = c(); U2 = c()
+  censor = c(); udiff = c()
+  for(i in 1:n){
+    # generate survival time 
+    temp = covs[i]
+    u = runif(1,0,1); U = c(U, u)
+    deathtemp = inverse(u, St)
+    death = c(death, deathtemp)
+    U2 = c(U2, St(deathtemp))
+    # generate censoring time 
+    u = runif(1,0,1)
+    temp = covs2[i]
+    censor = c(censor, inverse(u, St))
+  }
+  udiff = c(udiff, max(abs(U2 - U)))
+  data = data.frame(death = death, censor = censor, x1 = X[, 1], x2 = X[, 2], status2 = 1)
+  data$status = ifelse(data$death < data$censor, 1, 0)
+  data$time = ifelse(data$status == 1, data$death, data$censor)
+  data = data[order(data$time), ]
+  rownames(data) = NULL
+}
+
+par(mfrow = c(1,3))
+
+fit0 = coxph(Surv(time, status) ~ x1 + x2, data=data)
+fit2 = coxph(Surv(time, status) ~ x2, data=data)
+fit1 = coxph(Surv(time, status) ~ x1, data=data)
+
+x1 = -1; x2 = 0.5;
+fit02 = survfit(fit2, newdata=data.frame(x2 = x2))
+fit01 = survfit(fit1, newdata=data.frame(x1 = x1))
+fit00 = survfit(fit0, newdata=data.frame(x1 = x1, x2 = x2))
+
+plot(fit00, main = 'Cox with x1,x2', xlab = 'time', ylab = 'survival S(t)')
+temp = beta[1] * x1 + beta[2] * x2
+lines(seq(0,20,0.1), St(seq(0,20,0.1)), col = 2)
+legend("topright", legend = c('Cox x1,x2', 'true S(t)'), col = c(1,2), lty = 1)
+
+plot(fit01, main = 'Cox with only x1', xlab = 'time', ylab = 'survival S(t)')
+temp = beta[1] * x1 + beta[2] * x2
+lines(seq(0,20,0.1), St(seq(0,20,0.1)), col = 2)
+legend("topright", legend = c('Cox x1', 'true S(t)'), col = c(1,2), lty = 1)
+
+plot(fit02, main = 'Cox with only x2', xlab = 'time', ylab = 'survival S(t)')
+temp = beta[1] * x1 + beta[2] * x2
+lines(seq(0,20,0.1), St(seq(0,20,0.1)), col = 2)
+legend("topright", legend = c('Cox x2', 'true S(t)'), col = c(1,2), lty = 1)
+
+```
+
+
+
+```{R include = FALSE}
+
+
+msetable = biastable = absbiastable = sdtable = c();  msesdtable = c()
+real= c()
+for(rho in c(0,0.2)){
+  
+  names = paste('~/Desktop/NYU/Research/Survival/13. cox model does not work example/4.10/old_censormodeldiff20200404_single_rho_', rho, '.RData', sep = '')
+  # names = paste('~/Desktop/NYU/Research/Survival/13. cox model does not work example/4.10/censormodeldiff2020404_single_rho_', rho, '.RData', sep = '')
+  load(names)
+  
+  for(resultrollup in 1){
+    # x1 + x2
+    Strue_table = c()
+    temp = result$Strue_list
+    for(i in 1:length(temp)){
+      Strue_table = rbind(Strue_table, temp[[i]])
+    }
+    Sest_table = c()
+    temp = result$Sest_list
+    for(i in 1:length(temp)){
+      Sest_table = rbind(Sest_table, temp[[i]])
+    }
+    # x1 + x2 0
+    Strue0_table = c()
+    temp = result$Strue_list0
+    for(i in 1:length(temp)){
+      Strue0_table = rbind(Strue0_table, temp[[i]])
+    }
+    Sest0_table = c()
+    temp = result$Sest_list0
+    for(i in 1:length(temp)){
+      Sest0_table = rbind(Sest0_table, temp[[i]])
+    }
+    # x1 
+    Strue1_table = c()
+    temp = result$Strue_list1
+    for(i in 1:length(temp)){
+      Strue1_table = rbind(Strue1_table, temp[[i]])
+    }
+    Sest1_table = c()
+    temp = result$Sest_list1
+    for(i in 1:length(temp)){
+      Sest1_table = rbind(Sest1_table, temp[[i]])
+    }
+    # x2 
+    Strue2_table = c()
+    temp = result$Strue_list2
+    for(i in 1:length(temp)){
+      Strue2_table = rbind(Strue2_table, temp[[i]])
+    }
+    Sest2_table = c()
+    temp = result$Sest_list2
+    for(i in 1:length(temp)){
+      Sest2_table = rbind(Sest2_table, temp[[i]])
+    }
+    # x01 
+    Strue01_table = c()
+    temp = result$Strue_list01
+    for(i in 1:length(temp)){
+      Strue01_table = rbind(Strue01_table, temp[[i]])
+    }
+    Sest01_table = c()
+    temp = result$Sest_list01
+    for(i in 1:length(temp)){
+      Sest01_table = rbind(Sest01_table, temp[[i]])
+    }
+    # x02 
+    Strue02_table = c()
+    temp = result$Strue_list02
+    for(i in 1:length(temp)){
+      Strue02_table = rbind(Strue02_table, temp[[i]])
+    }
+    Sest02_table = c()
+    temp = result$Sest_list02
+    for(i in 1:length(temp)){
+      Sest02_table = rbind(Sest02_table, temp[[i]])
+    }
+    # 1 
+    Res1_table = c()
+    temp = result$Res1_list
+    for(i in 1:length(temp)){
+      Res1_table = rbind(Res1_table, temp[[i]])
+    }
+    # 2
+    Res2_table = c()
+    temp = result$Res2_list
+    for(i in 1:length(temp)){
+      Res2_table = rbind(Res2_table, temp[[i]])
+    }
+    # 3 
+    Res3_table = c()
+    temp = result$Res3_list
+    for(i in 1:length(temp)){
+      Res3_table = rbind(Res3_table, temp[[i]])
+    }
+    # 4
+    Res4_table = c()
+    temp = result$Res4_list
+    for(i in 1:length(temp)){
+      Res4_table = rbind(Res4_table, temp[[i]])
+    }
+    # 5 
+    Res5_table = c()
+    temp = result$Res5_list
+    for(i in 1:length(temp)){
+      Res5_table = rbind(Res5_table, temp[[i]])
+    }
+    # 0
+    Real_table = c()
+    temp = result$Realsurv_list
+    for(i in 1:length(temp)){
+      Real_table = rbind(Real_table, temp[[i]])
+    }
+  }
+  
+  real = rbind(real, Real_table[1,])
+  
+  ######################################## 
+  # # bias
+  # temp = cbind(apply(Sest_table - Real_table,2,mean),
+  # apply(Sest1_table - Real_table,2,mean) ,
+  # apply(Sest2_table - Real_table,2,mean) ,
+  # # apply(Sest0_table - Real_table,2,mean) ,
+  # # apply(Sest01_table - Real_table,2,mean) ,
+  # # apply(Sest02_table - Real_table,2,mean) ,
+  # apply(Res1_table - Real_table,2,mean),
+  # apply(Res2_table - Real_table,2,mean),
+  # apply(Res3_table - Real_table,2,mean) ,
+  # apply(Res4_table - Real_table,2,mean) ,
+  # apply(Res5_table - Real_table,2,mean) )
+  
+  temp = cbind(apply(Sest_table,2,mean),
+               apply(Sest1_table ,2,mean) ,
+               apply(Sest2_table ,2,mean) ,
+               # apply(Sest0_table - Strue0_table,2,mean) ,
+               # apply(Sest01_table - Strue01_table,2,mean), 
+               # apply(Sest02_table - Strue02_table,2,mean) ,
+               apply(Res1_table,2,mean),
+               apply(Res2_table ,2,mean),
+               apply(Res3_table ,2,mean) ,
+               apply(Res4_table ,2,mean) ,
+               apply(Res5_table ,2,mean) )
+  
+  biastable = rbind(biastable, temp)
+  
+  ######################################## 
+  # absolute bias
+  # temp = cbind(apply(abs(Sest_table - Real_table),2,mean), 
+  #              apply(abs(Sest1_table - Real_table),2,mean) ,
+  #              apply(abs(Sest2_table - Real_table),2,mean) ,
+  #              apply(abs(Sest0_table - Real_table),2,mean),
+  #              apply(abs(Sest01_table - Real_table),2,mean),
+  #              apply(abs(Sest02_table - Real_table),2,mean),
+  #              apply(abs(Res1_table - Real_table),2,mean),
+  #              apply(abs(Res2_table - Real_table),2,mean),
+  #              apply(abs(Res3_table - Real_table),2,mean) ,
+  #              apply(abs(Res4_table - Real_table),2,mean) ,
+  #              apply(abs(Res5_table - Real_table),2,mean))
+  
+  temp = cbind(apply(abs(Sest_table - Strue_table),2,mean) ,
+               apply(abs(Sest1_table - Strue1_table),2,mean) ,
+               apply(abs(Sest2_table - Strue2_table),2,mean) ,
+               # apply(abs(Sest0_table - Strue0_table),2,mean) ,
+               # apply(abs(Sest01_table - Strue01_table),2,mean), 
+               # apply(abs(Sest02_table - Strue02_table),2,mean) ,
+               apply(abs(Res1_table - Real_table),2,mean),
+               apply(abs(Res2_table - Real_table),2,mean),
+               apply(abs(Res3_table - Real_table),2,mean) ,
+               apply(abs(Res4_table - Real_table),2,mean) ,
+               apply(abs(Res5_table - Real_table),2,mean) )
+  
+  absbiastable = rbind(absbiastable, temp)
+  
+  ######################################## 
+  # sd
+  
+  temp = cbind(apply(Sest_table,2,sd),
+               apply(Sest1_table,2,sd) ,
+               apply(Sest2_table,2,sd) ,
+               # apply(Sest0_table,2,sd) ,
+               # apply(Sest01_table,2,sd) ,
+               # apply(Sest02_table,2,sd) ,
+               apply(Res1_table,2,sd),
+               apply(Res2_table,2,sd),
+               apply(Res3_table,2,sd) ,
+               apply(Res4_table,2,sd) ,
+               apply(Res5_table,2,sd) )
+  
+  sdtable = rbind(sdtable, temp)
+  
+  ######################################## 
+  # MSE
+  
+  # apply((Sest_table - Real_table)^2,2,mean) 
+  # apply((Sest1_table - Real_table)^2,2,mean) 
+  # apply((Sest2_table - Real_table)^2,2,mean) 
+  # apply((Sest0_table - Real_table)^2,2,mean) 
+  # apply((Sest01_table - Real_table)^2,2,mean) 
+  # apply((Sest02_table - Real_table)^2,2,mean) 
+  
+  temp = cbind(apply((Sest_table - Strue_table)^2,2,mean),
+               apply((Sest1_table - Strue1_table)^2,2,mean) ,
+               apply((Sest2_table - Strue2_table)^2,2,mean) ,
+               # apply((Sest0_table - Strue0_table)^2,2,mean) ,
+               # apply((Sest01_table - Strue01_table)^2,2,mean), 
+               # apply((Sest02_table - Strue02_table)^2,2,mean) ,
+               apply((Res1_table - Real_table)^2,2,mean),
+               apply((Res2_table - Real_table)^2,2,mean),
+               apply((Res3_table - Real_table)^2,2,mean) ,
+               apply((Res4_table - Real_table)^2,2,mean) ,
+               apply((Res5_table - Real_table)^2,2,mean) )
+  
+   msetable = rbind(msetable, temp) 
+  
+   temp = cbind(apply((Sest_table - Strue_table)^2,2,sd),
+               apply((Sest1_table - Strue1_table)^2,2,sd) ,
+               apply((Sest2_table - Strue2_table)^2,2,sd) ,
+               # apply((Sest0_table - Strue0_table)^2,2,sd) ,
+               # apply((Sest01_table - Strue01_table)^2,2,sd), 
+               # apply((Sest02_table - Strue02_table)^2,2,sd) ,
+               apply((Res1_table - Real_table)^2,2,sd),
+               apply((Res2_table - Real_table)^2,2,sd),
+               apply((Res3_table - Real_table)^2,2,sd) ,
+               apply((Res4_table - Real_table)^2,2,sd) ,
+               apply((Res5_table - Real_table)^2,2,sd) )
+   
+   msesdtable = rbind(msesdtable, temp) 
+}
+
+```
+
+Let's repete the above procedure for 100 times. The estimation value and standard deviations are shown below: 
+
+$\beta = (\beta_1, \beta_2) = (2,0.1)$
+
+```{R fig.width=6, fig.height=6,echo=FALSE, fig.align = "center"}
+
+par(mfrow = c(1,2))
+par(oma=c(0,0,2,0))  
+par(mar=c(4,4,2,1))
+m <- matrix(c(1,2,3,4),nrow = 2,ncol = 2,byrow = TRUE)
+layout(mat=m,heights = c(2,2))
+
+count = 0
+for(rho in c(0,0.2)){
+  qtablem = biastable[(1 + 5*count):(5*(count+1)),]
+  qtablesd = sdtable[(1 + 5*count):(5*(count+1)),]
+  count  = count + 1
+  plot(c(0.1, 0.3, 0.5, 0.7, 0.9),qtablem[,1], type = 'l',
+     ylim = c( min(qtablem - 1.96*qtablesd), max(qtablem + 1.96*qtablesd)), xlim = c(0,1),
+     xlab = 'quantile time', ylab = 'Bias', # bquote(.('mean(abs(S(t)') -hat('S(t)))')),
+     main = paste('rho =',rho),
+     xaxt = "n")
+axis(1, at= c(0.1, 0.25, 0.5, 0.75, 0.9),
+     labels= c('0.1', '0.3',"0.5", "0.7", "0.9"))
+
+lines(c(0.1, 0.3, 0.5, 0.7, 0.9)+ 0.025 , qtablem[,2], col = 2)
+lines(c(0.1, 0.3, 0.5, 0.7, 0.9)+ 0.05, qtablem[,3], col = 4)
+points(c(0.1, 0.3, 0.5, 0.7, 0.9),qtablem[,1], pch = 20)
+points(c(0.1, 0.3, 0.5, 0.7, 0.9)+ 0.025,qtablem[,2], pch = 20, col = 2)
+points(c(0.1, 0.3, 0.5, 0.7, 0.9)+0.05,qtablem[,3], col = 4, pch = 20)
+
+arrows(c(0.1, 0.3, 0.5, 0.7, 0.9), qtablem[,1] - 1.96*qtablesd[,1],
+       c(0.1, 0.3, 0.5, 0.7, 0.9), qtablem[,1] + 1.96*qtablesd[,1],
+       length=0.05, angle=90, code=3)
+arrows(c(0.1, 0.3, 0.5, 0.7, 0.9)+ 0.025, qtablem[,2] - 1.96*qtablesd[,2],
+       c(0.1, 0.3, 0.5, 0.7, 0.9)+ 0.025, qtablem[,2] + 1.96*qtablesd[,2],
+       length=0.05, angle=90, code=3, col = 2)
+arrows(c(0.1, 0.3, 0.5, 0.7, 0.9)+ 0.05, qtablem[,3] - 1.96*qtablesd[,3],
+       c(0.1, 0.3, 0.5, 0.7, 0.9)+ 0.05, qtablem[,3] + 1.96*qtablesd[,3],
+       length=0.05, angle=90, code=3, col = 4)
+
+lines(c(0.1, 0.3, 0.5, 0.7, 0.9) + 0.05, real[count, ],lty = 2, col = 6, lwd = 2)
+legend(x = "bottomleft",inset = 0,
+       legend = c("Cox PH (X1, X2)", "Cox PH (X1)", " Cox PH (X2)","True S(t)"),
+       col=c(1,2,4,6),
+       pch=c(20),lty=c(1), cex = 0.7)
+
+}
+
+# plot.new()
+ #,
+
+```
+
+
+```{R fig.width=6, fig.height=6,echo=FALSE, fig.align = "center"}
+
+par(mfrow = c(1,2))
+par(oma=c(0,0,2,0))  
+par(mar=c(4,4,2,1))
+m <- matrix(c(1,2,3,4),nrow = 2,ncol = 2,byrow = TRUE)
+layout(mat=m,heights = c(2,2))
+
+count = 0
+for(rho in c(0,0.2)){
+  qtablem = msetable[(1 + 5*count):(5*(count+1)),] * 1000
+  qtablesd = msesdtable[(1 + 5*count):(5*(count+1)),] * 1000
+  count = count  + 1
+  plot(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], type = 'l',
+       ylim = c( min(qtablem - 1.96*qtablesd), max(qtablem + 1.96*qtablesd)), xlim = c(0,1),
+       xlab = 'quantile time', ylab = 'MSE', # bquote(.('mean(abs(S(t)') -hat('S(t)))')),
+       main = paste('MSE: rho =',rho),
+       xaxt = "n")
+  axis(1, at= c(0.1, 0.25, 0.5, 0.75, 0.9),
+       labels= c('t = 0.1', ' t = 0.25'," t = 0.5", "t = 0.75", "t = 0.90"))
+  
+  lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025 , qtablem[,2], col = 2)
+  lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,3], col = 4)
+  # lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,5], col = 4)
+  points(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], pch = 20)
+  points(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025,qtablem[,2], pch = 20, col = 2)
+  points(c(0.1, 0.25, 0.5, 0.75, 0.9)+0.05,qtablem[,3], col = 4, pch = 20)
+  
+  arrows(c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] - 1.96*qtablesd[,1],
+         c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] + 1.96*qtablesd[,1],
+         length=0.05, angle=90, code=3)
+  arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, qtablem[,2] - 1.96*qtablesd[,2],
+         c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, qtablem[,2] + 1.96*qtablesd[,2],
+         length=0.05, angle=90, code=3, col = 2)
+  arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,3] - 1.96*qtablesd[,3],
+         c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,3] + 1.96*qtablesd[,3],
+         length=0.05, angle=90, code=3, col = 4)
+  
+  abline(h = 0, lty = 2, col = 6)
+  legend(x = "topleft",inset = 0,
+         legend = c("Cox PH (X1, X2)", "Cox PH (X1)", "Cox PH (X2)"),
+         col=c(1,2,4),
+         pch=c(20),lty=c(1), cex = 0.7)
+}
+
+# plot.new()
+#,
+
+```
+
+
+
+
+$\beta = (\beta_1, \beta_2) = (0.2,0.1), \gamma = (\gamma_1, \gamma_2) = (0.1, 0.2)$
+
+Survival function $S(T > t | X) = \exp(-t)^{\exp(\beta X)}$
+Observed time function $S(Z > t | X) = S(T > t | X) S(C > t | X) = \exp(-t)^{\exp(\beta X)} \exp(-t)^{\exp(\gamma X)}$
+
+Draw the survival plots at the point (-1, 0.5): 
+
+```{R fig.height = 3.5, fig.width = 9, fig.align = "center", echo = FALSE}
+
+set.seed(321)
+S0 = function(t){return(exp(-1*t))}
+rho = 0.9
+sigma = matrix(0.2,2,2)
+diag(sigma) = 1
+n = 1000
+seqs = seq(0,5,0.1)
+beta = matrix(c(0.2,0.1), 2, 1)
+gamma = matrix(c(0.1,0.2), 2, 1)
+
+# generate covariates
+X = mvrnorm(n, c(1,2), sigma)
+covs = X %*% beta
+covs2 = X %*% gamma
+
+# training set 
+for(training in 1){
+  death = c(); U = c(); U2 = c()
+  censor = c(); udiff = c()
+  for(i in 1:n){
+    # generate survival time 
+    temp = covs[i]
+    u = runif(1,0,1); U = c(U, u)
+    deathtemp = inverse(u, St)
+    death = c(death, deathtemp)
+    U2 = c(U2, St(deathtemp))
+    # generate censoring time 
+    u = runif(1,0,1)
+    temp = covs2[i]
+    censor = c(censor, inverse(u, St))
+  }
+  udiff = c(udiff, max(abs(U2 - U)))
+  data = data.frame(death = death, censor = censor, x1 = X[, 1], x2 = X[, 2], status2 = 1)
+  data$status = ifelse(data$death < data$censor, 1, 0)
+  data$time = ifelse(data$status == 1, data$death, data$censor)
+  data = data[order(data$time), ]
+  rownames(data) = NULL
+}
+
+par(mfrow = c(1,3))
+
+fit0 = coxph(Surv(time, status) ~ x1 + x2, data=data)
+fit2 = coxph(Surv(time, status) ~ x2, data=data)
+fit1 = coxph(Surv(time, status) ~ x1, data=data)
+
+x1 = -1; x2 = 0.5;
+fit02 = survfit(fit2, newdata=data.frame(x2 = x2))
+fit01 = survfit(fit1, newdata=data.frame(x1 = x1))
+fit00 = survfit(fit0, newdata=data.frame(x1 = x1, x2 = x2))
+
+plot(fit00, main = 'Cox with x1,x2', xlab = 'time', ylab = 'survival S(t)')
+temp = beta[1] * x1 + beta[2] * x2
+lines(seq(0,20,0.1), St(seq(0,20,0.1)), col = 2)
+legend("topright", legend = c('Cox x1,x2', 'true S(t)'), col = c(1,2), lty = 1)
+
+plot(fit01, main = 'Cox with only x1', xlab = 'time', ylab = 'survival S(t)')
+temp = beta[1] * x1 + beta[2] * x2
+lines(seq(0,20,0.1), St(seq(0,20,0.1)), col = 2)
+legend("topright", legend = c('Cox x1', 'true S(t)'), col = c(1,2), lty = 1)
+
+plot(fit02, main = 'Cox with only x2', xlab = 'time', ylab = 'survival S(t)')
+temp = beta[1] * x1 + beta[2] * x2
+lines(seq(0,20,0.1), St(seq(0,20,0.1)), col = 2)
+legend("topright", legend = c('Cox x2', 'true S(t)'), col = c(1,2), lty = 1)
+
+```
+
+
+```{R include = FALSE}
+
+
+msetable = biastable = absbiastable = sdtable = c();  msesdtable = c()
+real= c()
+for(rho in c(0,0.2,0.5,0.9)){
+  
+  names = paste('~/Desktop/NYU/Research/Survival/11/censormodeldiff20200328_single_rho_', rho, '.RData', sep = '')
+  # names = paste('~/Desktop/NYU/Research/Survival/13. cox model does not work example/4.10/censormodeldiff2020404_single_rho_', rho, '.RData', sep = '')
+  load(names)
+  
+  for(resultrollup in 1){
+    # x1 + x2
+    Strue_table = c()
+    temp = result$Strue_list
+    for(i in 1:length(temp)){
+      Strue_table = rbind(Strue_table, temp[[i]])
+    }
+    Sest_table = c()
+    temp = result$Sest_list
+    for(i in 1:length(temp)){
+      Sest_table = rbind(Sest_table, temp[[i]])
+    }
+    # x1 + x2 0
+    Strue0_table = c()
+    temp = result$Strue_list0
+    for(i in 1:length(temp)){
+      Strue0_table = rbind(Strue0_table, temp[[i]])
+    }
+    Sest0_table = c()
+    temp = result$Sest_list0
+    for(i in 1:length(temp)){
+      Sest0_table = rbind(Sest0_table, temp[[i]])
+    }
+    # x1 
+    Strue1_table = c()
+    temp = result$Strue_list1
+    for(i in 1:length(temp)){
+      Strue1_table = rbind(Strue1_table, temp[[i]])
+    }
+    Sest1_table = c()
+    temp = result$Sest_list1
+    for(i in 1:length(temp)){
+      Sest1_table = rbind(Sest1_table, temp[[i]])
+    }
+    # x2 
+    Strue2_table = c()
+    temp = result$Strue_list2
+    for(i in 1:length(temp)){
+      Strue2_table = rbind(Strue2_table, temp[[i]])
+    }
+    Sest2_table = c()
+    temp = result$Sest_list2
+    for(i in 1:length(temp)){
+      Sest2_table = rbind(Sest2_table, temp[[i]])
+    }
+    # x01 
+    Strue01_table = c()
+    temp = result$Strue_list01
+    for(i in 1:length(temp)){
+      Strue01_table = rbind(Strue01_table, temp[[i]])
+    }
+    Sest01_table = c()
+    temp = result$Sest_list01
+    for(i in 1:length(temp)){
+      Sest01_table = rbind(Sest01_table, temp[[i]])
+    }
+    # x02 
+    Strue02_table = c()
+    temp = result$Strue_list02
+    for(i in 1:length(temp)){
+      Strue02_table = rbind(Strue02_table, temp[[i]])
+    }
+    Sest02_table = c()
+    temp = result$Sest_list02
+    for(i in 1:length(temp)){
+      Sest02_table = rbind(Sest02_table, temp[[i]])
+    }
+    # 1 
+    Res1_table = c()
+    temp = result$Res1_list
+    for(i in 1:length(temp)){
+      Res1_table = rbind(Res1_table, temp[[i]])
+    }
+    # 2
+    Res2_table = c()
+    temp = result$Res2_list
+    for(i in 1:length(temp)){
+      Res2_table = rbind(Res2_table, temp[[i]])
+    }
+    # 3 
+    Res3_table = c()
+    temp = result$Res3_list
+    for(i in 1:length(temp)){
+      Res3_table = rbind(Res3_table, temp[[i]])
+    }
+    # 4
+    Res4_table = c()
+    temp = result$Res4_list
+    for(i in 1:length(temp)){
+      Res4_table = rbind(Res4_table, temp[[i]])
+    }
+    # 5 
+    Res5_table = c()
+    temp = result$Res5_list
+    for(i in 1:length(temp)){
+      Res5_table = rbind(Res5_table, temp[[i]])
+    }
+    # 0
+    Real_table = c()
+    temp = result$Realsurv_list
+    for(i in 1:length(temp)){
+      Real_table = rbind(Real_table, temp[[i]])
+    }
+  }
+  
+  real = rbind(real, Real_table[1,])
+  
+  ######################################## 
+  # # bias
+  # temp = cbind(apply(Sest_table - Real_table,2,mean),
+  # apply(Sest1_table - Real_table,2,mean) ,
+  # apply(Sest2_table - Real_table,2,mean) ,
+  # # apply(Sest0_table - Real_table,2,mean) ,
+  # # apply(Sest01_table - Real_table,2,mean) ,
+  # # apply(Sest02_table - Real_table,2,mean) ,
+  # apply(Res1_table - Real_table,2,mean),
+  # apply(Res2_table - Real_table,2,mean),
+  # apply(Res3_table - Real_table,2,mean) ,
+  # apply(Res4_table - Real_table,2,mean) ,
+  # apply(Res5_table - Real_table,2,mean) )
+  
+  temp = cbind(apply(Sest_table,2,mean),
+               apply(Sest1_table ,2,mean) ,
+               apply(Sest2_table ,2,mean) ,
+               # apply(Sest0_table - Strue0_table,2,mean) ,
+               # apply(Sest01_table - Strue01_table,2,mean), 
+               # apply(Sest02_table - Strue02_table,2,mean) ,
+               apply(Res1_table,2,mean),
+               apply(Res2_table ,2,mean),
+               apply(Res3_table ,2,mean) ,
+               apply(Res4_table ,2,mean) ,
+               apply(Res5_table ,2,mean) )
+  
+  biastable = rbind(biastable, temp)
+  
+  ######################################## 
+  # absolute bias
+  # temp = cbind(apply(abs(Sest_table - Real_table),2,mean), 
+  #              apply(abs(Sest1_table - Real_table),2,mean) ,
+  #              apply(abs(Sest2_table - Real_table),2,mean) ,
+  #              apply(abs(Sest0_table - Real_table),2,mean),
+  #              apply(abs(Sest01_table - Real_table),2,mean),
+  #              apply(abs(Sest02_table - Real_table),2,mean),
+  #              apply(abs(Res1_table - Real_table),2,mean),
+  #              apply(abs(Res2_table - Real_table),2,mean),
+  #              apply(abs(Res3_table - Real_table),2,mean) ,
+  #              apply(abs(Res4_table - Real_table),2,mean) ,
+  #              apply(abs(Res5_table - Real_table),2,mean))
+  
+  temp = cbind(apply(abs(Sest_table - Strue_table),2,mean) ,
+               apply(abs(Sest1_table - Strue1_table),2,mean) ,
+               apply(abs(Sest2_table - Strue2_table),2,mean) ,
+               # apply(abs(Sest0_table - Strue0_table),2,mean) ,
+               # apply(abs(Sest01_table - Strue01_table),2,mean), 
+               # apply(abs(Sest02_table - Strue02_table),2,mean) ,
+               apply(abs(Res1_table - Real_table),2,mean),
+               apply(abs(Res2_table - Real_table),2,mean),
+               apply(abs(Res3_table - Real_table),2,mean) ,
+               apply(abs(Res4_table - Real_table),2,mean) ,
+               apply(abs(Res5_table - Real_table),2,mean) )
+  
+  absbiastable = rbind(absbiastable, temp)
+  
+  ######################################## 
+  # sd
+  
+  temp = cbind(apply(Sest_table,2,sd),
+               apply(Sest1_table,2,sd) ,
+               apply(Sest2_table,2,sd) ,
+               # apply(Sest0_table,2,sd) ,
+               # apply(Sest01_table,2,sd) ,
+               # apply(Sest02_table,2,sd) ,
+               apply(Res1_table,2,sd),
+               apply(Res2_table,2,sd),
+               apply(Res3_table,2,sd) ,
+               apply(Res4_table,2,sd) ,
+               apply(Res5_table,2,sd) )
+  
+  sdtable = rbind(sdtable, temp)
+  
+  ######################################## 
+  # MSE
+  
+  # apply((Sest_table - Real_table)^2,2,mean) 
+  # apply((Sest1_table - Real_table)^2,2,mean) 
+  # apply((Sest2_table - Real_table)^2,2,mean) 
+  # apply((Sest0_table - Real_table)^2,2,mean) 
+  # apply((Sest01_table - Real_table)^2,2,mean) 
+  # apply((Sest02_table - Real_table)^2,2,mean) 
+  
+  temp = cbind(apply((Sest_table - Strue_table)^2,2,mean),
+               apply((Sest1_table - Strue1_table)^2,2,mean) ,
+               apply((Sest2_table - Strue2_table)^2,2,mean) ,
+               # apply((Sest0_table - Strue0_table)^2,2,mean) ,
+               # apply((Sest01_table - Strue01_table)^2,2,mean), 
+               # apply((Sest02_table - Strue02_table)^2,2,mean) ,
+               apply((Res1_table - Real_table)^2,2,mean),
+               apply((Res2_table - Real_table)^2,2,mean),
+               apply((Res3_table - Real_table)^2,2,mean) ,
+               apply((Res4_table - Real_table)^2,2,mean) ,
+               apply((Res5_table - Real_table)^2,2,mean) )
+  
+   msetable = rbind(msetable, temp) 
+  
+   temp = cbind(apply((Sest_table - Strue_table)^2,2,sd),
+               apply((Sest1_table - Strue1_table)^2,2,sd) ,
+               apply((Sest2_table - Strue2_table)^2,2,sd) ,
+               # apply((Sest0_table - Strue0_table)^2,2,sd) ,
+               # apply((Sest01_table - Strue01_table)^2,2,sd), 
+               # apply((Sest02_table - Strue02_table)^2,2,sd) ,
+               apply((Res1_table - Real_table)^2,2,sd),
+               apply((Res2_table - Real_table)^2,2,sd),
+               apply((Res3_table - Real_table)^2,2,sd) ,
+               apply((Res4_table - Real_table)^2,2,sd) ,
+               apply((Res5_table - Real_table)^2,2,sd) )
+   
+   msesdtable = rbind(msesdtable, temp) 
+}
+
+```
+
+
+$\beta = (\beta_1, \beta_2) = (0.2,0.1)$
+
+```{R fig.width=6, fig.height=6,echo=FALSE, fig.align = "center"}
+
+par(mfrow = c(1,2))
+par(oma=c(0,0,2,0))  
+par(mar=c(4,4,2,1))
+m <- matrix(c(1,2,3,4),nrow = 2,ncol = 2,byrow = TRUE)
+layout(mat=m,heights = c(2,2))
+
+count = 0
+for(rho in c(0,0.2)){
+  qtablem = biastable[(1 + 5*count):(5*(count+1)),]
+  qtablesd = sdtable[(1 + 5*count):(5*(count+1)),]
+  count  = count + 1
+  plot(c(0.1, 0.3, 0.5, 0.7, 0.9),qtablem[,1], type = 'l',
+     ylim = c( min(qtablem - 1.96*qtablesd), max(qtablem + 1.96*qtablesd)), xlim = c(0,1),
+     xlab = 'quantile time', ylab = 'Bias', # bquote(.('mean(abs(S(t)') -hat('S(t)))')),
+     main = paste('rho =',rho),
+     xaxt = "n")
+axis(1, at= c(0.1, 0.25, 0.5, 0.75, 0.9),
+     labels= c('0.1', '0.3',"0.5", "0.7", "0.9"))
+
+lines(c(0.1, 0.3, 0.5, 0.7, 0.9)+ 0.025 , qtablem[,2], col = 2)
+lines(c(0.1, 0.3, 0.5, 0.7, 0.9)+ 0.05, qtablem[,3], col = 4)
+points(c(0.1, 0.3, 0.5, 0.7, 0.9),qtablem[,1], pch = 20)
+points(c(0.1, 0.3, 0.5, 0.7, 0.9)+ 0.025,qtablem[,2], pch = 20, col = 2)
+points(c(0.1, 0.3, 0.5, 0.7, 0.9)+0.05,qtablem[,3], col = 4, pch = 20)
+
+arrows(c(0.1, 0.3, 0.5, 0.7, 0.9), qtablem[,1] - 1.96*qtablesd[,1],
+       c(0.1, 0.3, 0.5, 0.7, 0.9), qtablem[,1] + 1.96*qtablesd[,1],
+       length=0.05, angle=90, code=3)
+arrows(c(0.1, 0.3, 0.5, 0.7, 0.9)+ 0.025, qtablem[,2] - 1.96*qtablesd[,2],
+       c(0.1, 0.3, 0.5, 0.7, 0.9)+ 0.025, qtablem[,2] + 1.96*qtablesd[,2],
+       length=0.05, angle=90, code=3, col = 2)
+arrows(c(0.1, 0.3, 0.5, 0.7, 0.9)+ 0.05, qtablem[,3] - 1.96*qtablesd[,3],
+       c(0.1, 0.3, 0.5, 0.7, 0.9)+ 0.05, qtablem[,3] + 1.96*qtablesd[,3],
+       length=0.05, angle=90, code=3, col = 4)
+
+lines(c(0.1, 0.3, 0.5, 0.7, 0.9) + 0.05, real[count, ],lty = 2, col = 6, lwd = 2)
+legend(x = "bottomleft",inset = 0,
+       legend = c("Cox PH (X1, X2)", "Cox PH (X1)", " Cox PH (X2)","True S(t)"),
+       col=c(1,2,4,6),
+       pch=c(20),lty=c(1), cex = 0.7)
+
+}
+
+# plot.new()
+ #,
+
+```
+
+
+```{R fig.width=6, fig.height=6,echo=FALSE, fig.align = "center"}
+
+par(mfrow = c(1,2))
+par(oma=c(0,0,2,0))  
+par(mar=c(4,4,2,1))
+m <- matrix(c(1,2,3,4),nrow = 2,ncol = 2,byrow = TRUE)
+layout(mat=m,heights = c(2,2))
+
+count = 0
+for(rho in c(0,0.2)){
+  qtablem = msetable[(1 + 5*count):(5*(count+1)),] * 1000
+  qtablesd = msesdtable[(1 + 5*count):(5*(count+1)),] * 1000
+  count = count  + 1
+  plot(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], type = 'l',
+       ylim = c( min(qtablem - 1.96*qtablesd), max(qtablem + 1.96*qtablesd)), xlim = c(0,1),
+       xlab = 'quantile time', ylab = 'MSE', # bquote(.('mean(abs(S(t)') -hat('S(t)))')),
+       main = paste('MSE: rho =',rho),
+       xaxt = "n")
+  axis(1, at= c(0.1, 0.25, 0.5, 0.75, 0.9),
+       labels= c('t = 0.1', ' t = 0.25'," t = 0.5", "t = 0.75", "t = 0.90"))
+  
+  lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025 , qtablem[,2], col = 2)
+  lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,3], col = 4)
+  # lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,5], col = 4)
+  points(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], pch = 20)
+  points(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025,qtablem[,2], pch = 20, col = 2)
+  points(c(0.1, 0.25, 0.5, 0.75, 0.9)+0.05,qtablem[,3], col = 4, pch = 20)
+  
+  arrows(c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] - 1.96*qtablesd[,1],
+         c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] + 1.96*qtablesd[,1],
+         length=0.05, angle=90, code=3)
+  arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, qtablem[,2] - 1.96*qtablesd[,2],
+         c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, qtablem[,2] + 1.96*qtablesd[,2],
+         length=0.05, angle=90, code=3, col = 2)
+  arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,3] - 1.96*qtablesd[,3],
+         c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,3] + 1.96*qtablesd[,3],
+         length=0.05, angle=90, code=3, col = 4)
+  
+  abline(h = 0, lty = 2, col = 6)
+  legend(x = "topleft",inset = 0,
+         legend = c("Cox PH (X1, X2)", "Cox PH (X1)", "Cox PH (X2)"),
+         col=c(1,2,4),
+         pch=c(20),lty=c(1), cex = 0.7)
+}
+
+# plot.new()
+#,
+
+```
+
+
+
+
+### Example 2 (Dependent censoring (Tsiatis example))
+
+
+The Tsiatis proposed an example of dependent censorship. 
+$$P(T > t, C > s) = \exp(-\lambda t - \mu s - \theta ts)$$
+$$S_T(t) = P(T > t) = \exp(-\lambda t)$$
+$$S_C(s) = P(C > s) = \exp(-\mu s)$$
+If we add covariates in the joint model, we can replace $\lambda$ with $\lambda^\prime = k\exp(\beta X)$, replace $\mu$ with $\mu^\prime = k\exp(\gamma X)$. Therefore, the joint distribution with covariates is: 
+$$P(T > t, C > s| X) = \exp(- k\exp(\beta X) t - k \exp(\gamma X) s - \theta ts)$$
+And the marignal distributions are 
+$$S_T(t | X) = P(T > t | X) = \exp(-k \exp(\beta X) t) = \exp(-k t)^{\exp(\beta X)} = S_0(t)^{\exp(\beta X)}, \text{ where }S_0(t) = \exp(-kt)$$
+$$S_C(s | X) = P(C > s | X) = \exp(-k \exp(\gamma X) s) = \exp(-k s)^{\exp(\gamma X)} = S_0(s)^{\exp(\gamma X)}$$
+Therefore the marignal distributions  $S_T(t | X)$ and $S_C(t | X)$ have the forms of Cox PH model. 
+
+
+
+
+#### Data set generation
+
+* 1. Simulate the covariates for n subjects: $X = (x1, x2) \sim MVN(\mu, \Sigma)$, where $X$ is $n$ by 2 matrix and $x1, x2$ are $n$ by 1 vectors. For each subject, the covariates is $x_{i1}, x_{i2}$. 
+    + $\beta = (\beta_1, \beta_2) = (0.2,0.1), \gamma = (\gamma_1, \gamma_2) = (0.1, 0.2)$
+    + $X = (x1, x2) \sim MVN(\mu, \Sigma)$, $\mu = (1,2)$, $\Sigma = \left(\begin{array}
+{cc}
+1 & \rho \\
+\rho & 1 
+\end{array}\right)$, where $\rho = 0, 0.2, 0.5, 0.9$. 
+* 2. For subject $i$, calculate the $\beta X_i$. Simulate the survival time $T_i$ from below CDF by using the inverse probablity sampling. 
+$$S_{T,i}(t) = S_{0,i}(t)^{\exp(\beta X_i)} = \exp(-t \times \exp(\beta X_i))$$
+* 3. Simulate the censoring time $C_i$ from below the conditional CDF by using the inverse probablity sampling. 
+<!-- $$S_{C,i}(t) = S_{0,i}(t)^{\exp(\gamma X_i)} = \exp(-t \times \exp(\gamma X_i))$$ -->
+$$P(C > t | T = t, X = x)$$
+* 4. Calculate observed time $Z_i = T_i \wedge C_i$ and indicator $\delta_i = I(T_i < C_i)$. 
+* Then we get the dataset with death time, censoring time, observed time, censoring indicator, and covariates. The times are calculated one by one based on the subject's covariates values.
+
+Data size: $n = 1000$; Censoringship proportion: 
+
+##### Models
+
+* Model 1: Fit the Cox PH model with both $x_1$ and $x_2$
+* Model 2: Fit the Cox PH model with only $x_1$, ($x_2$ is unobserved)
+* Model 3: Fit the Cox PH model with only $x_2$, ($x_1$ is unobserved)
+
+
+The estimated covariates table: 
+
+* Cox model fitted with only X1, the $\beta_1$ is; 
+* Cox model fitted with only X2, the $\beta_2$ is; 
+
+```{R include = FALSE}
+
+library(knitr)
+library(kableExtra)
+
+coef_table = c()
+for(rho in c(0,0.2,0.5,0.9)){
+  # names = paste('~/Desktop/NYU/Research/Survival/11/censormodeldiff20200328_single_rho_', rho, '.RData', sep = '')
+  names = paste('~/Desktop/NYU/Research/Survival/13. cox model does not work example/4.10/censormodeldiff2020404_single_rho_', rho, '.RData', sep = '')
+  load(names)
+  temp = c(mean(result$Cox1[,1]),
+           sd(result$Cox1[,1]),
+           sum(result$Cox1[, 5]<0.05)/100,
+           mean(result$Cox2[,1]),
+           sd(result$Cox2[,1]),
+           sum(result$Cox2[, 5]<0.05)/100)
+  # print(temp)
+  coef_table = rbind(coef_table, temp)
+}
+coef_table = cbind(c(0,0.2,0.5,0.9),coef_table)
+
+coef_table  = round(coef_table,4)
+colnames(coef_table) = c('rho','mean','sd','signifcant','mean','sd','signifcant') 
+
+```
+
+<!-- Covariates table  -->
+
+```{R echo = FALSE}
+
+kable(coef_table, "latex", align="c", booktabs=TRUE, row.names = FALSE,
+      escape = F, longtable = T,
+      caption = 'Covariates estimation') %>%
+   add_header_above(header = c(" "= 1,
+                              "X1 (true = 0.2)" = 3, 
+                              "X2 (true = 0.1)" = 3)) 
+
+```
+
+The coefficent plots within 100 repetitions. 
+
+```{R fig2, fig.height = 3, fig.width = 5.5, fig.align = "center", echo = FALSE }
+par(mfrow = c(1,2))
+plot(c(1,2,3,4), coef_table[,2], type = 'l', ylim = c(-0.3,0.3), xaxt = "n",
+     xlab = 'rho: correlation of x1,x2', ylab = 'coefficient estimation',
+     main = 'Estimation of coefficient x1')
+axis(1, at=c(1,2,3,4), 
+     labels = c(0,0.2,0.5,0.9))
+points(c(1,2,3,4), coef_table[,2], pch = 20)
+abline(h = 0.2, col = 2, lty = 2)
+arrows(c(1,2,3,4), coef_table[,2] - 1.96 * coef_table[,3], 
+       c(1,2,3,4), coef_table[,2] + 1.96 * coef_table[,3],
+       length=0.05, angle=90, code=3)
+
+plot(c(1,2,3,4), coef_table[,5], type = 'l', ylim = c(-0.3,0.3), xaxt = "n",
+     xlab = 'rho: correlation of x1,x2', ylab = 'coefficient estimation',
+     main = 'Estimation of coefficient x2')
+axis(1, at=c(1,2,3,4), 
+     labels = c(0,0.2,0.5,0.9))
+points(c(1,2,3,4), coef_table[,5], pch = 20)
+abline(h = 0.1, col = 2, lty = 2)
+arrows(c(1,2,3,4), coef_table[,5] - 1.96 * coef_table[,6], 
+       c(1,2,3,4), coef_table[,5] + 1.96 * coef_table[,6],
+       length=0.05, angle=90, code=3)
+```
+
+
+
+```{R include = FALSE}
+Ft_s = function(t,s){
+  return((b - (c*t + b)* exp(-a*t-c*s*t))/b)
+}
+inverse_xy = function(x,Funs,s){
+  res1 = c()
+  for(i in seq(0.00000001, 20, 1)){
+    res1 = c(res1, Funs(i,s))
+  }
+  temp = seq(0.00000001, 100, 1)[which(abs(res1 - x) == min(abs(res1 - x)))[1]]
+  
+  res2 = c()
+  for(i in seq(max(0,(temp - 1)), (temp+1), 0.1)){
+    res2 = c(res2, Funs(i,s))
+  }
+  temp = seq(max(0,(temp - 1)), (temp+1), 0.1)[which(abs(res2 - x) == min(abs(res2 - x)))[1]]
+  
+  res3 = c()
+  for(i in seq((temp - 0.1), (temp+0.1), 0.01)){
+    res3 = c(res3, Funs(i,s))
+  }
+  temp = seq((temp - 0.1), (temp + 0.1), 0.01)[which(abs(res3 - x) == min(abs(res3 - x)))[1]]
+  
+  res4 = c()
+  for(i in seq((temp - 0.01), (temp + 0.01), 0.001)){
+    res4 = c(res4, Funs(i,s))
+  }
+  temp =seq((temp - 0.01), (temp + 0.01), 0.001)[which(abs(res4 - x) == min(abs(res4 - x)))[1]]
+  
+  res5 = c()
+  for(i in seq((temp - 0.001), (temp + 0.001), 0.0001)){
+    res5 = c(res5, Funs(i,s))
+  }
+  temp = seq((temp - 0.001), (temp + 0.001), 0.0001)[which(abs(res5 - x) == min(abs(res5 - x)))[1]]
+  
+  res6 = c()
+  for(i in seq((temp - 0.0001), (temp + 0.0001), 0.00001)){
+    res6 = c(res6, Funs(i,s))
+  }
+  temp = seq((temp - 0.0001), (temp + 0.0001), 0.00001)[which(abs(res6 - x) == min(abs(res6 - x)))[1]]
+  
+  return(temp)
+}
+inverse = function(x,Funs){
+  res1 = c()
+  for(i in seq(0.00000001, 20, 1)){
+    res1 = c(res1, Funs(i))
+  }
+  temp = seq(0.00000001, 100, 1)[which(abs(res1 - x) == min(abs(res1 - x)))[1]]
+  
+  res2 = c()
+  for(i in seq((temp - 1), (temp+1), 0.1)){
+    res2 = c(res2, Funs(i))
+  }
+  temp = seq((temp - 1), (temp+1), 0.1)[which(abs(res2 - x) == min(abs(res2 - x)))[1]]
+  
+  res3 = c()
+  for(i in seq((temp - 0.1), (temp+0.1), 0.01)){
+    res3 = c(res3, Funs(i))
+  }
+  temp = seq((temp - 0.1), (temp + 0.1), 0.01)[which(abs(res3 - x) == min(abs(res3 - x)))[1]]
+  
+  res4 = c()
+  for(i in seq((temp - 0.01), (temp + 0.01), 0.001)){
+    res4 = c(res4, Funs(i))
+  }
+  temp =seq((temp - 0.01), (temp + 0.01), 0.001)[which(abs(res4 - x) == min(abs(res4 - x)))[1]]
+  
+  res5 = c()
+  for(i in seq((temp - 0.001), (temp + 0.001), 0.0001)){
+    res5 = c(res5, Funs(i))
+  }
+  temp = seq((temp - 0.001), (temp + 0.001), 0.0001)[which(abs(res5 - x) == min(abs(res5 - x)))[1]]
+  
+  res6 = c()
+  for(i in seq((temp - 0.0001), (temp + 0.0001), 0.00001)){
+    res6 = c(res6, Funs(i))
+  }
+  temp = seq((temp - 0.0001), (temp + 0.0001), 0.00001)[which(abs(res6 - x) == min(abs(res6 - x)))[1]]
+  
+  return(temp)
+}
+```
+
+
+```{R echo = FALSE}
+### generate data with covariates 
+### generate data with covariates 
+set.seed(123)
+n = 1000
+rho = 0.9
+sigma = matrix(rho,2,2)
+diag(sigma) = 1
+X = mvrnorm(n, c(0,0), sigma)
+x1 = X[,1]; x2 = X[,2]
+
+beta = c(0.2,0.1); gamma = c(0.1, 0.2)
+censor = c()
+death = c()
+for(i in 1:n){
+  a = exp(x1[i] * beta[1] + x2[i] * beta[2])
+  b = exp(x1[i] * gamma[1] + x2[i] * gamma[2])
+  c = 2
+  censortemp = rexp(1, b)
+  censor = c(censor, censortemp)
+  u = runif(1,0,1)
+  death = c(death, inverse_xy(u, Ft_s, censortemp))
+}
+
+data = data.frame(death = death, censor = censor, x1 = x1, x2 = x2)
+data$status = ifelse(data$death < data$censor,1,0)
+data$time = ifelse(data$status == 1, data$death, data$censor)
+
+fitcox = coxph(Surv(time, status) ~ x1 + x2, data=data)
+fitcox1 = coxph(Surv(time, status) ~ x1, data=data)
+fitcox2 = coxph(Surv(time, status) ~ x2, data=data)
+```
+
+
+Survival plots 
+
+at point (-1,1)
+
+
+```{R fig.height = 3.5, fig.width = 9, fig.align = "center", echo = FALSE}
+ 
+par(mfrow = c(1,3))
+tx1 = -1; tx2 = 1
+a = exp(tx1 * beta[1] + tx2 * beta[2])
+fit0 = survfit(fitcox, newdata=data.frame(x1 = tx1, x2 = tx2))
+fit1 = survfit(fitcox1, newdata=data.frame(x1 = tx1))
+fit2 = survfit(fitcox2, newdata=data.frame(x2 = tx2))
+plot(fit0, main = 'Cox with x1, x2', xlab = 'time', ylab = 'survival S(t)')
+lines(seq(0,5,0.1),exp(-a*seq(0,5,0.1)), col = 2)
+legend("topright", legend = c('Cox x1,x2', 'true S(t)'), col = c(1,2), lty = 1)
+plot(fit1, main = 'Cox with only x1', xlab = 'time', ylab = 'survival S(t)')
+lines(seq(0,5,0.1),exp(-a*seq(0,5,0.1)), col = 2)
+legend("topright", legend = c('Cox x1', 'true S(t)'), col = c(1,2), lty = 1)
+plot(fit2, main = 'Cox with only x2', xlab = 'time', ylab = 'survival S(t)')
+lines(seq(0,5,0.1),exp(-a*seq(0,5,0.1)), col = 2)
+legend("topright", legend = c('Cox x2', 'true S(t)'), col = c(1,2), lty = 1)
+
+```
+
+
+We repete the procedure for 100 times. The estimated value of  $S_T(t | x_1 = -1, x_2 = 2)$, $t = 0.1, 0.3, 0.5, 0.9$.
+
+
+<!-- ```{R include = FALSE} -->
+
+<!-- msetable = biastable = absbiastable = sdtable = c();  msesdtable = c() -->
+<!-- real= c() -->
+
+<!-- for(rho in c(0,0.2,0.5,0.9)){ -->
+
+<!--   names = paste('~/Desktop/NYU/Research/Survival/13. cox model does not work example/4.10/censormodeldiff2020404_single_rho_', rho, '.RData', sep = '') -->
+<!--   load(names) -->
+
+<!--   for(resultrollup in 1){ -->
+<!--     # x1 + x2 -->
+<!--     Strue_table = c() -->
+<!--     temp = result$Strue_list0 -->
+<!--     for(i in 1:length(temp)){ -->
+<!--       Strue_table = rbind(Strue_table, temp[[i]]) -->
+<!--     } -->
+<!--     Sest_table = c() -->
+<!--     temp = result$Sest_list0 -->
+<!--     for(i in 1:length(temp)){ -->
+<!--       Sest_table = rbind(Sest_table, temp[[i]]) -->
+<!--     } -->
+<!--     # x1 + x2 0 -->
+<!--     Strue0_table = c() -->
+<!--     temp = result$Strue_list0 -->
+<!--     for(i in 1:length(temp)){ -->
+<!--       Strue0_table = rbind(Strue0_table, temp[[i]]) -->
+<!--     } -->
+<!--     Sest0_table = c() -->
+<!--     temp = result$Sest_list0 -->
+<!--     for(i in 1:length(temp)){ -->
+<!--       Sest0_table = rbind(Sest0_table, temp[[i]]) -->
+<!--     } -->
+<!--     # x1  -->
+<!--     Strue1_table = c() -->
+<!--     temp = result$Strue_list1 -->
+<!--     for(i in 1:length(temp)){ -->
+<!--       Strue1_table = rbind(Strue1_table, temp[[i]]) -->
+<!--     } -->
+<!--     Sest1_table = c() -->
+<!--     temp = result$Sest_list1 -->
+<!--     for(i in 1:length(temp)){ -->
+<!--       Sest1_table = rbind(Sest1_table, temp[[i]]) -->
+<!--     } -->
+<!--     # x2  -->
+<!--     Strue2_table = c() -->
+<!--     temp = result$Strue_list2 -->
+<!--     for(i in 1:length(temp)){ -->
+<!--       Strue2_table = rbind(Strue2_table, temp[[i]]) -->
+<!--     } -->
+<!--     Sest2_table = c() -->
+<!--     temp = result$Sest_list2 -->
+<!--     for(i in 1:length(temp)){ -->
+<!--       Sest2_table = rbind(Sest2_table, temp[[i]]) -->
+<!--     } -->
+<!--     # x01  -->
+<!--     Strue01_table = c() -->
+<!--     temp = result$Strue_list01 -->
+<!--     for(i in 1:length(temp)){ -->
+<!--       Strue01_table = rbind(Strue01_table, temp[[i]]) -->
+<!--     } -->
+<!--     Sest01_table = c() -->
+<!--     temp = result$Sest_list01 -->
+<!--     for(i in 1:length(temp)){ -->
+<!--       Sest01_table = rbind(Sest01_table, temp[[i]]) -->
+<!--     } -->
+<!--     # x02  -->
+<!--     Strue02_table = c() -->
+<!--     temp = result$Strue_list02 -->
+<!--     for(i in 1:length(temp)){ -->
+<!--       Strue02_table = rbind(Strue02_table, temp[[i]]) -->
+<!--     } -->
+<!--     Sest02_table = c() -->
+<!--     temp = result$Sest_list02 -->
+<!--     for(i in 1:length(temp)){ -->
+<!--       Sest02_table = rbind(Sest02_table, temp[[i]]) -->
+<!--     } -->
+<!--     # 1  -->
+<!--     Res1_table = c() -->
+<!--     temp = result$Res1_list -->
+<!--     for(i in 1:length(temp)){ -->
+<!--       Res1_table = rbind(Res1_table, temp[[i]]) -->
+<!--     } -->
+<!--     # 2 -->
+<!--     Res2_table = c() -->
+<!--     temp = result$Res2_list -->
+<!--     for(i in 1:length(temp)){ -->
+<!--       Res2_table = rbind(Res2_table, temp[[i]]) -->
+<!--     } -->
+<!--     # 3  -->
+<!--     Res3_table = c() -->
+<!--     temp = result$Res3_list -->
+<!--     for(i in 1:length(temp)){ -->
+<!--       Res3_table = rbind(Res3_table, temp[[i]]) -->
+<!--     } -->
+<!--     # 4 -->
+<!--     Res4_table = c() -->
+<!--     temp = result$Res4_list -->
+<!--     for(i in 1:length(temp)){ -->
+<!--       Res4_table = rbind(Res4_table, temp[[i]]) -->
+<!--     } -->
+<!--     # 5  -->
+<!--     Res5_table = c() -->
+<!--     temp = result$Res5_list -->
+<!--     for(i in 1:length(temp)){ -->
+<!--       Res5_table = rbind(Res5_table, temp[[i]]) -->
+<!--     } -->
+<!--     # 0 -->
+<!--     Real_table = c() -->
+<!--     temp = result$Realsurv_list -->
+<!--     for(i in 1:length(temp)){ -->
+<!--       Real_table = rbind(Real_table, temp[[i]]) -->
+<!--     } -->
+<!--   } -->
+
+<!--   real = rbind(real, Real_table[1, ]) -->
+<!--   ########################################  -->
+<!--   # # bias -->
+<!--   # temp = cbind(apply(Sest_table - Real_table,2,mean), -->
+<!--   # apply(Sest1_table - Real_table,2,mean) , -->
+<!--   # apply(Sest2_table - Real_table,2,mean) , -->
+<!--   # # apply(Sest0_table - Real_table,2,mean) , -->
+<!--   # # apply(Sest01_table - Real_table,2,mean) , -->
+<!--   # # apply(Sest02_table - Real_table,2,mean) , -->
+<!--   # apply(Res1_table - Real_table,2,mean), -->
+<!--   # apply(Res2_table - Real_table,2,mean), -->
+<!--   # apply(Res3_table - Real_table,2,mean) , -->
+<!--   # apply(Res4_table - Real_table,2,mean) , -->
+<!--   # apply(Res5_table - Real_table,2,mean) ) -->
+
+<!--   temp = cbind(apply(Sest_table - Strue_table,2,mean), -->
+<!--                apply(Sest1_table - Strue1_table,2,mean) , -->
+<!--                apply(Sest2_table - Strue2_table,2,mean) , -->
+<!--                # apply(Sest0_table - Strue0_table,2,mean) , -->
+<!--                # apply(Sest01_table - Strue01_table,2,mean),  -->
+<!--                # apply(Sest02_table - Strue02_table,2,mean) , -->
+<!--                apply(Res1_table - Real_table,2,mean), -->
+<!--                apply(Res2_table - Real_table,2,mean), -->
+<!--                apply(Res3_table - Real_table,2,mean) , -->
+<!--                apply(Res4_table - Real_table,2,mean)) -->
+
+<!--     temp = cbind(apply(Sest_table,2,mean), -->
+<!--                apply(Sest1_table,2,mean) , -->
+<!--                apply(Sest2_table,2,mean) , -->
+<!--                # apply(Sest0_table - Strue0_table,2,mean) , -->
+<!--                # apply(Sest01_table - Strue01_table,2,mean),  -->
+<!--                # apply(Sest02_table - Strue02_table,2,mean) , -->
+<!--                apply(Res1_table,2,mean), -->
+<!--                apply(Res2_table,2,mean), -->
+<!--                apply(Res3_table,2,mean) , -->
+<!--                apply(Res4_table,2,mean)) -->
+
+<!--   biastable = rbind(biastable, temp) -->
+
+<!--   ########################################  -->
+<!--   # absolute bias -->
+<!--   # temp = cbind(apply(abs(Sest_table - Real_table),2,mean),  -->
+<!--   #              apply(abs(Sest1_table - Real_table),2,mean) , -->
+<!--   #              apply(abs(Sest2_table - Real_table),2,mean) , -->
+<!--   #              apply(abs(Sest0_table - Real_table),2,mean), -->
+<!--   #              apply(abs(Sest01_table - Real_table),2,mean), -->
+<!--   #              apply(abs(Sest02_table - Real_table),2,mean), -->
+<!--   #              apply(abs(Res1_table - Real_table),2,mean), -->
+<!--   #              apply(abs(Res2_table - Real_table),2,mean), -->
+<!--   #              apply(abs(Res3_table - Real_table),2,mean) , -->
+<!--   #              apply(abs(Res4_table - Real_table),2,mean) , -->
+<!--   #              apply(abs(Res5_table - Real_table),2,mean)) -->
+
+<!--   temp = cbind(apply(abs(Sest_table - Strue_table),2,mean) , -->
+<!--                apply(abs(Sest1_table - Strue1_table),2,mean) , -->
+<!--                apply(abs(Sest2_table - Strue2_table),2,mean) , -->
+<!--                # apply(abs(Sest0_table - Strue0_table),2,mean) , -->
+<!--                # apply(abs(Sest01_table - Strue01_table),2,mean),  -->
+<!--                # apply(abs(Sest02_table - Strue02_table),2,mean) , -->
+<!--                apply(abs(Res1_table - Real_table),2,mean), -->
+<!--                apply(abs(Res2_table - Real_table),2,mean), -->
+<!--                apply(abs(Res3_table - Real_table),2,mean) , -->
+<!--                apply(abs(Res4_table - Real_table),2,mean)) -->
+
+
+<!--   absbiastable = rbind(absbiastable, temp) -->
+
+<!--   ########################################  -->
+<!--   # sd -->
+
+<!--   temp = cbind(apply(Sest_table,2,sd), -->
+<!--                apply(Sest1_table,2,sd) , -->
+<!--                apply(Sest2_table,2,sd) , -->
+<!--                # apply(Sest0_table,2,sd) , -->
+<!--                # apply(Sest01_table,2,sd) , -->
+<!--                # apply(Sest02_table,2,sd) , -->
+<!--                apply(Res1_table,2,sd), -->
+<!--                apply(Res2_table,2,sd), -->
+<!--                apply(Res3_table,2,sd) , -->
+<!--                apply(Res4_table,2,sd) ) -->
+
+<!--   sdtable = rbind(sdtable, temp) -->
+
+<!--   ########################################  -->
+<!--   # MSE -->
+
+<!--   # apply((Sest_table - Real_table)^2,2,mean)  -->
+<!--   # apply((Sest1_table - Real_table)^2,2,mean)  -->
+<!--   # apply((Sest2_table - Real_table)^2,2,mean)  -->
+<!--   # apply((Sest0_table - Real_table)^2,2,mean)  -->
+<!--   # apply((Sest01_table - Real_table)^2,2,mean)  -->
+<!--   # apply((Sest02_table - Real_table)^2,2,mean)  -->
+
+<!--   temp = cbind(apply((Sest_table - Strue_table)^2,2,mean), -->
+<!--                apply((Sest1_table - Strue1_table)^2,2,mean) , -->
+<!--                apply((Sest2_table - Strue2_table)^2,2,mean) , -->
+<!--                # apply((Sest0_table - Strue0_table)^2,2,mean) , -->
+<!--                # apply((Sest01_table - Strue01_table)^2,2,mean),  -->
+<!--                # apply((Sest02_table - Strue02_table)^2,2,mean) , -->
+<!--                apply((Res1_table - Real_table)^2,2,mean), -->
+<!--                apply((Res2_table - Real_table)^2,2,mean), -->
+<!--                apply((Res3_table - Real_table)^2,2,mean) , -->
+<!--                apply((Res4_table - Real_table)^2,2,mean) ) -->
+
+<!--   msetable = rbind(msetable, temp)  -->
+
+<!--   temp = cbind(apply((Sest_table - Strue_table)^2,2,sd), -->
+<!--                apply((Sest1_table - Strue1_table)^2,2,sd) , -->
+<!--                apply((Sest2_table - Strue2_table)^2,2,sd) , -->
+<!--                # apply((Sest0_table - Strue0_table)^2,2,sd) , -->
+<!--                # apply((Sest01_table - Strue01_table)^2,2,sd),  -->
+<!--                # apply((Sest02_table - Strue02_table)^2,2,sd) , -->
+<!--                apply((Res1_table - Real_table)^2,2,sd), -->
+<!--                apply((Res2_table - Real_table)^2,2,sd), -->
+<!--                apply((Res3_table - Real_table)^2,2,sd) , -->
+<!--                apply((Res4_table - Real_table)^2,2,sd) ) -->
+
+<!--   msesdtable = rbind(msesdtable, temp)  -->
+<!-- } -->
+<!-- ``` -->
+
+<!-- ```{R fig.width=6, fig.height=6,echo=FALSE, fig.align = "center"} -->
+
+<!-- par(mfrow = c(2,2)) -->
+<!-- count = 0 -->
+<!-- for(rho in c(0,0.2,0.5,0.9)){ -->
+<!--   qtablem = biastable[(1 + 5*count):(5*(count+1)),] -->
+<!--   qtablesd = sdtable[(1 + 5*count):(5*(count+1)),] -->
+<!--   count = count + 1 -->
+<!--   plot(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], type = 'l', -->
+<!--        ylim = c( min(qtablem - 1.96*qtablesd), max(qtablem + 1.96*qtablesd)), xlim = c(0,1), -->
+<!--        xlab = 'quantile time', ylab = 'Bias', # bquote(.('mean(abs(S(t)') -hat('S(t)))')), -->
+<!--        main = paste('rho =',rho), -->
+<!--        xaxt = "n") -->
+<!--   axis(1, at= c(0.1, 0.25, 0.5, 0.75, 0.9), -->
+<!--        labels= c('t = 0.1', ' t = 0.25'," t = 0.5", "t = 0.75", "t = 0.90")) -->
+
+<!--   lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025 , qtablem[,2], col = 2) -->
+<!--   lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,3], col = 4) -->
+<!--   points(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], pch = 20) -->
+<!--   points(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025,qtablem[,2], pch = 20, col = 2) -->
+<!--   points(c(0.1, 0.25, 0.5, 0.75, 0.9)+0.05,qtablem[,3], col = 4, pch = 20) -->
+
+<!--   arrows(c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] - 1.96*qtablesd[,1], -->
+<!--          c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] + 1.96*qtablesd[,1], -->
+<!--          length=0.05, angle=90, code=3) -->
+<!--   arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, qtablem[,2] - 1.96*qtablesd[,2], -->
+<!--          c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, qtablem[,2] + 1.96*qtablesd[,2], -->
+<!--          length=0.05, angle=90, code=3, col = 2) -->
+<!--   arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,3] - 1.96*qtablesd[,3], -->
+<!--          c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,3] + 1.96*qtablesd[,3], -->
+<!--          length=0.05, angle=90, code=3, col = 4) -->
+
+<!--   lines(c(0.1, 0.25, 0.5, 0.75, 0.9), real[count,], col = 6, lty = 2) -->
+<!--   legend(x = "bottomleft",inset = 0, -->
+<!--          legend = c("Cox PH (X1, X2)", "Cox PH (X1)", "Cox PH (X2)","True"), -->
+<!--          col=c(1,2,4,6), -->
+<!--          pch=c(20),lty=c(1), cex = 0.7) -->
+
+<!-- } -->
+
+<!-- ``` -->
+
+
+
+
+```{R include = FALSE}
+
+
+msetable = biastable = absbiastable = sdtable = c();  msesdtable = c()
+real= c()
+for(rho in c(0,0.2,0.5,0.9)){
+  
+  # names = paste('~/Desktop/NYU/Research/Survival/11/censormodeldiff20200328_single_rho_', rho, '.RData', sep = '')
+  names = paste('~/Desktop/NYU/Research/Survival/13. cox model does not work example/4.10/censormodeldiff2020404_single_rho_', rho, '.RData', sep = '')
+  load(names)
+  
+  for(resultrollup in 1){
+    # x1 + x2
+    Strue_table = c()
+    temp = result$Strue_list
+    for(i in 1:length(temp)){
+      Strue_table = rbind(Strue_table, temp[[i]])
+    }
+    Sest_table = c()
+    temp = result$Sest_list
+    for(i in 1:length(temp)){
+      Sest_table = rbind(Sest_table, temp[[i]])
+    }
+    # x1 + x2 0
+    Strue0_table = c()
+    temp = result$Strue_list0
+    for(i in 1:length(temp)){
+      Strue0_table = rbind(Strue0_table, temp[[i]])
+    }
+    Sest0_table = c()
+    temp = result$Sest_list0
+    for(i in 1:length(temp)){
+      Sest0_table = rbind(Sest0_table, temp[[i]])
+    }
+    # x1 
+    Strue1_table = c()
+    temp = result$Strue_list1
+    for(i in 1:length(temp)){
+      Strue1_table = rbind(Strue1_table, temp[[i]])
+    }
+    Sest1_table = c()
+    temp = result$Sest_list1
+    for(i in 1:length(temp)){
+      Sest1_table = rbind(Sest1_table, temp[[i]])
+    }
+    # x2 
+    Strue2_table = c()
+    temp = result$Strue_list2
+    for(i in 1:length(temp)){
+      Strue2_table = rbind(Strue2_table, temp[[i]])
+    }
+    Sest2_table = c()
+    temp = result$Sest_list2
+    for(i in 1:length(temp)){
+      Sest2_table = rbind(Sest2_table, temp[[i]])
+    }
+    # x01 
+    Strue01_table = c()
+    temp = result$Strue_list01
+    for(i in 1:length(temp)){
+      Strue01_table = rbind(Strue01_table, temp[[i]])
+    }
+    Sest01_table = c()
+    temp = result$Sest_list01
+    for(i in 1:length(temp)){
+      Sest01_table = rbind(Sest01_table, temp[[i]])
+    }
+    # x02 
+    Strue02_table = c()
+    temp = result$Strue_list02
+    for(i in 1:length(temp)){
+      Strue02_table = rbind(Strue02_table, temp[[i]])
+    }
+    Sest02_table = c()
+    temp = result$Sest_list02
+    for(i in 1:length(temp)){
+      Sest02_table = rbind(Sest02_table, temp[[i]])
+    }
+    # 1 
+    Res1_table = c()
+    temp = result$Res1_list
+    for(i in 1:length(temp)){
+      Res1_table = rbind(Res1_table, temp[[i]])
+    }
+    # 2
+    Res2_table = c()
+    temp = result$Res2_list
+    for(i in 1:length(temp)){
+      Res2_table = rbind(Res2_table, temp[[i]])
+    }
+    # 3 
+    Res3_table = c()
+    temp = result$Res3_list
+    for(i in 1:length(temp)){
+      Res3_table = rbind(Res3_table, temp[[i]])
+    }
+    # 4
+    Res4_table = c()
+    temp = result$Res4_list
+    for(i in 1:length(temp)){
+      Res4_table = rbind(Res4_table, temp[[i]])
+    }
+    # 5 
+    Res5_table = c()
+    temp = result$Res5_list
+    for(i in 1:length(temp)){
+      Res5_table = rbind(Res5_table, temp[[i]])
+    }
+    # 0
+    Real_table = c()
+    temp = result$Realsurv_list
+    for(i in 1:length(temp)){
+      Real_table = rbind(Real_table, temp[[i]])
+    }
+  }
+  
+  real = rbind(real, Real_table[1,])
+  
+  ######################################## 
+  # # bias
+  # temp = cbind(apply(Sest_table - Real_table,2,mean),
+  # apply(Sest1_table - Real_table,2,mean) ,
+  # apply(Sest2_table - Real_table,2,mean) ,
+  # # apply(Sest0_table - Real_table,2,mean) ,
+  # # apply(Sest01_table - Real_table,2,mean) ,
+  # # apply(Sest02_table - Real_table,2,mean) ,
+  # apply(Res1_table - Real_table,2,mean),
+  # apply(Res2_table - Real_table,2,mean),
+  # apply(Res3_table - Real_table,2,mean) ,
+  # apply(Res4_table - Real_table,2,mean) ,
+  # apply(Res5_table - Real_table,2,mean) )
+  
+  temp = cbind(apply(Sest_table,2,mean),
+               apply(Sest1_table ,2,mean) ,
+               apply(Sest2_table ,2,mean) ,
+               # apply(Sest0_table - Strue0_table,2,mean) ,
+               # apply(Sest01_table - Strue01_table,2,mean), 
+               # apply(Sest02_table - Strue02_table,2,mean) ,
+               apply(Res1_table,2,mean),
+               apply(Res2_table ,2,mean),
+               apply(Res3_table ,2,mean) ,
+               apply(Res4_table ,2,mean) ,
+               apply(Res5_table ,2,mean) )
+  
+  biastable = rbind(biastable, temp)
+  
+  ######################################## 
+  # absolute bias
+  # temp = cbind(apply(abs(Sest_table - Real_table),2,mean), 
+  #              apply(abs(Sest1_table - Real_table),2,mean) ,
+  #              apply(abs(Sest2_table - Real_table),2,mean) ,
+  #              apply(abs(Sest0_table - Real_table),2,mean),
+  #              apply(abs(Sest01_table - Real_table),2,mean),
+  #              apply(abs(Sest02_table - Real_table),2,mean),
+  #              apply(abs(Res1_table - Real_table),2,mean),
+  #              apply(abs(Res2_table - Real_table),2,mean),
+  #              apply(abs(Res3_table - Real_table),2,mean) ,
+  #              apply(abs(Res4_table - Real_table),2,mean) ,
+  #              apply(abs(Res5_table - Real_table),2,mean))
+  
+  temp = cbind(apply(abs(Sest_table - Strue_table),2,mean) ,
+               apply(abs(Sest1_table - Strue1_table),2,mean) ,
+               apply(abs(Sest2_table - Strue2_table),2,mean) ,
+               # apply(abs(Sest0_table - Strue0_table),2,mean) ,
+               # apply(abs(Sest01_table - Strue01_table),2,mean), 
+               # apply(abs(Sest02_table - Strue02_table),2,mean) ,
+               apply(abs(Res1_table - Real_table),2,mean),
+               apply(abs(Res2_table - Real_table),2,mean),
+               apply(abs(Res3_table - Real_table),2,mean) ,
+               apply(abs(Res4_table - Real_table),2,mean) ,
+               apply(abs(Res5_table - Real_table),2,mean) )
+  
+  absbiastable = rbind(absbiastable, temp)
+  
+  ######################################## 
+  # sd
+  
+  temp = cbind(apply(Sest_table,2,sd),
+               apply(Sest1_table,2,sd) ,
+               apply(Sest2_table,2,sd) ,
+               # apply(Sest0_table,2,sd) ,
+               # apply(Sest01_table,2,sd) ,
+               # apply(Sest02_table,2,sd) ,
+               apply(Res1_table,2,sd),
+               apply(Res2_table,2,sd),
+               apply(Res3_table,2,sd) ,
+               apply(Res4_table,2,sd) ,
+               apply(Res5_table,2,sd) )
+  
+  sdtable = rbind(sdtable, temp)
+  
+  ######################################## 
+  # MSE
+  
+  # apply((Sest_table - Real_table)^2,2,mean) 
+  # apply((Sest1_table - Real_table)^2,2,mean) 
+  # apply((Sest2_table - Real_table)^2,2,mean) 
+  # apply((Sest0_table - Real_table)^2,2,mean) 
+  # apply((Sest01_table - Real_table)^2,2,mean) 
+  # apply((Sest02_table - Real_table)^2,2,mean) 
+  
+  temp = cbind(apply((Sest_table - Strue_table)^2,2,mean),
+               apply((Sest1_table - Strue1_table)^2,2,mean) ,
+               apply((Sest2_table - Strue2_table)^2,2,mean) ,
+               # apply((Sest0_table - Strue0_table)^2,2,mean) ,
+               # apply((Sest01_table - Strue01_table)^2,2,mean), 
+               # apply((Sest02_table - Strue02_table)^2,2,mean) ,
+               apply((Res1_table - Real_table)^2,2,mean),
+               apply((Res2_table - Real_table)^2,2,mean),
+               apply((Res3_table - Real_table)^2,2,mean) ,
+               apply((Res4_table - Real_table)^2,2,mean) ,
+               apply((Res5_table - Real_table)^2,2,mean) )
+  
+   msetable = rbind(msetable, temp) 
+  
+   temp = cbind(apply((Sest_table - Strue_table)^2,2,sd),
+               apply((Sest1_table - Strue1_table)^2,2,sd) ,
+               apply((Sest2_table - Strue2_table)^2,2,sd) ,
+               # apply((Sest0_table - Strue0_table)^2,2,sd) ,
+               # apply((Sest01_table - Strue01_table)^2,2,sd), 
+               # apply((Sest02_table - Strue02_table)^2,2,sd) ,
+               apply((Res1_table - Real_table)^2,2,sd),
+               apply((Res2_table - Real_table)^2,2,sd),
+               apply((Res3_table - Real_table)^2,2,sd) ,
+               apply((Res4_table - Real_table)^2,2,sd) ,
+               apply((Res5_table - Real_table)^2,2,sd) )
+   
+   msesdtable = rbind(msesdtable, temp) 
+}
+
+```
+
+
+```{R fig.width=6, fig.height=6,echo=FALSE, fig.align = "center"}
+
+par(mfrow = c(2,2))
+par(oma=c(0,0,2,0))  
+par(mar=c(4,4,2,1))
+m <- matrix(c(1,2,3,4),nrow = 2,ncol = 2,byrow = TRUE)
+layout(mat=m,heights = c(2,2))
+
+count = 0
+for(rho in c(0,0.2,0.5,0.9)){
+  qtablem = biastable[(1 + 5*count):(5*(count+1)),]
+  qtablesd = sdtable[(1 + 5*count):(5*(count+1)),]
+  count  = count + 1
+  plot(c(0.1, 0.3, 0.5, 0.7, 0.9),qtablem[,1], type = 'l',
+     ylim = c( min(qtablem - 1.96*qtablesd), max(qtablem + 1.96*qtablesd)), xlim = c(0,1),
+     xlab = 'quantile time', ylab = 'Bias', # bquote(.('mean(abs(S(t)') -hat('S(t)))')),
+     main = paste('rho =',rho),
+     xaxt = "n")
+axis(1, at= c(0.1, 0.25, 0.5, 0.75, 0.9),
+     labels= c('0.1', '0.3',"0.5", "0.7", "0.9"))
+
+lines(c(0.1, 0.3, 0.5, 0.7, 0.9)+ 0.025 , qtablem[,2], col = 2)
+lines(c(0.1, 0.3, 0.5, 0.7, 0.9)+ 0.05, qtablem[,3], col = 4)
+# lines(c(0.1, 0.3, 0.5, 0.7, 0.9)+ 0.05, qtablem[,4], col = 6)
+points(c(0.1, 0.3, 0.5, 0.7, 0.9),qtablem[,1], pch = 20)
+points(c(0.1, 0.3, 0.5, 0.7, 0.9)+ 0.025,qtablem[,2], pch = 20, col = 2)
+points(c(0.1, 0.3, 0.5, 0.7, 0.9)+0.05,qtablem[,3], col = 4, pch = 20)
+
+arrows(c(0.1, 0.3, 0.5, 0.7, 0.9), qtablem[,1] - 1.96*qtablesd[,1],
+       c(0.1, 0.3, 0.5, 0.7, 0.9), qtablem[,1] + 1.96*qtablesd[,1],
+       length=0.05, angle=90, code=3)
+arrows(c(0.1, 0.3, 0.5, 0.7, 0.9)+ 0.025, qtablem[,2] - 1.96*qtablesd[,2],
+       c(0.1, 0.3, 0.5, 0.7, 0.9)+ 0.025, qtablem[,2] + 1.96*qtablesd[,2],
+       length=0.05, angle=90, code=3, col = 2)
+arrows(c(0.1, 0.3, 0.5, 0.7, 0.9)+ 0.05, qtablem[,3] - 1.96*qtablesd[,3],
+       c(0.1, 0.3, 0.5, 0.7, 0.9)+ 0.05, qtablem[,3] + 1.96*qtablesd[,3],
+       length=0.05, angle=90, code=3, col = 4)
+
+lines(c(0.1, 0.3, 0.5, 0.7, 0.9) + 0.05, real[count, ],lty = 2, col = 6, lwd = 2)
+legend(x = "topright",inset = 0,
+       legend = c("Cox PH (X1, X2)", "Cox PH (X1)", " Cox PH (X2)","True S(t)"),
+       col=c(1,2,4,6),
+       pch=c(20),lty=c(1), cex = 0.7)
+
+}
+
+# plot.new()
+ #,
+
+```
+
+The MSE of the point estimation: 
+
+```{R fig.width=6, fig.height=6,echo=FALSE, fig.align = "center"}
+
+par(mfrow = c(2,2))
+par(oma=c(0,0,2,0))  
+par(mar=c(4,4,2,1))
+m <- matrix(c(1,2,3,4),nrow = 2,ncol = 2,byrow = TRUE)
+layout(mat=m,heights = c(2,2))
+
+count = 0
+for(rho in c(0,0.2, 0.5,0.9)){
+  qtablem = msetable[(1 + 5*count):(5*(count+1)),] * 1000
+  qtablesd = msesdtable[(1 + 5*count):(5*(count+1)),] * 1000
+  count = count  + 1
+  plot(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], type = 'l',
+       ylim = c( min(qtablem - 1.96*qtablesd), max(qtablem + 1.96*qtablesd)), xlim = c(0,1),
+       xlab = 'quantile time', ylab = 'MSE', # bquote(.('mean(abs(S(t)') -hat('S(t)))')),
+       main = paste('MSE: rho =',rho),
+       xaxt = "n")
+  axis(1, at= c(0.1, 0.25, 0.5, 0.75, 0.9),
+       labels= c('t = 0.1', ' t = 0.25'," t = 0.5", "t = 0.75", "t = 0.90"))
+  
+  lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025 , qtablem[,2], col = 2)
+  lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,3], col = 4)
+  # lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,5], col = 4)
+  points(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], pch = 20)
+  points(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025,qtablem[,2], pch = 20, col = 2)
+  points(c(0.1, 0.25, 0.5, 0.75, 0.9)+0.05,qtablem[,3], col = 4, pch = 20)
+  
+  arrows(c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] - 1.96*qtablesd[,1],
+         c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] + 1.96*qtablesd[,1],
+         length=0.05, angle=90, code=3)
+  arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, qtablem[,2] - 1.96*qtablesd[,2],
+         c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, qtablem[,2] + 1.96*qtablesd[,2],
+         length=0.05, angle=90, code=3, col = 2)
+  arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,3] - 1.96*qtablesd[,3],
+         c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,3] + 1.96*qtablesd[,3],
+         length=0.05, angle=90, code=3, col = 4)
+  
+  abline(h = 0, lty = 2, col = 6)
+  legend(x = "topleft",inset = 0,
+         legend = c("Cox PH (X1, X2)", "Cox PH (X1)", "Cox PH (X2)"),
+         col=c(1,2,4),
+         pch=c(20),lty=c(1), cex = 0.7)
+}
+
+# plot.new()
+#,
+
+```
+
+
+
+#### Calculate the bias over the dataset 
+
+* For $n = 100$, we just look at the quantile time at $t =$ 10$\%$, 25$\%$, 50$\%$, 75$\%$, 90$\%$, across the dataset. 
+    + for each subject in the dataset, calculate the true survival function $S_i(t, x_i)$
+    + for each subject in the dataset, calculate the estimated survival functions by above methods, $\hat S_i(t, x_i)$.    
+    + calculate the bias: $\hat S_i(t, x_i) - S_i(t, x_i)$
+    + then calculate the mean bias for the dataset $\frac{1}{n}\sum_{i = 1}^n (\hat S_i(t, x_i) - S_i(t, x_i))$, which is marked as the bias for the dataset, $\text{bias}_{data}$. 
+    + for the 100 repetitions, get the mean value of the bias for the dataset $\frac{1}{100}\sum_{i=1}^{100} \text{bias}_{data,i}$
+    + For MSE, for each repetition, calculate $\frac{1}{n}\sum_{i = 1}^n (\hat S_i(t, x_i) - S_i(t, x_i))^2$, and then calculate the mean value of the MSE across the 100 repetition. 
+
+
+```{R include = FALSE}
+
+biastable = c(); sdtable = c(); absbiastable = c(); msetable = c(); msesdtable = c()
+
+for(rho in c(0,0.2,0.5,0.9)){
+  
+  names = paste('~/Desktop/NYU/Research/Survival/13. cox model does not work example/4.10/censormodeldiff20200408_c2_n200_rho_', rho, '.RData', sep = '')
+  
+  load(names)
+  
+  ### bias 
+  qtable= c()
+  for(i in 1:length(result$Sest_list0)){
+    qtabletemp = c()
+    temp = result$Sest_list0[[i]] - result$Strue_list0[[i]]
+    qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+    temp = result$Sest_list1[[i]] - result$Strue_list1[[i]]
+    qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+    temp = result$Sest_list2[[i]] - result$Strue_list2[[i]]
+    qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+    names
+    temp = result$Realsurv_list[[i]] - result$Res1_list[[i]]
+    qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+    temp = result$Realsurv_list[[i]] - result$Res2_list[[i]]
+    qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+    temp = result$Realsurv_list[[i]] - result$Res3_list[[i]]
+    qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+    temp =result$Realsurv_list[[i]] - result$Res4_list[[i]]
+    qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+    qtable = rbind(qtable, qtabletemp)
+  }
+  qtablem = rbind(apply(qtable[seq(1,dim(qtable)[1],5),], 2, mean),
+                  apply(qtable[seq(2,dim(qtable)[1],5),], 2, mean),
+                  apply(qtable[seq(3,dim(qtable)[1],5),], 2, mean),
+                  apply(qtable[seq(4,dim(qtable)[1],5),], 2, mean),
+                  apply(qtable[seq(5,dim(qtable)[1],5),], 2, mean))
+  biastable = rbind(biastable, qtablem)
+  
+  ### sd 
+  qtablesd = rbind(apply(qtable[seq(1,dim(qtable)[1],5),], 2, sd),
+                   apply(qtable[seq(2,dim(qtable)[1],5),], 2, sd),
+                   apply(qtable[seq(3,dim(qtable)[1],5),], 2, sd),
+                   apply(qtable[seq(4,dim(qtable)[1],5),], 2, sd),
+                   apply(qtable[seq(5,dim(qtable)[1],5),], 2, sd))
+  sdtable = rbind(sdtable, qtablesd)
+  
+  ### absolute bias
+  qtable= c()
+  for(i in 1:length(result$Sest_list0)){
+    qtabletemp = c()
+    temp = result$Sest_list0[[i]] - result$Strue_list0[[i]]
+    qtabletemp = cbind(qtabletemp, apply(abs(temp),2,mean))
+    temp = result$Sest_list1[[i]] - result$Strue_list1[[i]]
+    qtabletemp = cbind(qtabletemp, apply(abs(temp),2,mean))
+    temp = result$Sest_list2[[i]] - result$Strue_list2[[i]]
+    qtabletemp = cbind(qtabletemp, apply(abs(temp),2,mean))
+    names
+    temp = result$Realsurv_list[[i]] - result$Res1_list[[i]]
+    qtabletemp = cbind(qtabletemp, apply(abs(temp),2,mean))
+    temp = result$Realsurv_list[[i]] - result$Res2_list[[i]]
+    qtabletemp = cbind(qtabletemp, apply(abs(temp),2,mean))
+    temp = result$Realsurv_list[[i]] - result$Res3_list[[i]]
+    qtabletemp = cbind(qtabletemp, apply(abs(temp),2,mean))
+    temp =result$Realsurv_list[[i]] - result$Res4_list[[i]]
+    qtabletemp = cbind(qtabletemp, apply(abs(temp),2,mean))
+    qtable = rbind(qtable, qtabletemp)
+  }
+  qtablem = rbind(apply(qtable[seq(1,dim(qtable)[1],5),], 2, mean),
+                  apply(qtable[seq(2,dim(qtable)[1],5),], 2, mean),
+                  apply(qtable[seq(3,dim(qtable)[1],5),], 2, mean),
+                  apply(qtable[seq(4,dim(qtable)[1],5),], 2, mean),
+                  apply(qtable[seq(5,dim(qtable)[1],5),], 2, mean))
+  absbiastable = rbind(absbiastable, qtablem)
+  
+  
+  ### mse 
+  qtable= c()
+  for(i in 1:length(result$Sest_list0)){
+    qtabletemp = c()
+    temp = result$Sest_list0[[i]] - result$Strue_list0[[i]]
+    qtabletemp = cbind(qtabletemp, apply((temp)^2,2,mean))
+    temp = result$Sest_list1[[i]] - result$Strue_list1[[i]]
+    qtabletemp = cbind(qtabletemp, apply((temp)^2,2,mean))
+    temp = result$Sest_list2[[i]] - result$Strue_list2[[i]]
+    qtabletemp = cbind(qtabletemp, apply((temp)^2,2,mean))
+    names
+    temp = result$Realsurv_list[[i]] - result$Res1_list[[i]]
+    qtabletemp = cbind(qtabletemp, apply((temp)^2,2,mean))
+    temp = result$Realsurv_list[[i]] - result$Res2_list[[i]]
+    qtabletemp = cbind(qtabletemp, apply((temp)^2,2,mean))
+    temp = result$Realsurv_list[[i]] - result$Res3_list[[i]]
+    qtabletemp = cbind(qtabletemp, apply((temp)^2,2,mean))
+    temp =result$Realsurv_list[[i]] - result$Res4_list[[i]]
+    qtabletemp = cbind(qtabletemp, apply((temp)^2,2,mean))
+    qtable = rbind(qtable, qtabletemp)
+  }
+  qtablem = rbind(apply(qtable[seq(1,dim(qtable)[1],5),], 2, mean),
+                  apply(qtable[seq(2,dim(qtable)[1],5),], 2, mean),
+                  apply(qtable[seq(3,dim(qtable)[1],5),], 2, mean),
+                  apply(qtable[seq(4,dim(qtable)[1],5),], 2, mean),
+                  apply(qtable[seq(5,dim(qtable)[1],5),], 2, mean))
+  msetable = rbind(msetable, qtablem)
+  
+  qtable= c()
+  for(i in 1:length(result$Sest_list0)){
+    qtabletemp = c()
+    temp = result$Sest_list0[[i]] - result$Strue_list0[[i]]
+    qtabletemp = cbind(qtabletemp, apply((temp)^2,2,mean))
+    temp = result$Sest_list1[[i]] - result$Strue_list1[[i]]
+    qtabletemp = cbind(qtabletemp, apply((temp)^2,2,mean))
+    temp = result$Sest_list2[[i]] - result$Strue_list2[[i]]
+    qtabletemp = cbind(qtabletemp, apply((temp)^2,2,mean))
+    names
+    temp = result$Realsurv_list[[i]] - result$Res1_list[[i]]
+    qtabletemp = cbind(qtabletemp, apply((temp)^2,2,mean))
+    temp = result$Realsurv_list[[i]] - result$Res2_list[[i]]
+    qtabletemp = cbind(qtabletemp, apply((temp)^2,2,mean))
+    temp = result$Realsurv_list[[i]] - result$Res3_list[[i]]
+    qtabletemp = cbind(qtabletemp, apply((temp)^2,2,mean))
+    temp =result$Realsurv_list[[i]] - result$Res4_list[[i]]
+    qtabletemp = cbind(qtabletemp, apply((temp)^2,2,mean))
+    qtable = rbind(qtable, qtabletemp)
+  }
+  qtablem = rbind(apply(qtable[seq(1,dim(qtable)[1],5),], 2, sd),
+                  apply(qtable[seq(2,dim(qtable)[1],5),], 2, sd),
+                  apply(qtable[seq(3,dim(qtable)[1],5),], 2, sd),
+                  apply(qtable[seq(4,dim(qtable)[1],5),], 2, sd),
+                  apply(qtable[seq(5,dim(qtable)[1],5),], 2, sd))
+  msesdtable = rbind(msesdtable, qtablem)
+  
+}
+
+```
+
+
+```{R echo = FALSE}
+temp = round(biastable * 1000,3)
+temp = temp[,1:7]
+cnames = c('cox12','cox1','cox2','m()','m()hat','dikta','dikta hat')
+colnames(temp) = cnames
+temp = cbind(rep(c('qt=0.1','qt=0.25','qt=0.5','qt=0.75','qt=0.9'),4),temp)
+kable(temp, "latex", align="c", booktabs=TRUE, row.names = FALSE,
+      escape = F, longtable = T,
+      caption = 'Table of Bias') %>%
+  # add_header_above(header = c("quantile time"= 1,
+  #                             "true m(t,x)" = 2, 
+  #                             "est m(t,x)" = 2,
+  #                             "true stute m(t,x)" = 2,
+  #                             "est stute m(t,x)" = 2)) 
+  group_rows("rho = 0", 1, 5) %>%
+  group_rows("rho = 0.2", 6, 10) %>%
+  group_rows("rho = 0.5", 11, 15) %>%
+  group_rows("rho = 0.9", 16, 20) 
+
+
+```
+
+(values were timed 1000)
+
+```{R echo = FALSE}
+temp = round(sdtable * 1000,3)
+temp = temp[,1:7]
+cnames = c('cox12','cox1','cox2','m()','m()hat','dikta','dikta hat')
+colnames(temp) = cnames
+temp = cbind(rep(c('qt=0.1','qt=0.25','qt=0.5','qt=0.75','qt=0.9'),4),temp)
+kable(temp, "latex", align="c", booktabs=TRUE, row.names = FALSE,
+      escape = F, longtable = T,
+      caption = 'Table of Standard deviation') %>%
+  # add_header_above(header = c("quantile time"= 1,
+  #                             "true m(t,x)" = 2, 
+  #                             "est m(t,x)" = 2,
+  #                             "true stute m(t,x)" = 2,
+  #                             "est stute m(t,x)" = 2)) 
+  group_rows("rho = 0", 1, 5) %>%
+  group_rows("rho = 0.2", 6, 10) %>%
+  group_rows("rho = 0.5", 11, 15) %>%
+  group_rows("rho = 0.9", 16, 20) 
+```
+
+(values were timed 1000)
+
+```{R echo = FALSE}
+temp = round(msetable * 1000,3)
+temp = temp[,1:7]
+cnames = c('cox12','cox1','cox2','m()','m()hat','dikta','dikta hat')
+colnames(temp) = cnames
+temp = cbind(rep(c('qt=0.1','qt=0.25','qt=0.5','qt=0.75','qt=0.9'),4),temp)
+kable(temp, "latex", align="c", booktabs=TRUE, row.names = FALSE,
+      escape = F, longtable = T,
+      caption = 'Table of MSE') %>%
+  # add_header_above(header = c("quantile time"= 1,
+  #                             "true m(t,x)" = 2, 
+  #                             "est m(t,x)" = 2,
+  #                             "true stute m(t,x)" = 2,
+  #                             "est stute m(t,x)" = 2)) 
+  group_rows("rho = 0", 1, 5) %>%
+  group_rows("rho = 0.2", 6, 10) %>%
+  group_rows("rho = 0.5", 11, 15) %>%
+  group_rows("rho = 0.9", 16, 20) 
+
+
+```
+
+(values were timed 1000)
+
+
+```{R fig.width=6, fig.height=6,echo=FALSE, fig.align = "center"}
+
+par(mfrow = c(2,2))
+par(oma=c(0,0,2,0))  
+par(mar=c(4,4,2,1))
+m <- matrix(c(1,2,3,4),nrow = 2,ncol = 2,byrow = TRUE)
+layout(mat=m,heights = c(2,2))
+
+count = 0
+for(rho in c(0,0.2,0.5,0.9)){
+  qtablem = biastable[(1 + 5*count):(5*(count+1)),]
+  qtablesd = sdtable[(1 + 5*count):(5*(count+1)),]
+  count = count + 1
+  
+  plot(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], type = 'l',
+       ylim = c( min(qtablem - 1.96*qtablesd), max(qtablem + 1.96*qtablesd)), xlim = c(0,1),
+       xlab = 'quantile time', ylab = "Bias",
+       main = paste('rho =',rho),
+       xaxt = "n")
+  axis(1, at= c(0.1, 0.25, 0.5, 0.75, 0.9),
+       labels= c('t = 0.1', ' t = 0.25'," t = 0.5", "t = 0.75", "t = 0.90"))
+  
+  lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025 , qtablem[,2], col = 2)
+  lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,5], col = 4)
+  points(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], pch = 20)
+  points(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025,qtablem[,2], pch = 20, col = 2)
+  points(c(0.1, 0.25, 0.5, 0.75, 0.9)+0.05,qtablem[,5], col = 4, pch = 20)
+  
+  arrows(c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] - 1.96*qtablesd[,1],
+         c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] + 1.96*qtablesd[,1],
+         length=0.05, angle=90, code=3)
+  arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, qtablem[,2] - 1.96*qtablesd[,2],
+         c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, qtablem[,2] + 1.96*qtablesd[,2],
+         length=0.05, angle=90, code=3, col = 2)
+  arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,5] - 1.96*qtablesd[,5],
+         c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,5] + 1.96*qtablesd[,5],
+         length=0.05, angle=90, code=3, col = 4)
+  
+  abline(h = 0, lty = 2, col = 6)
+  
+  # plot.new()
+  legend(x = "bottomleft",inset = 0,
+         legend = c("Cox PH (X1, X2)", "Cox PH (X1)", " m(t,x)"),
+         col=c(1,2,4),
+         pch=c(20),lty=c(1), cex = 0.7) #,
+  
+}
+
+
+
+```
+
+
+```{R fig.width=6, fig.height=6,echo=FALSE, fig.align = "center"}
+
+par(mfrow = c(2,2))
+par(oma=c(0,0,2,0))  
+par(mar=c(4,4,2,1))
+m <- matrix(c(1,2,3,4),nrow = 2,ncol = 2,byrow = TRUE)
+layout(mat=m,heights = c(2,2))
+
+count = 0
+for(rho in c(0,0.2,0.5,0.9)){
+  qtablem = msetable[(1 + 5*count):(5*(count+1)),] * 1000
+  qtablesd = msesdtable[(1 + 5*count):(5*(count+1)),] * 1000
+  count = count + 1
+  plot(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], type = 'l',
+       ylim = c( min(qtablem - 1.96*qtablesd), max(qtablem + 1.96*qtablesd)), xlim = c(0,1),
+       xlab = 'quantile time', ylab = 'MSE',
+       main = paste('MSE: rho =',rho),
+       xaxt = "n")
+  axis(1, at= c(0.1, 0.25, 0.5, 0.75, 0.9),
+       labels= c('t = 0.1', ' t = 0.25'," t = 0.5", "t = 0.75", "t = 0.90"))
+  
+  lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025 , qtablem[,2], col = 2)
+  lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,5], col = 4)
+  points(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], pch = 20)
+  points(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025,qtablem[,2], pch = 20, col = 2)
+  points(c(0.1, 0.25, 0.5, 0.75, 0.9)+0.05,qtablem[,5], col = 4, pch = 20)
+  
+  arrows(c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] - 1.96*qtablesd[,1],
+         c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] + 1.96*qtablesd[,1],
+         length=0.05, angle=90, code=3)
+  arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, qtablem[,2] - 1.96*qtablesd[,2],
+         c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, qtablem[,2] + 1.96*qtablesd[,2],
+         length=0.05, angle=90, code=3, col = 2)
+  arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,5] - 1.96*qtablesd[,5],
+         c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,5] + 1.96*qtablesd[,5],
+         length=0.05, angle=90, code=3, col = 4)
+  
+  abline(h = 0, lty = 2, col = 6)
+  legend(x = "topleft",inset = 0,
+         legend = c("Cox PH (X1, X2)", "Cox PH (X1)", " m(t,x)"),
+         col=c(1,2,4),
+         pch=c(20),lty=c(1), cex = 0.7) 
+}
+
+# 
+# plot.new()
+# legend(x = "topleft",inset = 0,
+#        legend = c("Cox PH (X1, X2)", "Cox PH (X1)", " m(t,x)"),
+#        col=c(1,2,4),
+#        pch=c(20),lty=c(1)) #,
+
+```
+
+
+
+
+<!-- The $m(t)$ function is defined as the conditional expectation of $\delta$ given $Z$:  -->
+<!-- $$m(t) = E(\delta  | Z = t) = P(\delta = 1 | Z = t)$$ -->
+<!-- When the covariates exist,  -->
+<!-- $$m(t,x) = E(\delta  | Z = t, X = x) = P(\delta = 1 | Z = t, X = x)$$ -->
+<!-- Also, $m(t,x)$ can be written into another formula as:  -->
+<!-- $$\begin{aligned} -->
+<!-- m(t,x) = & P(\delta = 1 | Z = t, X = x) = \frac{P(\delta = 1,  Z = t, X = x)}{P(Z = t, X = x)} \\ -->
+<!-- = & \frac{P(C > t, T = t, X = x)}{P(Z = t, X = x)} \\ -->
+<!-- = & \frac{P(C > t| T = t, X = x) P(T = t, X = x)}{P(Z = t, X = x)} \\ -->
+<!-- = & P(C > t| T = t, X = x) \frac{ P(T = t| X = x)}{ P(Z = t| X = x)} \\ -->
+<!-- = & P(C > t| T > t, X = x) \frac{ P(T = t| X = x)}{ P(Z = t| X = x)} \text{  ,since } T \perp \!\!\! \perp  C\\ -->
+<!-- = & \frac{P(C > t, T > t, X = x)}{P(T > t, X = x)} \frac{ P(T = t| X = x)}{ P(Z = t| X = x)} \\ -->
+<!-- = & \frac{P(C > t, T > t| X = x)}{P(T > t| X = x)} \frac{ P(T = t| X = x)}{ P(Z = t| X = x)} \\ -->
+<!-- = & \frac{S_Z(t | x)}{S_T(t | x)} \frac{f_T(t | x)}{f_Z(t | x)} \\ -->
+<!-- = & \frac{\lambda_T(t | x)}{\lambda_Z(t|x)} -->
+<!-- \end{aligned}$$ -->

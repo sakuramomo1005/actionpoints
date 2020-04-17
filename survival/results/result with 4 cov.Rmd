@@ -1,0 +1,474 @@
+---
+title: "Cox model with more covariates"
+date: 2020-03-18
+output: pdf_document
+---
+
+
+$$\text{ event time: } \lambda_T(t | x) = \lambda_0(t) \exp(\beta^\prime x) =  \exp(\beta_1 x_1+ \beta_2 x_2 + \beta_3 x_3+ \beta_4x_4)$$
+$$\text{ censor time: } \lambda_C(t | x) = \lambda_0(t) \exp(\gamma^\prime x) =  \exp(\gamma_1 x_1+ \gamma_2 x_2 + \gamma_3 x_3+ \gamma_4x_4)$$
+where $x_1, x_2, x_3, x_4$ iid $\sim N(0,1)$, $\beta_1 = 0.3, \beta_2 = 0.2, \beta_3 = 0.1, \beta_4 = 0.1$, $\gamma_1 = 0.1, \gamma_2 = 0.1, \gamma_3 = 0.3, \gamma_4 = 0.4$
+
+
+
+```{R include = FALSE}
+
+library(knitr)
+library(kableExtra)
+setwd("/Users/yaolanqiu/Desktop/NYU/Research/Survival/9. cox mt independent 20200222")
+
+
+load("~/Desktop/NYU/Research/Survival/9. cox mt independent 20200222/result0310_2.RData")
+
+
+resulttable = c()
+for(i in 1:100){
+  resulttable = rbind(resulttable, result$table_list[[i]])
+}
+resultm = rbind(apply(resulttable[seq(1,500,5),], 2, mean),
+                apply(resulttable[seq(2,500,5),], 2, mean),
+                apply(resulttable[seq(3,500,5),], 2, mean),
+                apply(resulttable[seq(4,500,5),], 2, mean),
+                apply(resulttable[seq(5,500,5),], 2, mean))
+cbind(round(resultm[,1:3]), round(resultm[,4:7],3))
+resultsd = rbind(apply(resulttable[seq(1,500,5),], 2, sd),
+                 apply(resulttable[seq(2,500,5),], 2, sd),
+                 apply(resulttable[seq(3,500,5),], 2, sd),
+                 apply(resulttable[seq(4,500,5),], 2, sd),
+                 apply(resulttable[seq(5,500,5),], 2, sd))
+
+temp = round(cbind(resultm[,4], resultsd[,4],
+                   resultm[,5], resultsd[,5],
+                   resultm[,6], resultsd[,6], 
+                   resultm[,7], resultsd[,7],
+                   resultm[,8], resultsd[,8],
+                   resultm[,9], resultsd[,9],
+                   resultm[,10], resultsd[,10]),3)
+
+temp = data.frame(temp)
+colnames(temp) = c('mean','sd','mean','sd','mean','sd','mean',
+                   'sd','mean','sd','mean','sd','mean','sd')
+rownames(temp) = c('10','25','50','75','90')
+
+
+```
+
+
+```{R echo = FALSE}
+
+kable(temp, "latex", align="c", booktabs=TRUE, 
+      escape = F, longtable = T,
+      caption = 'estimated time dependent AUC') %>%
+  add_header_above(header = c(" " =1 ,"Cox (x1 only)" = 2,
+                              "Cox (x2 only)" = 2,
+                              "Cox (x3 only)" = 2,
+                              "Cox (x4 only)" = 2,
+                              "Cox full" = 2,
+                              "m(t,x)" = 2,
+                              "hat m(t,x)"=2)) 
+
+```
+
+
+```{R fig.width=7, fig.height=3.5,echo=FALSE, fig.align = "center"}
+
+
+temp = round(cbind(resultm[,4], resultsd[,4],
+                   resultm[,5], resultsd[,5],
+                   resultm[,6], resultsd[,6], 
+                   resultm[,7], resultsd[,7],
+                   resultm[,8], resultsd[,8],
+                   resultm[,9], resultsd[,9],
+                   resultm[,10], resultsd[,10]),3)
+
+temp = data.frame(temp)
+colnames(temp) = c('mean','sd','mean','sd','mean','sd','mean',
+                   'sd','mean','sd','mean','sd','mean','sd')
+rownames(temp) = c('10','25','50','75','90')
+
+par(mfrow = c(1,2))
+
+plot(c(0.1, 0.25, 0.5, 0.75, 0.9),resultm[,8], type = 'l', 
+     ylim = c(0.4, 1), xlim = c(0,1),
+     xlab = 'quantile', ylab = "AUC",
+     main = 'AUC at quantile times',
+     xaxt = "n")
+axis(1, at= c(0.1, 0.25, 0.5, 0.75, 0.9), 
+     labels= c('10', '25',"50", "75", "90"))
+lines(c(0.1, 0.25, 0.5, 0.75, 0.9) ,resultm[,4], col = 2)
+#lines(c(0.1, 0.25, 0.5, 0.75, 0.9) + 0.025,resultm[,6], col = 3)
+#lines(c(0.1, 0.25, 0.5, 0.75, 0.9) + 0.05,resultm[,7], col = 4)
+#lines(c(0.1, 0.25, 0.5, 0.75, 0.9) + 0.075,resultm[,8], col = 5)
+lines(c(0.1, 0.25, 0.5, 0.75, 0.9) + 0.1,resultm[,9], col = 4)
+# lines(c(0.1, 0.25, 0.5, 0.75, 0.9) + 0.125,resultm[,10], col =7)
+
+points(c(0.1, 0.25, 0.5, 0.75, 0.9),resultm[,4], col =2, pch = 20)
+# points(c(0.1, 0.25, 0.5, 0.75, 0.9),resultm[,5],col =2, pch = 20)
+# points(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025,resultm[,6],col =3, pch = 20)
+# points(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05,resultm[,7], col = 4, pch = 20)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.075,resultm[,8], col = 1, pch = 20)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.1,resultm[,9], col = 4, pch = 20)
+# points(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.125,resultm[,10], col = 7, pch = 20)
+abline(h = 0.5, lty = 2)
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9), resultm[,4] - 1.96*resultsd[,4], 
+       c(0.1, 0.25, 0.5, 0.75, 0.9), resultm[,4] + 1.96*resultsd[,4], 
+       length=0.05, angle=90, code=3, col = 2)
+# arrows(c(0.1, 0.25, 0.5, 0.75, 0.9), resultm[,5] - 1.96*resultsd[,5], 
+#        c(0.1, 0.25, 0.5, 0.75, 0.9), resultm[,5] + 1.96*resultsd[,5], 
+#        length=0.05, angle=90, code=3, col = 2)
+# arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, resultm[,6] - 1.96*resultsd[,6], 
+#        c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, resultm[,6] + 1.96*resultsd[,6], 
+#        length=0.05, angle=90, code=3, col = 3)
+# arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, resultm[,7] - 1.96*resultsd[,7], 
+#        c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, resultm[,7] + 1.96*resultsd[,7], 
+#        length=0.05, angle=90, code=3, col = 4)
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.075, resultm[,8] - 1.96*resultsd[,8], 
+       c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.075, resultm[,8] + 1.96*resultsd[,8], 
+       length=0.05, angle=90, code=3, col = 1)
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.1, resultm[,9] - 1.96*resultsd[,9], 
+       c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.1, resultm[,9] + 1.96*resultsd[,9], 
+       length=0.05, angle=90, code=3, col = 4)
+# arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.125, resultm[,10] - 1.96*resultsd[,10], 
+#        c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.125, resultm[,10] + 1.96*resultsd[,10], 
+#        length=0.05, angle=90, code=3, col = 7)
+
+plot.new()
+legend(x = "topleft",inset = 0,
+       legend = c("Cox PH (full model)", "Cox PH (x1 only)", "m(t,x)"),
+       col=c(1,2,4),
+       pch=c(20),lty=c(1)) #,
+
+```
+
+
+```{R include =FALSE}
+qtable = c()
+for(i in 1:100){
+  qtable = rbind(qtable, result$qdiff_list[[i]])
+}
+qtablem = rbind(apply(qtable[seq(1,500,5),], 2, mean),
+                apply(qtable[seq(2,500,5),], 2, mean),
+                apply(qtable[seq(3,500,5),], 2, mean),
+                apply(qtable[seq(4,500,5),], 2, mean),
+                apply(qtable[seq(5,500,5),], 2, mean))
+qtablem
+qtablesd = rbind(apply(qtable[seq(1,500,5),], 2, sd),
+                 apply(qtable[seq(2,500,5),], 2, sd),
+                 apply(qtable[seq(3,500,5),], 2, sd),
+                 apply(qtable[seq(4,500,5),], 2, sd),
+                 apply(qtable[seq(5,500,5),], 2, sd))
+qtablesd
+
+temp = cbind(qtablem[,1], qtablesd[,1],
+             qtablem[,2], qtablesd[,2],
+             qtablem[,2], qtablesd[,3],
+             qtablem[,4], qtablesd[,4],
+             qtablem[,5], qtablesd[,5],
+             qtablem[,6], qtablesd[,6],
+             qtablem[,7], qtablesd[,7]
+             )
+temp = round(temp,3)
+temp = data.frame(temp)
+colnames(temp) = c('mean','sd','mean','sd','mean','sd',
+                   'mean','sd','mean','sd','mean','sd','mean','sd')
+rownames(temp) = c('10','25','50','75','90')
+
+```
+
+
+
+```{R echo = FALSE}
+
+kable(temp, "latex", align="c", booktabs=TRUE, 
+      escape = F, longtable = T,
+      caption = 'mean absolute difference between S(t) and hat S(t)') %>%
+  add_header_above(header = c(" " =1 ,"Cox (x1 only)" = 2,
+                              "Cox (x2 only)" = 2,
+                              "Cox (x3 only)" = 2,
+                              "Cox (x4 only)" = 2,
+                              "Cox full" = 2,
+                              "m(t,x)" = 2,
+                              "hat m(t,x)"=2)) 
+
+```
+
+
+```{R fig.width=7, fig.height=3.5,echo=FALSE, fig.align = "center"}
+par(mfrow = c(1,2))
+plot(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,5], type = 'l',
+     ylim = c(0, max(qtablem + 1.96*qtablesd)), xlim = c(0,1),
+     xlab = 'quantile', ylab = bquote(.('mean(abs(S(t)') -hat('S(t)))')),
+     main = 'Differences of S(t) at quantile times',
+     xaxt = "n")
+axis(1, at= c(0.1, 0.25, 0.5, 0.75, 0.9),
+     labels= c('10', '25',"50", "75", "90"))
+
+lines(c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1], col = 2)
+lines(c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,6], col = 4)
+# lines(c(0.1, 0.25, 0.5, 0.75, 0.9) + 0.05,qtablem[,4], col = 4)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,5], pch = 20)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], pch = 20, col = 2)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,6], col = 4, pch = 20)
+# points(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05,qtablem[,4], col = 4, pch = 20)
+
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,5] - 1.96*qtablesd[,5],
+       c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,5] + 1.96*qtablesd[,5],
+       length=0.05, angle=90, code=3)
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] - 1.96*qtablesd[,1],
+       c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] + 1.96*qtablesd[,1],
+       length=0.05, angle=90, code=3, col = 2)
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,6] - 1.96*qtablesd[,6],
+       c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,6] + 1.96*qtablesd[,6],
+       length=0.05, angle=90, code=3, col = 4)
+# arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,4] - 1.96*qtablesd[,4],
+#        c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,4] + 1.96*qtablesd[,4],
+#        length=0.05, angle=90, code=3, col = 4)
+
+
+plot.new()
+legend(x = "topleft",inset = 0,
+       legend = c("Cox PH (full model)", "Cox PH (x1 only)", "m(t,x)"),
+       col=c(1,2,4),
+       pch=c(20),lty=c(1)) #,
+
+
+```
+
+
+
+
+##### scenario 2
+
+
+
+$$\text{ event time: } \lambda_T(t | x) = \lambda_0(t) \exp(\beta^\prime x) =  \exp(\beta_1 x_1+ \beta_2 x_2 + \beta_3 x_3+ \beta_4x_4)$$
+$$\text{ censor time: } \lambda_C(t | x) = \lambda_0(t) \exp(\gamma^\prime x) =  \exp(\gamma_1 x_1+ \gamma_2 x_2 + \gamma_3 x_3+ \gamma_4x_4)$$
+where $x_1, x_2, x_3, x_4$ iid $\sim N(0,1)$, $\beta_1 = 0.3, \beta_2 = 0.2, \beta_3 = 0.1, \beta_4 = 0.1$, $\gamma_1 = 0.1, \gamma_2 = 0.1, \gamma_3 = 0.3, \gamma_4 = 0.4$
+
+$x_1 \sim uni(-2,2), x_2 \sim exp(2), x_3 \sim n(0,1), x_4 \sim uni(0,2)$, $\beta_1 = 0.3, \beta_2 = 0.1, \beta_3 = 0.1, \beta_4 = 0.1$, $\gamma_1 = -0.3, \gamma_2 = -0.3, \gamma_3 = 0.3, \gamma_4 = 0.3$
+
+
+```{R include = FALSE}
+
+library(knitr)
+library(kableExtra)
+setwd("/Users/yaolanqiu/Desktop/NYU/Research/Survival/9. cox mt independent 20200222")
+
+
+load("~/Desktop/NYU/Research/Survival/9. cox mt independent 20200222/result0318_2.RData")
+
+
+resulttable = c()
+for(i in 1:70){
+  resulttable = rbind(resulttable, result$table_list[[i]])
+}
+resultm = rbind(apply(resulttable[seq(1,350,5),], 2, mean),
+                apply(resulttable[seq(2,350,5),], 2, mean),
+                apply(resulttable[seq(3,350,5),], 2, mean),
+                apply(resulttable[seq(4,350,5),], 2, mean),
+                apply(resulttable[seq(5,350,5),], 2, mean))
+cbind(round(resultm[,1:3]), round(resultm[,4:7],3))
+resultsd = rbind(apply(resulttable[seq(1,350,5),], 2, sd),
+                 apply(resulttable[seq(2,350,5),], 2, sd),
+                 apply(resulttable[seq(3,350,5),], 2, sd),
+                 apply(resulttable[seq(4,350,5),], 2, sd),
+                 apply(resulttable[seq(5,350,5),], 2, sd))
+
+temp = round(cbind(resultm[,4], resultsd[,4],
+                   resultm[,5], resultsd[,5],
+                   resultm[,6], resultsd[,6], 
+                   resultm[,7], resultsd[,7],
+                   resultm[,8], resultsd[,8],
+                   resultm[,9], resultsd[,9],
+                   resultm[,10], resultsd[,10]),3)
+
+temp = data.frame(temp)
+colnames(temp) = c('mean','sd','mean','sd','mean','sd','mean',
+                   'sd','mean','sd','mean','sd','mean','sd')
+rownames(temp) = c('10','25','50','75','90')
+
+
+```
+
+
+```{R echo = FALSE}
+
+kable(temp, "latex", align="c", booktabs=TRUE, 
+      escape = F, longtable = T,
+      caption = 'estimated time dependent AUC') %>%
+  add_header_above(header = c(" " =1 ,"Cox (x1 only)" = 2,
+                              "Cox (x2 only)" = 2,
+                              "Cox (x3 only)" = 2,
+                              "Cox (x4 only)" = 2,
+                              "Cox full" = 2,
+                              "m(t,x)" = 2,
+                              "hat m(t,x)"=2)) 
+
+```
+
+
+```{R fig.width=7, fig.height=3.5,echo=FALSE, fig.align = "center"}
+
+
+temp = round(cbind(resultm[,4], resultsd[,4],
+                   resultm[,5], resultsd[,5],
+                   resultm[,6], resultsd[,6], 
+                   resultm[,7], resultsd[,7],
+                   resultm[,8], resultsd[,8],
+                   resultm[,9], resultsd[,9],
+                   resultm[,10], resultsd[,10]),3)
+
+temp = data.frame(temp)
+colnames(temp) = c('mean','sd','mean','sd','mean','sd','mean',
+                   'sd','mean','sd','mean','sd','mean','sd')
+rownames(temp) = c('10','25','50','75','90')
+
+par(mfrow = c(1,2))
+
+plot(c(0.1, 0.25, 0.5, 0.75, 0.9),resultm[,8], type = 'l', 
+     ylim = c(0.4, 1), xlim = c(0,1),
+     xlab = 'quantile', ylab = "AUC",
+     main = 'AUC at quantile times',
+     xaxt = "n")
+axis(1, at= c(0.1, 0.25, 0.5, 0.75, 0.9), 
+     labels= c('10', '25',"50", "75", "90"))
+lines(c(0.1, 0.25, 0.5, 0.75, 0.9) ,resultm[,4], col = 2)
+#lines(c(0.1, 0.25, 0.5, 0.75, 0.9) + 0.025,resultm[,6], col = 3)
+#lines(c(0.1, 0.25, 0.5, 0.75, 0.9) + 0.05,resultm[,7], col = 4)
+#lines(c(0.1, 0.25, 0.5, 0.75, 0.9) + 0.075,resultm[,8], col = 5)
+lines(c(0.1, 0.25, 0.5, 0.75, 0.9) + 0.1,resultm[,9], col = 4)
+# lines(c(0.1, 0.25, 0.5, 0.75, 0.9) + 0.125,resultm[,10], col =7)
+
+points(c(0.1, 0.25, 0.5, 0.75, 0.9),resultm[,4], col =2, pch = 20)
+# points(c(0.1, 0.25, 0.5, 0.75, 0.9),resultm[,5],col =2, pch = 20)
+# points(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025,resultm[,6],col =3, pch = 20)
+# points(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05,resultm[,7], col = 4, pch = 20)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.075,resultm[,8], col = 1, pch = 20)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.1,resultm[,9], col = 4, pch = 20)
+# points(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.125,resultm[,10], col = 7, pch = 20)
+abline(h = 0.5, lty = 2)
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9), resultm[,4] - 1.96*resultsd[,4], 
+       c(0.1, 0.25, 0.5, 0.75, 0.9), resultm[,4] + 1.96*resultsd[,4], 
+       length=0.05, angle=90, code=3, col = 2)
+# arrows(c(0.1, 0.25, 0.5, 0.75, 0.9), resultm[,5] - 1.96*resultsd[,5], 
+#        c(0.1, 0.25, 0.5, 0.75, 0.9), resultm[,5] + 1.96*resultsd[,5], 
+#        length=0.05, angle=90, code=3, col = 2)
+# arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, resultm[,6] - 1.96*resultsd[,6], 
+#        c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, resultm[,6] + 1.96*resultsd[,6], 
+#        length=0.05, angle=90, code=3, col = 3)
+# arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, resultm[,7] - 1.96*resultsd[,7], 
+#        c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, resultm[,7] + 1.96*resultsd[,7], 
+#        length=0.05, angle=90, code=3, col = 4)
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.075, resultm[,8] - 1.96*resultsd[,8], 
+       c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.075, resultm[,8] + 1.96*resultsd[,8], 
+       length=0.05, angle=90, code=3, col = 1)
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.1, resultm[,9] - 1.96*resultsd[,9], 
+       c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.1, resultm[,9] + 1.96*resultsd[,9], 
+       length=0.05, angle=90, code=3, col = 4)
+# arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.125, resultm[,10] - 1.96*resultsd[,10], 
+#        c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.125, resultm[,10] + 1.96*resultsd[,10], 
+#        length=0.05, angle=90, code=3, col = 7)
+
+plot.new()
+legend(x = "topleft",inset = 0,
+       legend = c("Cox PH (full model)", "Cox PH (x1 only)", "m(t,x)"),
+       col=c(1,2,4),
+       pch=c(20),lty=c(1)) #,
+
+```
+
+
+```{R include =FALSE}
+qtable = c()
+for(i in 1:70){
+  qtable = rbind(qtable, result$qdiff_list[[i]])
+}
+qtablem = rbind(apply(qtable[seq(1,350,5),], 2, mean),
+                apply(qtable[seq(2,350,5),], 2, mean),
+                apply(qtable[seq(3,350,5),], 2, mean),
+                apply(qtable[seq(4,350,5),], 2, mean),
+                apply(qtable[seq(5,350,5),], 2, mean))
+qtablem
+qtablesd = rbind(apply(qtable[seq(1,350,5),], 2, sd),
+                 apply(qtable[seq(2,350,5),], 2, sd),
+                 apply(qtable[seq(3,350,5),], 2, sd),
+                 apply(qtable[seq(4,350,5),], 2, sd),
+                 apply(qtable[seq(5,350,5),], 2, sd))
+qtablesd
+
+temp = cbind(qtablem[,1], qtablesd[,1],
+             qtablem[,2], qtablesd[,2],
+             qtablem[,2], qtablesd[,3],
+             qtablem[,4], qtablesd[,4],
+             qtablem[,5], qtablesd[,5],
+             qtablem[,6], qtablesd[,6],
+             qtablem[,7], qtablesd[,7]
+             )
+temp = round(temp,3)
+temp = data.frame(temp)
+colnames(temp) = c('mean','sd','mean','sd','mean','sd',
+                   'mean','sd','mean','sd','mean','sd','mean','sd')
+rownames(temp) = c('10','25','50','75','90')
+
+```
+
+
+
+```{R echo = FALSE}
+
+kable(temp, "latex", align="c", booktabs=TRUE, 
+      escape = F, longtable = T,
+      caption = 'mean absolute difference between S(t) and hat S(t)') %>%
+  add_header_above(header = c(" " =1 ,"Cox (x1 only)" = 2,
+                              "Cox (x2 only)" = 2,
+                              "Cox (x3 only)" = 2,
+                              "Cox (x4 only)" = 2,
+                              "Cox full" = 2,
+                              "m(t,x)" = 2,
+                              "hat m(t,x)"=2)) 
+
+```
+
+
+```{R fig.width=7, fig.height=3.5,echo=FALSE, fig.align = "center"}
+par(mfrow = c(1,2))
+plot(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,5], type = 'l',
+     ylim = c(0, max(qtablem + 1.96*qtablesd)), xlim = c(0,1),
+     xlab = 'quantile', ylab = bquote(.('mean(abs(S(t)') -hat('S(t)))')),
+     main = 'Differences of S(t) at quantile times',
+     xaxt = "n")
+axis(1, at= c(0.1, 0.25, 0.5, 0.75, 0.9),
+     labels= c('10', '25',"50", "75", "90"))
+
+lines(c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1], col = 2)
+lines(c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,6], col = 4)
+# lines(c(0.1, 0.25, 0.5, 0.75, 0.9) + 0.05,qtablem[,4], col = 4)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,5], pch = 20)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], pch = 20, col = 2)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,6], col = 4, pch = 20)
+# points(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05,qtablem[,4], col = 4, pch = 20)
+
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,5] - 1.96*qtablesd[,5],
+       c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,5] + 1.96*qtablesd[,5],
+       length=0.05, angle=90, code=3)
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] - 1.96*qtablesd[,1],
+       c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] + 1.96*qtablesd[,1],
+       length=0.05, angle=90, code=3, col = 2)
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,6] - 1.96*qtablesd[,6],
+       c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,6] + 1.96*qtablesd[,6],
+       length=0.05, angle=90, code=3, col = 4)
+# arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,4] - 1.96*qtablesd[,4],
+#        c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,4] + 1.96*qtablesd[,4],
+#        length=0.05, angle=90, code=3, col = 4)
+
+
+plot.new()
+legend(x = "topleft",inset = 0,
+       legend = c("Cox PH (full model)", "Cox PH (x1 only)", "m(t,x)"),
+       col=c(1,2,4),
+       pch=c(20),lty=c(1)) #,
+
+
+```
+
+

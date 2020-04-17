@@ -1,0 +1,405 @@
+---
+title: "Untitled"
+output: pdf_document
+---
+
+
+#### b1 = 2; b2 = 0.1; r1 = 0.2; r2 = -0.2
+
+
+```{R include = FALSE}
+
+library(knitr)
+
+load("~/Desktop/NYU/Research/Survival/9. cox mt independent 20200222/result0309.RData")
+b1 = 2; b2 = 0.1; r1 = 0.2; r2 = -0.2
+
+```
+
+
+```{R echo = FALSE}
+
+## TRUE MODEL 
+b1 = 2; b2 = 0.1
+x_1 = result$Coxfull0[seq(1,dim(result$Coxfull)[1],2),]
+x_2 = result$Coxfull0[seq(2,dim(result$Coxfull)[1],2),]
+
+#sum(((x_1[,1] - 1.96 * sd(x_1[,1])) < b1) & ((x_1[,1] + 1.96 * sd(x_1[,1])) > b1))
+#sum(((x_2[,1] - 1.96 * sd(x_2[,1])) < b2) & ((x_2[,1] + 1.96 * sd(x_2[,1])) > b2))
+
+# apply(x_1, 2, mean)
+# apply(x_1, 2, sd)
+# apply(x_2, 2, mean)
+# apply(x_2, 2, sd)
+
+temp1 = c(b1, mean(x_1[,1]), sd(x_1[,1]), 
+sum(((x_1[,1] - 1.96 * sd(x_1[,1])) < b1) & 
+      ((x_1[,1] + 1.96 * sd(x_1[,1])) > b1)) / dim(x_1)[1], 
+sum(x_1[,5] < 0.05) / dim(x_1)[1])
+
+temp2 = c(b2, mean(x_2[,1]), sd(x_2[,1]), 
+  sum(((x_2[,1] - 1.96 * sd(x_2[,1])) < b2) & 
+        ((x_2[,1] + 1.96 * sd(x_2[,1])) > b2)) / dim(x_2)[1], 
+  sum(x_2[,5] < 0.05) / dim(x_2)[1])
+
+temp = rbind(temp1, temp2)
+
+colnames(temp) = c('true beta','mean estimated beta','sd estimated beta','converage','significant percentage')
+
+temp = round(temp, 2)
+rownames(temp) = c('x1','x2')
+
+kable(temp, caption = 'cox model fitted with x1 + x2')
+
+```
+
+
+
+
+
+
+
+
+```{R echo = FALSE}
+# PART MODEL 
+
+x_1 = result$Coxpart1[seq(1,dim(result$Coxpart1)[1],2),]
+x_2 = result$Coxpart2[seq(2,dim(result$Coxpart2)[1],2),]
+# 
+# sum(((x_1[,1] - 1.96 * sd(x_1[,1])) < b1) & ((x_1[,1] + 1.96 * sd(x_1[,1])) > b1))
+# sum(((x_2[,1] - 1.96 * sd(x_2[,1])) < b2) & ((x_2[,1] + 1.96 * sd(x_2[,1])) > b2))
+# 
+# apply(x_1, 2, mean)
+# apply(x_1, 2, sd)
+# apply(x_2, 2, mean)
+# apply(x_2, 2, sd)
+
+
+temp1 = c(b1, mean(x_1[,1]), sd(x_1[,1]), 
+  sum(((x_1[,1] - 1.96 * sd(x_1[,1])) < b1) & 
+        ((x_1[,1] + 1.96 * sd(x_1[,1])) > b1)) / dim(x_1)[1], 
+  sum(x_1[,5] < 0.05) / dim(x_1)[1])
+temp2 = c(b2, mean(x_2[,1]), sd(x_2[,1]), 
+  sum(((x_2[,1] - 1.96 * sd(x_2[,1])) < b2) & 
+        ((x_2[,1] + 1.96 * sd(x_2[,1])) > b2)) / dim(x_2)[1], 
+  sum(x_2[,5] < 0.05) / dim(x_2)[1])
+
+
+temp = rbind(temp1, temp2)
+
+colnames(temp) = c('true beta','mean estimated beta','sd estimated beta','converage','significant percentage')
+
+temp = round(temp, 2)
+rownames(temp) = c('x1','x2')
+
+kable(temp, caption = 'cox model fitted with only x1 or x2')
+
+```
+
+
+
+
+```{R echo = FALSE}
+# LOGISTIC REGRESSION
+r1 = 0.2; r2 = -0.2
+x_1 = result$Fitlg[seq(1,dim(result$Fitlg)[1],2),]
+x_2 = result$Fitlg[seq(2,dim(result$Fitlg)[1],2),]
+
+# sum(((x_1[,1] - 1.96 * sd(x_1[,1])) < (b1 - r1)) & ((x_1[,1] + 1.96 * sd(x_1[,1])) > (b1 - r1)))
+# sum(((x_2[,1] - 1.96 * sd(x_2[,1])) < (b2 - r2)) & ((x_2[,1] + 1.96 * sd(x_2[,1])) > (b2 - r2)))
+
+# apply(x_1, 2, mean)
+# apply(x_1, 2, sd)
+# apply(x_2, 2, mean)
+# apply(x_2, 2, sd)
+# b1 - r1; b2 - r2
+
+temp1 = c((b1 - r1), mean(x_1[,1]), sd(x_1[,1]), 
+  sum(((x_1[,1] - 1.96 * sd(x_1[,1])) < (b1 - r1)) &
+        ((x_1[,1] + 1.96 * sd(x_1[,1])) > (b1 - r1)))/ dim(x_1)[1], 
+  sum(x_1[,4] < 0.05) / dim(x_1)[1])
+temp2 = c((b2 - r2), mean(x_2[,1]), sd(x_2[,1]), 
+  sum(((x_2[,1] - 1.96 * sd(x_2[,1])) < (b2 - r2)) & 
+        ((x_2[,1] + 1.96 * sd(x_2[,1])) > (b2 - r2))) / dim(x_2)[1], 
+  sum(x_2[,4] < 0.05) / dim(x_2)[1])
+
+temp = rbind(temp1, temp2)
+
+colnames(temp) = c('true coef','mean estimated coef','sd estimated coef','converage','significant percentage')
+
+temp = round(temp, 2)
+rownames(temp) = c('x1','x2')
+
+kable(temp, caption = 'cox model fitted with x1 + x2')
+
+```
+
+
+
+
+####  b1 = 0.1; b2 = 0.1; r1 = 0.2; r2 = -0.2
+
+
+```{R include = FALSE}
+
+library(knitr)
+
+load("~/Desktop/NYU/Research/Survival/9. cox mt independent 20200222/result0309_2.RData")
+
+b1 = 0.1; b2 = 0.1; r1 = 0.2; r2 = -0.2
+
+```
+
+
+```{R echo = FALSE}
+
+## TRUE MODEL 
+
+x_1 = result$Coxfull0[seq(1,dim(result$Coxfull)[1],2),]
+x_2 = result$Coxfull0[seq(2,dim(result$Coxfull)[1],2),]
+
+#sum(((x_1[,1] - 1.96 * sd(x_1[,1])) < b1) & ((x_1[,1] + 1.96 * sd(x_1[,1])) > b1))
+#sum(((x_2[,1] - 1.96 * sd(x_2[,1])) < b2) & ((x_2[,1] + 1.96 * sd(x_2[,1])) > b2))
+
+# apply(x_1, 2, mean)
+# apply(x_1, 2, sd)
+# apply(x_2, 2, mean)
+# apply(x_2, 2, sd)
+
+temp1 = c(b1, mean(x_1[,1]), sd(x_1[,1]), 
+sum(((x_1[,1] - 1.96 * sd(x_1[,1])) < b1) & 
+      ((x_1[,1] + 1.96 * sd(x_1[,1])) > b1)) / dim(x_1)[1], 
+sum(x_1[,5] < 0.05) / dim(x_1)[1])
+
+temp2 = c(b2, mean(x_2[,1]), sd(x_2[,1]), 
+  sum(((x_2[,1] - 1.96 * sd(x_2[,1])) < b2) & 
+        ((x_2[,1] + 1.96 * sd(x_2[,1])) > b2)) / dim(x_2)[1], 
+  sum(x_2[,5] < 0.05) / dim(x_2)[1])
+
+temp = rbind(temp1, temp2)
+
+colnames(temp) = c('true beta','mean estimated beta','sd estimated beta','converage','significant percentage')
+
+temp = round(temp, 2)
+rownames(temp) = c('x1','x2')
+
+kable(temp, caption = 'cox model fitted with x1 + x2')
+
+```
+
+
+
+
+
+
+
+
+```{R echo = FALSE}
+# PART MODEL 
+
+x_1 = result$Coxpart1[seq(1,dim(result$Coxpart1)[1],2),]
+x_2 = result$Coxpart2[seq(2,dim(result$Coxpart2)[1],2),]
+# 
+# sum(((x_1[,1] - 1.96 * sd(x_1[,1])) < b1) & ((x_1[,1] + 1.96 * sd(x_1[,1])) > b1))
+# sum(((x_2[,1] - 1.96 * sd(x_2[,1])) < b2) & ((x_2[,1] + 1.96 * sd(x_2[,1])) > b2))
+# 
+# apply(x_1, 2, mean)
+# apply(x_1, 2, sd)
+# apply(x_2, 2, mean)
+# apply(x_2, 2, sd)
+
+
+temp1 = c(b1, mean(x_1[,1]), sd(x_1[,1]), 
+  sum(((x_1[,1] - 1.96 * sd(x_1[,1])) < b1) & 
+        ((x_1[,1] + 1.96 * sd(x_1[,1])) > b1)) / dim(x_1)[1], 
+  sum(x_1[,5] < 0.05) / dim(x_1)[1])
+temp2 = c(b2, mean(x_2[,1]), sd(x_2[,1]), 
+  sum(((x_2[,1] - 1.96 * sd(x_2[,1])) < b2) & 
+        ((x_2[,1] + 1.96 * sd(x_2[,1])) > b2)) / dim(x_2)[1], 
+  sum(x_2[,5] < 0.05) / dim(x_2)[1])
+
+
+temp = rbind(temp1, temp2)
+
+colnames(temp) = c('true beta','mean estimated beta','sd estimated beta','converage','significant percentage')
+
+temp = round(temp, 2)
+rownames(temp) = c('x1','x2')
+
+kable(temp, caption = 'cox model fitted with only x1 or x2')
+
+```
+
+
+
+
+```{R echo = FALSE}
+# LOGISTIC REGRESSION
+
+x_1 = result$Fitlg[seq(1,dim(result$Fitlg)[1],2),]
+x_2 = result$Fitlg[seq(2,dim(result$Fitlg)[1],2),]
+
+# sum(((x_1[,1] - 1.96 * sd(x_1[,1])) < (b1 - r1)) & ((x_1[,1] + 1.96 * sd(x_1[,1])) > (b1 - r1)))
+# sum(((x_2[,1] - 1.96 * sd(x_2[,1])) < (b2 - r2)) & ((x_2[,1] + 1.96 * sd(x_2[,1])) > (b2 - r2)))
+
+# apply(x_1, 2, mean)
+# apply(x_1, 2, sd)
+# apply(x_2, 2, mean)
+# apply(x_2, 2, sd)
+# b1 - r1; b2 - r2
+
+temp1 = c((b1 - r1), mean(x_1[,1]), sd(x_1[,1]), 
+  sum(((x_1[,1] - 1.96 * sd(x_1[,1])) < (b1 - r1)) &
+        ((x_1[,1] + 1.96 * sd(x_1[,1])) > (b1 - r1)))/ dim(x_1)[1], 
+  sum(x_1[,4] < 0.05) / dim(x_1)[1])
+temp2 = c((b2 - r2), mean(x_2[,1]), sd(x_2[,1]), 
+  sum(((x_2[,1] - 1.96 * sd(x_2[,1])) < (b2 - r2)) & 
+        ((x_2[,1] + 1.96 * sd(x_2[,1])) > (b2 - r2))) / dim(x_2)[1], 
+  sum(x_2[,4] < 0.05) / dim(x_2)[1])
+
+temp = rbind(temp1, temp2)
+
+colnames(temp) = c('true coef','mean estimated coef','sd estimated coef','converage','significant percentage')
+
+temp = round(temp, 2)
+rownames(temp) = c('x1','x2')
+
+kable(temp, caption = 'cox model fitted with x1 + x2')
+
+```
+
+
+
+
+
+####  b1 = 0.3; b2 = 0.1; r1 = 0.2; r2 = -0.2
+
+
+```{R include = FALSE}
+
+library(knitr)
+
+load("~/Desktop/NYU/Research/Survival/9. cox mt independent 20200222/result0310.RData")
+
+  b1 = 0.3; b2 = 0.1; 
+  r1 = 0.2; r2 = -0.2
+
+```
+
+
+```{R echo = FALSE}
+
+## TRUE MODEL 
+
+x_1 = result$Coxfull0[seq(1,dim(result$Coxfull)[1],2),]
+x_2 = result$Coxfull0[seq(2,dim(result$Coxfull)[1],2),]
+
+#sum(((x_1[,1] - 1.96 * sd(x_1[,1])) < b1) & ((x_1[,1] + 1.96 * sd(x_1[,1])) > b1))
+#sum(((x_2[,1] - 1.96 * sd(x_2[,1])) < b2) & ((x_2[,1] + 1.96 * sd(x_2[,1])) > b2))
+
+# apply(x_1, 2, mean)
+# apply(x_1, 2, sd)
+# apply(x_2, 2, mean)
+# apply(x_2, 2, sd)
+
+temp1 = c(b1, mean(x_1[,1]), sd(x_1[,1]), 
+sum(((x_1[,1] - 1.96 * sd(x_1[,1])) < b1) & 
+      ((x_1[,1] + 1.96 * sd(x_1[,1])) > b1)) / dim(x_1)[1], 
+sum(x_1[,5] < 0.05) / dim(x_1)[1])
+
+temp2 = c(b2, mean(x_2[,1]), sd(x_2[,1]), 
+  sum(((x_2[,1] - 1.96 * sd(x_2[,1])) < b2) & 
+        ((x_2[,1] + 1.96 * sd(x_2[,1])) > b2)) / dim(x_2)[1], 
+  sum(x_2[,5] < 0.05) / dim(x_2)[1])
+
+temp = rbind(temp1, temp2)
+
+colnames(temp) = c('true beta','mean estimated beta','sd estimated beta','converage','significant percentage')
+
+temp = round(temp, 2)
+rownames(temp) = c('x1','x2')
+
+kable(temp, caption = 'cox model fitted with x1 + x2')
+
+```
+
+
+
+
+
+
+
+
+```{R echo = FALSE}
+# PART MODEL 
+
+x_1 = result$Coxpart1[seq(1,dim(result$Coxpart1)[1],2),]
+x_2 = result$Coxpart2[seq(2,dim(result$Coxpart2)[1],2),]
+# 
+# sum(((x_1[,1] - 1.96 * sd(x_1[,1])) < b1) & ((x_1[,1] + 1.96 * sd(x_1[,1])) > b1))
+# sum(((x_2[,1] - 1.96 * sd(x_2[,1])) < b2) & ((x_2[,1] + 1.96 * sd(x_2[,1])) > b2))
+# 
+# apply(x_1, 2, mean)
+# apply(x_1, 2, sd)
+# apply(x_2, 2, mean)
+# apply(x_2, 2, sd)
+
+
+temp1 = c(b1, mean(x_1[,1]), sd(x_1[,1]), 
+  sum(((x_1[,1] - 1.96 * sd(x_1[,1])) < b1) & 
+        ((x_1[,1] + 1.96 * sd(x_1[,1])) > b1)) / dim(x_1)[1], 
+  sum(x_1[,5] < 0.05) / dim(x_1)[1])
+temp2 = c(b2, mean(x_2[,1]), sd(x_2[,1]), 
+  sum(((x_2[,1] - 1.96 * sd(x_2[,1])) < b2) & 
+        ((x_2[,1] + 1.96 * sd(x_2[,1])) > b2)) / dim(x_2)[1], 
+  sum(x_2[,5] < 0.05) / dim(x_2)[1])
+
+
+temp = rbind(temp1, temp2)
+
+colnames(temp) = c('true beta','mean estimated beta','sd estimated beta','converage','significant percentage')
+
+temp = round(temp, 2)
+rownames(temp) = c('x1','x2')
+
+kable(temp, caption = 'cox model fitted with only x1 or x2')
+
+```
+
+
+
+
+```{R echo = FALSE}
+# LOGISTIC REGRESSION
+
+x_1 = result$Fitlg[seq(1,dim(result$Fitlg)[1],2),]
+x_2 = result$Fitlg[seq(2,dim(result$Fitlg)[1],2),]
+
+# sum(((x_1[,1] - 1.96 * sd(x_1[,1])) < (b1 - r1)) & ((x_1[,1] + 1.96 * sd(x_1[,1])) > (b1 - r1)))
+# sum(((x_2[,1] - 1.96 * sd(x_2[,1])) < (b2 - r2)) & ((x_2[,1] + 1.96 * sd(x_2[,1])) > (b2 - r2)))
+
+# apply(x_1, 2, mean)
+# apply(x_1, 2, sd)
+# apply(x_2, 2, mean)
+# apply(x_2, 2, sd)
+# b1 - r1; b2 - r2
+
+temp1 = c((b1 - r1), mean(x_1[,1]), sd(x_1[,1]), 
+  sum(((x_1[,1] - 1.96 * sd(x_1[,1])) < (b1 - r1)) &
+        ((x_1[,1] + 1.96 * sd(x_1[,1])) > (b1 - r1)))/ dim(x_1)[1], 
+  sum(x_1[,4] < 0.05) / dim(x_1)[1])
+temp2 = c((b2 - r2), mean(x_2[,1]), sd(x_2[,1]), 
+  sum(((x_2[,1] - 1.96 * sd(x_2[,1])) < (b2 - r2)) & 
+        ((x_2[,1] + 1.96 * sd(x_2[,1])) > (b2 - r2))) / dim(x_2)[1], 
+  sum(x_2[,4] < 0.05) / dim(x_2)[1])
+
+temp = rbind(temp1, temp2)
+
+colnames(temp) = c('true coef','mean estimated coef','sd estimated coef','converage','significant percentage')
+
+temp = round(temp, 2)
+rownames(temp) = c('x1','x2')
+
+kable(temp, caption = 'cox model fitted with x1 + x2')
+
+```

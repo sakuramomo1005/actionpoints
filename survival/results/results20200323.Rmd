@@ -1,0 +1,798 @@
+---
+title: "Results"
+date: 2020-03-23
+fontsize: 12pt
+output: pdf_document
+---
+
+```{R include = FALSE}
+library(knitr)
+library(kableExtra)
+```
+
+
+
+## Model setting 
+
+#### Cox PH model
+
+Suppose the event time $T$ and the censoring time $C$ are both following cox models, who are sharing the same $S_0(t)$ function, i.e. 
+$$\text{ event time: }S_T(t | X = x) = P(T > t | X = x)  = S_0(t)^{\exp(\beta^\prime x)}$$
+$$\text{ censoring time: }S_C(t | X = x) = P(C > t | X = x) = S_0(t)^{\exp(\gamma^\prime x)}$$
+where $X$ is the covariates vector and $\beta  = (\beta_1, \beta_2, ..., \beta_p)$ are the coefficients for cox PH model in terms event time, $\gamma  = (\gamma_1, \gamma_2, ..., \gamma_p)$ are the coefficients for cox PH model in terms of censoring time. 
+
+Therefore, the associated hazard functions are 
+$$\text{ event time: } \lambda_T(t | x) = \lambda_0(t) \exp(\beta^\prime x) \text{, }\Lambda_T(t | x) = \Lambda_0(t) \exp(\beta^\prime x)$$
+$$\text{ censoring time: }\lambda_C(t | x) = \lambda_0(t) \exp(\gamma^\prime x) \text{, }\Lambda_C(t | x) = \Lambda_0(t) \exp(\gamma^\prime x)$$
+The associated $m()$ function can be 
+$$m(t,x) = \frac{ \lambda_T(t | x) }{ \lambda_T(t | x)  +  \lambda_C(t | x) } = \frac{\lambda_0(t) \exp(\beta^\prime x)}{\lambda_0(t) \exp(\beta^\prime x) + \lambda_0(t) \exp(\gamma^\prime x)} = \frac{1}{1 + \exp(-(\beta - \gamma)^\prime x)}$$
+which follows a logistic distribution. 
+
+
+Let's just consider a two dimension simple scenario, where $\lambda_0(t) = 1$, $\Lambda_0(t) = t, S_0(t) = \exp(-t)$
+
+* Event time:
+$$\text{hazard function: } \lambda_T(t | x) = \lambda_0(t) \exp(\beta_1 x_1 + \beta_2 x_2) = \exp(\beta_1 x_1 + \beta_2 x_2)$$
+$$\text{cumulative hazard function: } \Lambda_T(t | x) = \Lambda_0(t) \exp(\beta_1 x_1 + \beta_2 x_2) = t \exp(\beta_1 x_1 + \beta_2 x_2)$$
+$$\text{survival function: } S(t | x) = S_0(t)^{\exp(\beta_1 x_1 + \beta_2 x_2)} = \exp(-t \times (\beta_1 x_1 + \beta_2 x_2))$$
+
+* Censoring time
+$$\text{hazard function: } \lambda_C(t | x) = \lambda_0(t) \exp(\gamma_1 x_1 + \gamma_2 x_2) = \exp(\gamma_1 x_1 + \gamma_2 x_2)$$
+$$\text{cumulative hazard function: } \Lambda_C(t | x) = \Lambda_0(t) \exp(\gamma_1 x_1 + \gamma_2 x_2) = t \exp(\gamma_1 x_1 + \gamma_2 x_2)$$
+$$\text{survival function: } S(t | x) = S_0(t)^{\exp(\gamma_1 x_1 + \gamma_2 x_2)} = \exp(-t \times (\gamma_1 x_1 + \gamma_2 x_2))$$
+
+We will check whether: 
+
+1. $X_1, X_2$ have effect on the survival time $S(t)$, i.e. the coefficients are significant in the Cox PH model fitted with $X_1, X_2$
+2. $X_1, X_2$ have effect on the censoring time, i.e. the coefficients are significant by fitting the logistic regression with status $\sim X_1, X_2$
+3. When the Cox PH model is mis-specified, with only $X_1$ or $X_2$, how well the survival time is estimated? 
+4. The estimation methods:
+    + Cox PH model with $X_1, X_2$
+    + Cox PH model with only $X_1$
+    + Cox PH model with only $X_2$
+    + by using the true $m(t,x)$ function (true $\beta_1-\gamma_1, \beta_2-\gamma_2$)
+    + by using the estimated $\hat m(t,x)$ function (estimated from the logistic regression with $X_1, X_2$)
+
+
+## Simulation steps 
+
+#### Data set generation
+
+* 1. Simulate the covariates for n subjects: $X = (x1, x2) \sim MVN(\mu, \Sigma)$, where $X$ is $n$ by 2 matrix and $x1, x2$ are $n$ by 1 vectors. For each subject, the covariates is $x_{i1}, x_{i2}$. 
+    + $\beta = (\beta_1, \beta_2) = (0.2,0.1), \gamma = (\gamma_1, \gamma_2) = (0.1, 0.2)$
+    + $X = (x1, x2) \sim MVN(\mu, \Sigma)$, $\mu = (1,2)$, $\Sigma = \left(\begin{array}
+{cc}
+1 & 0.5  \\
+0.5 & 1 
+\end{array}\right)$.
+* 2. For subject $i$, calculate the $\beta X_i$. Simulate the survival time $T_i$ from below CDF by using the inverse probablity sampling. 
+$$S_{T,i}(t) = S_{0,i}(t)^{\exp(\beta X_i)} = \exp(-t \times \exp(\beta X_i))$$
+* 3. Simulate the censoring time $C_i$ from below CDF by using the inverse probablity sampling. 
+$$S_{C,i}(t) = S_{0,i}(t)^{\exp(\gamma X_i)} = \exp(-t \times \exp(\gamma X_i))$$
+* 4. Calculate observed time $Z_i = T_i \wedge C_i$ and indicator $\delta_i = I(T_i < C_i)$. 
+* Then we get the dataset with death time, censoring time, observed time, censoring indicator, and covariates. The times are calculated one by one based on the subject's covariates values.
+
+We generate a training dataset, with $n = 500$, following the above steps. A test dataset is generated with $n = 100$, following the above procedures. 
+
+100 repetitions are conducted. 
+
+#### Models 
+
+* Cox PH model with both x1, x2
+* Cox PH model with only x1 (mis-specified)
+* Cox PH model with only x2 (mis-specified)
+
+* Dikta's method (true m() function)
+* Dikta's method (estimated m() function)
+* Dikta's method, new formula, follows Stute's paper (true m() function)
+* Dikta's method, new formula, follows Stute's paper (estimated m() function)
+
+When there is no covariates are considered in the dataset, the 
+most commonly applied Kaplan Meier prodcut limit estimator is defined as
+\begin{equation}S^{KM}(t) =\prod_{Z_i \leq t} \big(1 - \frac{\delta_i}{n - R_{i,n} + 1} \big)\end{equation}
+where $Z_i$ is the $i$th ordered observed time, $R_{i,n}$ is the rank of $Z_i$. 
+
+Dikta (1998) proposed another product limited estimator defined as 
+\begin{equation}S^{D1} = \prod_{Z_i \leq t} \big(1 - \frac{1}{n - R_{i,n} + 1} \big)^{m(Z_{k:n})}\end{equation}
+He argued that the semiparameter $S^{D1}$ is unbiased and has less variance than Kaplan Meier estimator. 
+
+\color{blue} if we consider covariates, could we just replace $m(Z_{k:n})$ with $m(Z_{k:n}, X_{k:n})$ is the above formula ? 
+
+\color{black}
+
+The Stute estimator: 
+\begin{equation}F_0(x,t) = P(X \leq x, T \leq t) = \sum_{i=1}^n W_i \phi(x,t)\end{equation}
+If we set $\phi(x,t) = I_{(X \leq x, T \leq t)}$, it leads to
+\begin{equation}F_0(x,t) = \sum_{i=1}^n W_i I_{(X \leq x, T \leq t)} = \sum_{i=1}^n \big \{ \frac{\delta_i}{n - i + 1} \big[ \prod_{j = 1}^{i-1} (1 - \frac{1}{n-j + 1})^{\delta_i} \big ] \big \} I_{(X \leq x, T \leq t)}\end{equation}
+where $W_i = \frac{\delta_i}{n - i + 1} \prod_{j = 1}^{i-1} (1 - \frac{1}{n-j + 1})^{\delta_i}$. 
+
+Dikta replaced $\delta_i$ with $m(t,x)$ and got
+\begin{equation}S^{D2} =\sum_{i=1}^n  \big \{ \frac{m(Z_i, X_i)}{n - i + 1}  \big[ \prod_{j = 1}^{i-1} (1 - \frac{m(Z_i, X_i)}{n-j + 1})  \big] \big \} I_{(X \leq x, T \leq t)}\end{equation}
+
+#### Comparsion methods
+
+* bias of quantile times
+    + quantile time at $t =$ 10$\%$, 25$\%$, 50$\%$, 75$\%$, 90$\%$
+    + for each subject in the dataset, calculate the true survival function $S_i(t, x_i)$
+    + for each subject in the dataset, calculate the estimated survival functions by above methods, $\hat S_i(t, x_i)$.    
+    + calculate the bias: $\hat S_i(t, x_i) - S_i(t, x_i)$
+    + then calculate the mean bias for the dataset $\frac{1}{n}\sum_{i = 1}^n (\hat S_i(t, x_i) - S_i(t, x_i))$, which is marked as the bias for the dataset, $\text{bias}_{data}$. 
+    + for the 100 repetitions, get the mean value and standard deviation of the bias for the dataset $\frac{1}{100}\sum_{i=1}^{100} \text{bias}_{data,i}$
+   
+* absolute bias of quantile times
+    + similar with the above processes but use the absolute bias: $|\hat S_i(t, x_i) - S_i(t, x_i)|$
+  
+* Time dependent AUC
+    + quantile time at $t =$ 10$\%$, 25$\%$, 50$\%$, 75$\%$, 90$\%$
+    + for each subject in the dataset, calculate the estimated survival functions by above methods, $\hat S_i(t, x_i)$.    
+    + lables: whether the subjects is alive at the quantile time $P(T > t)$
+
+## Results 
+
+```{R include = FALSE}
+library(survival)
+library(MASS)
+library(lme4)
+library(pROC)
+## non idependent covariates 
+for(functions in 1){
+  St = function(t){
+    return((S0(t))^exp(temp))
+  }
+  S0 = function(t){return(exp(-t))}
+  Ri = function(t,data){
+    return(sum(data$time <= t))
+  }
+  inverse = function(x,Funs){
+    res1 = c()
+    for(i in seq(0.00000001, 20, 1)){
+      res1 = c(res1, Funs(i))
+    }
+    temp = seq(0.00000001, 100, 1)[which(abs(res1 - x) == min(abs(res1 - x)))[1]]
+    
+    res2 = c()
+    for(i in seq((temp - 1), (temp+1), 0.1)){
+      res2 = c(res2, Funs(i))
+    }
+    temp = seq((temp - 1), (temp+1), 0.1)[which(abs(res2 - x) == min(abs(res2 - x)))[1]]
+    
+    res3 = c()
+    for(i in seq((temp - 0.1), (temp+0.1), 0.01)){
+      res3 = c(res3, Funs(i))
+    }
+    temp = seq((temp - 0.1), (temp + 0.1), 0.01)[which(abs(res3 - x) == min(abs(res3 - x)))[1]]
+    
+    res4 = c()
+    for(i in seq((temp - 0.01), (temp + 0.01), 0.001)){
+      res4 = c(res4, Funs(i))
+    }
+    temp =seq((temp - 0.01), (temp + 0.01), 0.001)[which(abs(res4 - x) == min(abs(res4 - x)))[1]]
+    
+    res5 = c()
+    for(i in seq((temp - 0.001), (temp + 0.001), 0.0001)){
+      res5 = c(res5, Funs(i))
+    }
+    temp = seq((temp - 0.001), (temp + 0.001), 0.0001)[which(abs(res5 - x) == min(abs(res5 - x)))[1]]
+    
+    res6 = c()
+    for(i in seq((temp - 0.0001), (temp + 0.0001), 0.00001)){
+      res6 = c(res6, Funs(i))
+    }
+    temp = seq((temp - 0.0001), (temp + 0.0001), 0.00001)[which(abs(res6 - x) == min(abs(res6 - x)))[1]]
+    
+    return(temp)
+  }
+}
+
+for(parameters in 1){
+  sigma = matrix(0.2,2,2)
+  diag(sigma) = 1
+  n = 500
+  seqs = seq(0,5,0.1)
+  beta = matrix(c(0.2,0.1), 2, 1)
+  gamma = matrix(c(0.1,0.2), 2, 1)
+}
+
+```
+
+```{R include = FALSE}
+
+iters = 1
+  set.seed(iters)
+  print(iters)
+  X = mvrnorm(n, c(1,2), sigma)
+  covs = X %*% beta
+  covs2 = X %*% gamma
+  
+  for(training in 1){
+    death = c(); U = c(); U2 = c()
+    censor = c()
+    for(i in 1:n){
+      # generate survival time 
+      temp = covs[i]
+      u = runif(1,0,1); U = c(U, u)
+      deathtemp = inverse(u, St)
+      death = c(death, deathtemp)
+      U2 = c(U2, St(deathtemp))
+      # generate censoring time 
+      u = runif(1,0,1)
+      temp = covs2[i]
+      censor = c(censor, inverse(u, St))
+    }
+    
+    data = data.frame(death = death, censor = censor, x1 = X[, 1], x2 = X[, 2], status2 = 1)
+    data$status = ifelse(data$death < data$censor, 1, 0)
+    data$time = ifelse(data$status == 1, data$death, data$censor)
+    data = data[order(data$time), ]
+    rownames(data) = NULL
+  }
+ 
+  for(coxmodelfit in 1){
+    qtimes = quantile(data$time, probs = c(0.1, 0.25, 0.5,0.75,0.9))
+    fitcox = coxph(Surv(time, status) ~ x1 + x2, data=data)
+    fit1 = coxph(Surv(time, status) ~ x1, data=data)
+    fit2 = coxph(Surv(time, status) ~ x2, data=data)
+    fitcox0 = coxph(Surv(death, status2) ~ x1 + x2, data=data)
+    fit01 = coxph(Surv(death, status2) ~ x1, data=data)
+    fit02 = coxph(Surv(death, status2) ~ x2, data=data)
+  }
+  
+  for(logisticfit in 1){
+    logfit = glm(status ~ x1 + x2 - 1, data = data, family = 'binomial')
+  }
+  
+```
+
+The Cox PH model with both x1, x2
+```{R}
+fitcox = coxph(Surv(time, status) ~ x1 + x2, data=data)
+summary(fitcox)$coefficient
+```
+
+The Cox PH model with only x1
+```{R}
+fit1 = coxph(Surv(time, status) ~ x1, data=data)
+summary(fit1)$coefficient
+```
+
+The Cox PH model with only x2
+```{R}
+fit2 = coxph(Surv(time, status) ~ x2, data=data)
+summary(fit2)$coefficient
+```
+
+The logistic regression for $m(t,x) = E(\delta | X = x)$ function calculation.  
+```{R}
+logfit = glm(status ~ x1 + x2 - 1, data = data, family = 'binomial')
+summary(logfit)$coefficient
+```
+
+
+## Bias ($S(t) - \hat S(t)$)
+
+```{R include = FALSE}
+load("~/Desktop/NYU/Research/Survival/10. Dikta simulation mimic/censormodeldiff20200323.RData")
+
+qtable= c()
+for(i in 1:length(result$Sest_list0)){
+  qtabletemp = c()
+  temp = result$Sest_list0[[i]] - result$Strue_list0[[i]]
+  qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+  temp = result$Sest_list1[[i]] - result$Strue_list1[[i]]
+  qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+  temp = result$Sest_list2[[i]] - result$Strue_list2[[i]]
+  qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+  
+  qtable = rbind(qtable, qtabletemp)
+}
+
+qtablem = rbind(apply(qtable[seq(1,dim(qtable)[1],5),], 2, mean),
+                apply(qtable[seq(2,dim(qtable)[1],5),], 2, mean),
+                apply(qtable[seq(3,dim(qtable)[1],5),], 2, mean),
+                apply(qtable[seq(4,dim(qtable)[1],5),], 2, mean),
+                apply(qtable[seq(5,dim(qtable)[1],5),], 2, mean))
+# qtablem
+qtablesd = rbind(apply(qtable[seq(1,dim(qtable)[1],5),], 2, sd),
+                 apply(qtable[seq(2,dim(qtable)[1],5),], 2, sd),
+                 apply(qtable[seq(3,dim(qtable)[1],5),], 2, sd),
+                 apply(qtable[seq(4,dim(qtable)[1],5),], 2, sd),
+                 apply(qtable[seq(5,dim(qtable)[1],5),], 2, sd))
+# qtablesd
+
+temp = cbind(qtablem[,1], qtablesd[,1],
+             qtablem[,2], qtablesd[,2],
+             qtablem[,3], qtablesd[,3])
+temp = round(temp,4)
+temp = data.frame(temp)
+
+colnames(temp) = c('mean','sd','mean','sd','mean','sd')
+rownames(temp) = c('10','25','50','75','90')
+```
+
+```{R echo = FALSE}
+kable(temp, "latex", align="c", booktabs=TRUE, 
+      escape = F, longtable = T) %>%
+  add_header_above(header = c("quantile time"= 1,"Cox (x1,x2)" = 2,
+                              "Cox (x1 only)" = 2,
+                              "Cox (x2 only)" = 2)) 
+
+```
+
+
+
+```{R fig.width=7, fig.height=3.5,echo=FALSE, fig.align = "center"}
+# plots 
+par(mfrow = c(1,2))
+plot(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], type = 'l',
+     ylim = c( min(qtablem - 1.96*qtablesd), max(qtablem + 1.96*qtablesd)), xlim = c(0,1),
+     xlab = 'quantile', ylab = bquote(.('mean((S(t)') -hat('S(t)))')),
+     main = 'Differences of S(t) at quantile times',
+     xaxt = "n")
+axis(1, at= c(0.1, 0.25, 0.5, 0.75, 0.9),
+     labels= c('10', '25',"50", "75", "90"))
+
+lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025 , qtablem[,2], col = 2)
+lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,3], col = 4)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], pch = 20)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025,qtablem[,2], pch = 20, col = 2)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9)+0.05,qtablem[,3], col = 4, pch = 20)
+
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] - 1.96*qtablesd[,1],
+       c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] + 1.96*qtablesd[,1],
+       length=0.05, angle=90, code=3)
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, qtablem[,2] - 1.96*qtablesd[,2],
+       c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, qtablem[,2] + 1.96*qtablesd[,2],
+       length=0.05, angle=90, code=3, col = 2)
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,3] - 1.96*qtablesd[,3],
+       c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,3] + 1.96*qtablesd[,3],
+       length=0.05, angle=90, code=3, col = 4)
+
+abline(h = 0, lty = 2, col = 6)
+plot.new()
+legend(x = "topleft",inset = 0,
+       legend = c("Cox PH (X1, X2)", "Cox PH (X1 only)", "Cox PH (X2 only)"),
+       col=c(1,2,4),
+       pch=c(20),lty=c(1)) #,
+
+
+```
+
+
+
+## Absolute bias ($|S(t) - \hat S(t)|$)
+
+```{R include = FALSE}
+qtable= c()
+for(i in 1:length(result$Sest_list0)){
+  qtabletemp = c()
+  temp = abs(result$Sest_list0[[i]] - result$Strue_list0[[i]])
+  qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+  temp = abs(result$Sest_list1[[i]] - result$Strue_list1[[i]])
+  qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+  temp = abs(result$Sest_list2[[i]] - result$Strue_list2[[i]])
+  qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+  
+  qtable = rbind(qtable, qtabletemp)
+}
+
+qtablem = rbind(apply(qtable[seq(1,dim(qtable)[1],5),], 2, mean),
+                apply(qtable[seq(2,dim(qtable)[1],5),], 2, mean),
+                apply(qtable[seq(3,dim(qtable)[1],5),], 2, mean),
+                apply(qtable[seq(4,dim(qtable)[1],5),], 2, mean),
+                apply(qtable[seq(5,dim(qtable)[1],5),], 2, mean))
+# qtablem
+qtablesd = rbind(apply(qtable[seq(1,dim(qtable)[1],5),], 2, sd),
+                 apply(qtable[seq(2,dim(qtable)[1],5),], 2, sd),
+                 apply(qtable[seq(3,dim(qtable)[1],5),], 2, sd),
+                 apply(qtable[seq(4,dim(qtable)[1],5),], 2, sd),
+                 apply(qtable[seq(5,dim(qtable)[1],5),], 2, sd))
+# qtablesd
+
+temp = cbind(qtablem[,1], qtablesd[,1],
+             qtablem[,2], qtablesd[,2],
+             qtablem[,3], qtablesd[,3])
+temp = round(temp,4)
+temp = data.frame(temp)
+
+colnames(temp) = c('mean','sd','mean','sd','mean','sd')
+rownames(temp) = c('10','25','50','75','90')
+```
+
+
+```{R echo = FALSE}
+kable(temp, "latex", align="c", booktabs=TRUE, 
+      escape = F, longtable = T) %>%
+  add_header_above(header = c("quantile time"= 1,"Cox (x1,x2)" = 2,
+                              "Cox (x1 only)" = 2,
+                              "Cox (x2 only)" = 2)) 
+
+```
+
+
+
+```{R fig.width=7, fig.height=3.5,echo=FALSE, fig.align = "center"}
+# plots 
+par(mfrow = c(1,2))
+plot(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], type = 'l',
+     ylim = c( min(qtablem - 1.96*qtablesd), max(qtablem + 1.96*qtablesd)), xlim = c(0,1),
+     xlab = 'quantile', ylab = bquote(.('mean(abs(S(t)') -hat('S(t)))')),
+     main = 'Differences of S(t) at quantile times',
+     xaxt = "n")
+axis(1, at= c(0.1, 0.25, 0.5, 0.75, 0.9),
+     labels= c('10', '25',"50", "75", "90"))
+
+lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025 , qtablem[,2], col = 2)
+lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,3], col = 4)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], pch = 20)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025,qtablem[,2], pch = 20, col = 2)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9)+0.05,qtablem[,3], col = 4, pch = 20)
+
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] - 1.96*qtablesd[,1],
+       c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] + 1.96*qtablesd[,1],
+       length=0.05, angle=90, code=3)
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, qtablem[,2] - 1.96*qtablesd[,2],
+       c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, qtablem[,2] + 1.96*qtablesd[,2],
+       length=0.05, angle=90, code=3, col = 2)
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,3] - 1.96*qtablesd[,3],
+       c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,3] + 1.96*qtablesd[,3],
+       length=0.05, angle=90, code=3, col = 4)
+
+abline(h = 0, lty = 2, col = 6)
+plot.new()
+legend(x = "topleft",inset = 0,
+       legend = c("Cox PH (X1, X2)", "Cox PH (X1 only)", "Cox PH (X2 only)"),
+       col=c(1,2,4),
+       pch=c(20),lty=c(1)) #,
+
+
+```
+
+
+## Time depedent AUC
+
+```{R include = FALSE}
+
+resulttable = c()
+for(i in 1:length(result$table_list)){
+  resulttable = rbind(resulttable, result$table_list[[i]])
+}
+resultm = rbind(apply(resulttable[seq(1,dim(resulttable)[1],5),], 2, mean),
+                apply(resulttable[seq(2,dim(resulttable)[1],5),], 2, mean),
+                apply(resulttable[seq(3,dim(resulttable)[1],5),], 2, mean),
+                apply(resulttable[seq(4,dim(resulttable)[1],5),], 2, mean),
+                apply(resulttable[seq(5,dim(resulttable)[1],5),], 2, mean))
+# cbind(round(resultm[,1:3]), round(resultm[,4:7],3))
+resultsd = rbind(apply(resulttable[seq(1,dim(resulttable)[1],5),], 2, sd),
+                 apply(resulttable[seq(2,dim(resulttable)[1],5),], 2, sd),
+                 apply(resulttable[seq(3,dim(resulttable)[1],5),], 2, sd),
+                 apply(resulttable[seq(4,dim(resulttable)[1],5),], 2, sd),
+                 apply(resulttable[seq(5,dim(resulttable)[1],5),], 2, sd))
+
+temp = round(cbind(resultm[,4], resultsd[,4],
+                   resultm[,5], resultsd[,5], 
+                   resultm[,6], resultsd[,6]),3)
+
+```
+
+```{R echo = FALSE}
+
+temp = data.frame(temp)
+colnames(temp) = c('mean','sd','mean','sd','mean','sd')
+rownames(temp) = c('10','25','50','75','90')
+kable(temp, "latex", align="c", booktabs=TRUE, 
+      escape = F, longtable = T) %>%
+  add_header_above(header = c('quantile time' = 1,"Cox (x1,x2)" = 2,
+                              "Cox (x1 only)" = 2,
+                              "Cox (x2 only)" = 2)) 
+```
+
+
+
+```{R fig.width=7, fig.height=3.5,echo=FALSE, fig.align = "center"}
+# plots 
+par(mfrow = c(1,2))
+
+qtablem = resultm[,4:6]
+qtablesd = resultsd[,4:6]
+
+plot(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], type = 'l',
+     ylim = c( min(qtablem - 1.96*qtablesd), max(qtablem + 1.96*qtablesd)), xlim = c(0,1),
+     xlab = 'quantile', ylab = bquote(.('mean(abs(S(t)') -hat('S(t)))')),
+     main = 'AUC',
+     xaxt = "n")
+axis(1, at= c(0.1, 0.25, 0.5, 0.75, 0.9),
+     labels= c('10', '25',"50", "75", "90"))
+
+lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025 , qtablem[,2], col = 2)
+lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,3], col = 4)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], pch = 20)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025,qtablem[,2], pch = 20, col = 2)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9)+0.05,qtablem[,3], col = 4, pch = 20)
+
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] - 1.96*qtablesd[,1],
+       c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] + 1.96*qtablesd[,1],
+       length=0.05, angle=90, code=3)
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, qtablem[,2] - 1.96*qtablesd[,2],
+       c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, qtablem[,2] + 1.96*qtablesd[,2],
+       length=0.05, angle=90, code=3, col = 2)
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,3] - 1.96*qtablesd[,3],
+       c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,3] + 1.96*qtablesd[,3],
+       length=0.05, angle=90, code=3, col = 4)
+
+abline(h = 0.5, lty = 2, col = 6)
+plot.new()
+legend(x = "topleft",inset = 0,
+       legend = c("Cox PH (X1, X2)", "Cox PH (X1 only)", "Cox PH (X2 only)"),
+       col=c(1,2,4),
+       pch=c(20),lty=c(1)) #,
+
+```
+
+
+
+## With Dikta's method (bias)
+
+```{R include = FALSE}
+load("~/Desktop/NYU/Research/Survival/10. Dikta simulation mimic/censormodeldiff20200324.RData")
+
+qtable= c()
+for(i in 1:length(result$Sest_list0)){
+  qtabletemp = c()
+  temp = result$Sest_list0[[i]] - result$Strue_list0[[i]]
+  qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+  temp = result$Sest_list1[[i]] - result$Strue_list1[[i]]
+  qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+  temp = result$Sest_list2[[i]] - result$Strue_list2[[i]]
+  qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+  names
+  temp = result$Sest_list01[[i]] - result$Res1_list[[i]]
+  qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+  temp = result$Sest_list01[[i]] - result$Res2_list[[i]]
+  qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+  temp = result$Sest_list01[[i]] - result$Res3_list[[i]]
+  qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+  temp = result$Sest_list01[[i]] - result$Res4_list[[i]]
+  qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+  
+  qtable = rbind(qtable, qtabletemp)
+}
+
+
+qtablem = rbind(apply(qtable[seq(1,dim(qtable)[1],5),], 2, mean),
+                apply(qtable[seq(2,dim(qtable)[1],5),], 2, mean),
+                apply(qtable[seq(3,dim(qtable)[1],5),], 2, mean),
+                apply(qtable[seq(4,dim(qtable)[1],5),], 2, mean),
+                apply(qtable[seq(5,dim(qtable)[1],5),], 2, mean))
+# qtablem
+qtablesd = rbind(apply(qtable[seq(1,dim(qtable)[1],5),], 2, sd),
+                 apply(qtable[seq(2,dim(qtable)[1],5),], 2, sd),
+                 apply(qtable[seq(3,dim(qtable)[1],5),], 2, sd),
+                 apply(qtable[seq(4,dim(qtable)[1],5),], 2, sd),
+                 apply(qtable[seq(5,dim(qtable)[1],5),], 2, sd))
+# qtablesd
+
+temp = cbind(qtablem[,1], qtablesd[,1],
+             qtablem[,2], qtablesd[,2],
+             qtablem[,3], qtablesd[,3],
+              qtablem[,4], qtablesd[,4],
+              qtablem[,5], qtablesd[,5],
+              qtablem[,6], qtablesd[,6],
+              qtablem[,7], qtablesd[,7])
+
+temp = round(temp,4)
+temp = data.frame(temp)
+
+colnames(temp) = c('mean','sd','mean','sd','mean','sd','mean','sd','mean','sd','mean','sd','mean','sd')
+rownames(temp) = c('10','25','50','75','90')
+```
+
+
+```{R echo = FALSE}
+kable(temp[,1:6], "latex", align="c", booktabs=TRUE, 
+      escape = F, longtable = T) %>%
+  add_header_above(header = c("quantile time"= 1,"Cox (x1,x2)" = 2,
+                              "Cox (x1 only)" = 2,
+                              "Cox (x2 only)" = 2)) 
+
+kable(temp[,c(1,8:14)], "latex", align="c", booktabs=TRUE, 
+      escape = F, longtable = T) %>%
+  add_header_above(header = c("quantile time"= 1,
+                              "true m(t,x)" = 2, 
+                              "est m(t,x)" = 2,
+                              "true stute m(t,x)" = 2,
+                              "est stute m(t,x)" = 2)) 
+
+```
+
+
+```{R fig.width=7, fig.height=3.5,echo=FALSE, fig.align = "center"}
+# plots 
+par(mfrow = c(1,2))
+plot(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], type = 'l',
+     ylim = c( min(qtablem - 1.96*qtablesd), max(qtablem + 1.96*qtablesd)), xlim = c(0,1),
+     xlab = 'quantile', ylab = bquote(.('mean(abs(S(t)') -hat('S(t)))')),
+     main = 'Differences of S(t) at quantile times',
+     xaxt = "n")
+axis(1, at= c(0.1, 0.25, 0.5, 0.75, 0.9),
+     labels= c('10', '25',"50", "75", "90"))
+
+lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025 , qtablem[,4], col = 2)
+lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,6], col = 4)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], pch = 20)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025,qtablem[,4], pch = 20, col = 2)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9)+0.05,qtablem[,6], col = 4, pch = 20)
+
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] - 1.96*qtablesd[,1],
+       c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] + 1.96*qtablesd[,1],
+       length=0.05, angle=90, code=3)
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, qtablem[,4] - 1.96*qtablesd[,4],
+       c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, qtablem[,4] + 1.96*qtablesd[,4],
+       length=0.05, angle=90, code=3, col = 2)
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,6] - 1.96*qtablesd[,6],
+       c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,6] + 1.96*qtablesd[,6],
+       length=0.05, angle=90, code=3, col = 4)
+
+abline(h = 0, lty = 2, col = 6)
+plot.new()
+legend(x = "topleft",inset = 0,
+       legend = c("Cox PH (X1, X2)", "m(t,x)", "stute m(t,x)"),
+       col=c(1,2,4),
+       pch=c(20),lty=c(1)) #,
+
+
+```
+
+
+
+
+```{R fig.width=7, fig.height=3.5,echo=FALSE, fig.align = "center"}
+# plots 
+par(mfrow = c(1,2))
+plot(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], type = 'l',
+     ylim = c( min(qtablem - 1.96*qtablesd), max(qtablem + 1.96*qtablesd)), xlim = c(0,1),
+     xlab = 'quantile', ylab = bquote(.('mean(abs(S(t)') -hat('S(t)))')),
+     main = 'Differences of S(t) at quantile times',
+     xaxt = "n")
+axis(1, at= c(0.1, 0.25, 0.5, 0.75, 0.9),
+     labels= c('10', '25',"50", "75", "90"))
+
+lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025 , qtablem[,5], col = 2)
+lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,7], col = 4)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], pch = 20)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025,qtablem[,5], pch = 20, col = 2)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9)+0.05,qtablem[,7], col = 4, pch = 20)
+
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] - 1.96*qtablesd[,1],
+       c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] + 1.96*qtablesd[,1],
+       length=0.05, angle=90, code=3)
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, qtablem[,5] - 1.96*qtablesd[,5],
+       c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, qtablem[,5] + 1.96*qtablesd[,5],
+       length=0.05, angle=90, code=3, col = 2)
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,7] - 1.96*qtablesd[,7],
+       c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,7] + 1.96*qtablesd[,7],
+       length=0.05, angle=90, code=3, col = 4)
+
+abline(h = 0, lty = 2, col = 6)
+plot.new()
+legend(x = "topleft",inset = 0,
+       legend = c("Cox PH (X1, X2)", "hat m(t,x)", "hat stute m(t,x)"),
+       col=c(1,2,4),
+       pch=c(20),lty=c(1)) #,
+
+
+```
+
+
+
+
+## With Dikta's method (absolute bias)
+
+```{R include = FALSE}
+
+qtable= c()
+for(i in 1:length(result$Sest_list0)){
+  qtabletemp = c()
+  temp = abs(result$Sest_list0[[i]] - result$Strue_list0[[i]])
+  qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+  temp = abs(result$Sest_list1[[i]] - result$Strue_list1[[i]])
+  qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+  temp = abs(result$Sest_list2[[i]] - result$Strue_list2[[i]])
+  qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+  temp = abs(result$Sest_list01[[i]] - result$Res1_list[[i]])
+  qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+  temp = abs(result$Sest_list01[[i]] - result$Res2_list[[i]])
+  qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+  temp = abs(result$Sest_list01[[i]] - result$Res3_list[[i]])
+  qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+  temp = abs(result$Sest_list01[[i]] - result$Res4_list[[i]])
+  qtabletemp = cbind(qtabletemp, apply(temp,2,mean))
+  
+  qtable = rbind(qtable, qtabletemp)
+}
+
+
+qtablem = rbind(apply(qtable[seq(1,dim(qtable)[1],5),], 2, mean),
+                apply(qtable[seq(2,dim(qtable)[1],5),], 2, mean),
+                apply(qtable[seq(3,dim(qtable)[1],5),], 2, mean),
+                apply(qtable[seq(4,dim(qtable)[1],5),], 2, mean),
+                apply(qtable[seq(5,dim(qtable)[1],5),], 2, mean))
+# qtablem
+qtablesd = rbind(apply(qtable[seq(1,dim(qtable)[1],5),], 2, sd),
+                 apply(qtable[seq(2,dim(qtable)[1],5),], 2, sd),
+                 apply(qtable[seq(3,dim(qtable)[1],5),], 2, sd),
+                 apply(qtable[seq(4,dim(qtable)[1],5),], 2, sd),
+                 apply(qtable[seq(5,dim(qtable)[1],5),], 2, sd))
+# qtablesd
+
+temp = cbind(qtablem[,1], qtablesd[,1],
+             qtablem[,2], qtablesd[,2],
+             qtablem[,3], qtablesd[,3],
+              qtablem[,4], qtablesd[,4],
+              qtablem[,5], qtablesd[,5],
+              qtablem[,6], qtablesd[,6],
+              qtablem[,7], qtablesd[,7])
+
+temp = round(temp,4)
+temp = data.frame(temp)
+
+colnames(temp) = c('mean','sd','mean','sd','mean','sd','mean','sd','mean','sd','mean','sd','mean','sd')
+rownames(temp) = c('10','25','50','75','90')
+```
+
+
+```{R echo = FALSE}
+kable(temp[,1:6], "latex", align="c", booktabs=TRUE, 
+      escape = F, longtable = T) %>%
+  add_header_above(header = c("quantile time"= 1,"Cox (x1,x2)" = 2,
+                              "Cox (x1 only)" = 2,
+                              "Cox (x2 only)" = 2)) 
+
+kable(temp[,c(1,8:14)], "latex", align="c", booktabs=TRUE, 
+      escape = F, longtable = T) %>%
+  add_header_above(header = c("quantile time"= 1,
+                              "true m(t,x)" = 2, 
+                              "est m(t,x)" = 2,
+                              "true stute m(t,x)" = 2,
+                              "est stute m(t,x)" = 2)) 
+
+```
+
+
+```{R fig.width=7, fig.height=3.5,echo=FALSE, fig.align = "center"}
+# plots 
+par(mfrow = c(1,2))
+plot(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], type = 'l',
+     ylim = c( min(qtablem - 1.96*qtablesd), max(qtablem + 1.96*qtablesd)), xlim = c(0,1),
+     xlab = 'quantile', ylab = bquote(.('mean(abs(S(t)') -hat('S(t)))')),
+     main = 'Differences of S(t) at quantile times',
+     xaxt = "n")
+axis(1, at= c(0.1, 0.25, 0.5, 0.75, 0.9),
+     labels= c('10', '25',"50", "75", "90"))
+
+lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025 , qtablem[,4], col = 2)
+lines(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,6], col = 4)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9),qtablem[,1], pch = 20)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025,qtablem[,4], pch = 20, col = 2)
+points(c(0.1, 0.25, 0.5, 0.75, 0.9)+0.05,qtablem[,6], col = 4, pch = 20)
+
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] - 1.96*qtablesd[,1],
+       c(0.1, 0.25, 0.5, 0.75, 0.9), qtablem[,1] + 1.96*qtablesd[,1],
+       length=0.05, angle=90, code=3)
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, qtablem[,4] - 1.96*qtablesd[,4],
+       c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.025, qtablem[,4] + 1.96*qtablesd[,4],
+       length=0.05, angle=90, code=3, col = 2)
+arrows(c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,6] - 1.96*qtablesd[,6],
+       c(0.1, 0.25, 0.5, 0.75, 0.9)+ 0.05, qtablem[,6] + 1.96*qtablesd[,6],
+       length=0.05, angle=90, code=3, col = 4)
+
+abline(h = 0, lty = 2, col = 6)
+plot.new()
+legend(x = "topleft",inset = 0,
+       legend = c("Cox PH (X1, X2)", "m(t,x)", "stute m(t,x)"),
+       col=c(1,2,4),
+       pch=c(20),lty=c(1)) #,
+
+
+```
+
+
