@@ -1,5 +1,11 @@
 
+## 2020-04-16
 
+* check the angles between gamma1 and gamma2 for EMBARC dataset with different parameter settings
+* check the code: why the "all pbo", "all drug" have so narrow confidence interval?
+* try hcaf dataset
+* try weighted change score
+* how to add longitudinal information? 
 
 ## 2020-04-09
 
