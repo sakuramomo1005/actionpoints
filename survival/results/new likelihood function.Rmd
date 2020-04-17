@@ -1,0 +1,48 @@
+---
+title: "New likelihood function"
+fontsize: 12pt
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Likelihood: 
+$$L(\rho; x, \delta) = \prod_{i=1}^n f( x_i, \delta_i; \rho) = \prod_{i=1}^n f( x_i, \delta_i = 1; \rho)^{\delta_i}f( x_i, \delta_i = 0; \rho)^{1-\delta_i}$$
+And 
+
+* $f( x, \delta = 1; \rho) = \lim_{h \rightarrow 0} \frac{P(x < X < x + h, \delta = 1)}{h}$
+
+* $f( x, \delta = 0; \rho) = \lim_{h \rightarrow 0} \frac{P(x < X < x + h, \delta = 0)}{h}$
+
+
+For $P(x < X < x + h, \delta = 1)$
+
+\begin{equation}
+\begin{aligned}
+P(x < X < x + h, \delta = 1) = & P(x < T < x + h, T < C) \\
+\approx & P(x < T < x + h, C>x) \\
+= & P(C>x | x < T < x + h) P(x < T < x + h) \\
+\end{aligned}
+\end{equation}
+
+Since $\psi(t) = \int_t^{\infty} f(t,s) ds = \int_t^{\infty} f(t) f(s|t) ds = f(t)\int_t^{\infty}  f(s|t) ds= f(t) P(C > t | T = t) = f(t) P(C > T| t<T < t + h)$, $P(C>x | x < T < x + h) = \psi(t)/f(t)$
+
+Therefore, **Eq 1** $= \frac{\psi(t)}{f(t)} \times f(t) h = \psi(t) h$.
+
+Therefroe, $P(x < X < x + h, \delta = 1) = \psi(t)$ (is that correct?) 
+
+Similarly, for $P(x < X < x + h, \delta = 0)$
+
+\begin{equation}
+\begin{aligned}
+P(x < X < x + h, \delta = 0) = & P(x < C < x + h, T > C) \\
+\approx & P(x < C < x + h, T>x) \\
+= & P(T>x | x < C < x + h) P(x < C < x + h) \\
+\end{aligned}
+\end{equation}
+
+
+

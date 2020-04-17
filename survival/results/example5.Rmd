@@ -1,0 +1,287 @@
+---
+title: "Example 5"
+output: pdf_document
+---
+
+Mimic Zhiliang Ying's paper and to make things easy, let's look at the Joint CDF which is: 
+$$
+S(T \geq x, C \geq y) =
+\begin{cases}
+e^{-\theta x}  e^{-(e^{\theta y} - 1)\big( (x-y) + 1\big)} & x \geq y \\
+e^{-\theta x} e^{-(e^{\theta y} - 1)} & x < y
+\end{cases}
+$$
+
+For $x > y$ scenario
+$$\begin{aligned}
+\frac{\partial}{\partial x }e^{-(e^{\theta y} - 1)\big( (x-y) + 1\big)} = - (e^{\theta y} + \theta -1) e^{-\theta x -(e^{\theta y} - 1)\big( (x-y) + 1\big)}
+\end{aligned}$$
+$$\begin{aligned}
+& -\frac{\partial}{\partial y }(e^{\theta y} + \theta -1) e^{-\theta x -(e^{\theta y} - 1)\big( (x-y) + 1\big)}  \\
+= & \big \{ \big[ (\theta x-\theta y) + (\theta - 1) \big] e^{2 \theta y} + \big[(\theta^2 - \theta)(x-y) +(\theta -1)(\theta-2)\big] e^{\theta y} + (\theta - 1)  \big\}e^{-\theta x -(e^{\theta y} - 1)\big( (x-y) + 1\big)}
+\end{aligned}$$
+which is bigger than 0 for sure when $\theta > 2$
+
+Therefore, the pdfs are 
+$$f_{T,C}(x,y)  = \begin{cases}
+\big \{ \big[ (\theta x-\theta y) + (\theta - 1) \big] e^{2 \theta y} + \big[(\theta^2 - \theta)(x-y) +(\theta -1)(\theta-2)\big] e^{\theta y} + (\theta - 1)  \big\} \\
+\times e^{-\theta x -(e^{\theta y} - 1)\big( (x-y) + 1\big)}
+ & x \geq y \\
+ \\
+\theta^2  e^{-e^{ \theta y} +\theta y - \theta x + 1} & x < y
+\end{cases}$$
+
+Besides, the functions $S(t), S_z(t), f(t), f_z(t)$ are the same,  therefore, $m(t)$ is the same as Dr. Ying's example. 
+$$S_T(t) = P(T > t) = P(T > t, C > 0) = e^{- \theta t}  e^{-(e^{ \theta 0} - 1)\big( (t-0) + 1\big)} = e^{- \theta t}$$
+$$f_T(t) = \frac{\partial}{\partial t} (1 - S_T(t)) = \frac{\partial}{\partial t} (1 - e^{-\theta t}) = \theta e^{- \theta t}$$
+$$S_Z(t) = P(T > t, C> t) = e^{-\theta t} e^{-(e^{ \theta t} - 1)} = e^{-e^{\theta t} - \theta t + 1}$$
+$$f_Z(t) = \frac{\partial}{\partial t} (1 - S_Z(t)) = 1- e^{-e^{\theta t} - \theta t + 1} = \theta (1 + e^{\theta t})e^{-e^{\theta t} - \theta t + 1}$$
+$$\psi(t) = \int_t^{\infty} f(t,c) dc = \int_t^{\infty} \theta^2  e^{-e^{ \theta c} +\theta c - \theta t + 1} dc = \theta e^{-e^{\theta t} - \theta t + 1}$$
+Therefore, 
+the $m()$ function is: 
+$$m(t) = \frac{\lambda_F(t)}{\lambda_H(t)} = \frac{f_T(t)}{S_T(t)}/ \frac{f_Z(t)}{S_Z(t)} = \frac{\theta e^{- \theta t}}{e^{- \theta t}} / \frac{ \theta (1 + e^{\theta t})e^{-e^{\theta t} - \theta t + 1}}{e^{-e^{\theta t} - \theta t + 1}} = \frac{1}{1 + e^{\theta t}}$$
+And for the $\rho()$ function, 
+$$\begin{aligned}
+\rho = & \frac{f(t)/\psi(t) - 1}{S(t)/S_x(t) - 1}  \\ 
+= & \frac{\theta e^{-\theta t}/(\theta e^{-e^ {\theta t} - \theta t + 1}) -1}{ e^{- \theta t}/ e^{-e^{\theta t} -\theta t + 1} -1}\\
+= & 1
+\end{aligned}$$
+
+
+```{R include =FALSE}
+library(kableExtra)
+library(knitr)
+library(png)
+library(grid)
+
+setwd('/Users/yaolanqiu/Desktop/NYU/Research/Survival/M variance quantile 20191124/example5')
+add_table_name = function(data){
+  data = data.frame(data)
+  data = round(data,5)
+  nn = dim(data)[1]
+  nn = round(nn/5)
+  data = cbind(rep(c('t0.1', 't0.25', 't0.5', 't0.75', 't0.9'), nn), data)
+  colnames(data) = c('Quantile','KM','Exp m()','Dikta 1', 'Dikta 2')
+  rownames(data) = NULL
+  return(data)
+}
+
+M_diff_m = c(); M_diff_sd = c()
+The_est_the = c();
+S_est_diff = c(); S_est_diff_lg = c()
+S_est_sd = c(); S_est_sd_lg = c()
+mse1 = c(); mse_lg = c()
+
+for(theta  in c(1, 1.5, 2, 5)){
+  names = paste('example5_quant_inverse_', theta, '.RData', sep = '')
+  load(names)
+  
+  
+  # estimate of m
+  temp_m_diff = result$m_diff
+  M_diff_m = c(M_diff_m, mean(temp_m_diff))
+  M_diff_sd = c(M_diff_sd, sd(temp_m_diff))
+  #hist(temp_m_diff, breaks = 100)
+  
+  # estimate of theta
+  theta1 = -result$theta_est
+  The_est_the = c(The_est_the, mean(theta1))
+  
+  
+  # est of true S and 
+  true_quant = c(0.9, 0.75, 0.5, 0.25, 0.1)
+  # km
+  temp = cbind(
+    apply(abs(result$s0 - matrix(true_quant, 
+                                 dim(result$s0)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE), 
+    # 1
+    apply(abs(result$s1 - matrix(true_quant, 
+                                 dim(result$s1)[1], 5, byrow =  TRUE)),2,
+          mean, na.rm=TRUE), 
+    # 2 
+    apply(abs(result$s2 - matrix(true_quant, 
+                                 dim(result$s2)[1], 5, byrow =  TRUE)),2,
+          mean, na.rm=TRUE),
+    # 3
+    apply(abs(result$s3 - matrix(true_quant, 
+                                 dim(result$s3)[1], 5, byrow =  TRUE)),2,
+          mean, na.rm=TRUE))
+  
+  S_est_diff = rbind(S_est_diff, temp)
+  
+  temp = cbind(
+    apply(abs(result$s0 - matrix(true_quant, 
+                                 dim(result$s0)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE), 
+    # 1
+    apply(abs(result$s1 - matrix(true_quant, 
+                                 dim(result$s1)[1], 5, byrow =  TRUE))^2,2,
+          mean, na.rm=TRUE), 
+    # 2 
+    apply(abs(result$s2 - matrix(true_quant, 
+                                 dim(result$s2)[1], 5, byrow =  TRUE))^2,2,
+          mean, na.rm=TRUE),
+    # 3
+    apply(abs(result$s3 - matrix(true_quant, 
+                                 dim(result$s3)[1], 5, byrow =  TRUE))^2,2,
+          mean, na.rm=TRUE))
+  
+  mse1 = rbind(mse1, temp)
+  
+  
+  ## estimated
+  # km 
+  temp = cbind(
+    apply(abs(result$s_lg0 - matrix(true_quant, dim(result$s_lg0)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE), 
+    # 1
+    apply(abs(result$s_lg1 - matrix(true_quant, dim(result$s_lg1)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE), 
+    # 2 
+    apply(abs(result$s_lg2 - matrix(true_quant, dim(result$s_lg2)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE), 
+    # 3
+    apply(abs(result$s_lg3 - matrix(true_quant, dim(result$s_lg3)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE) )
+  
+  S_est_diff_lg = rbind( S_est_diff_lg, temp)
+  
+  temp = cbind(
+    apply(abs(result$s_lg0 - matrix(true_quant, dim(result$s_lg0)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE), 
+    # 1
+    apply(abs(result$s_lg1 - matrix(true_quant, dim(result$s_lg1)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE), 
+    # 2 
+    apply(abs(result$s_lg2 - matrix(true_quant, dim(result$s_lg2)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE), 
+    # 3
+    apply(abs(result$s_lg3 - matrix(true_quant, dim(result$s_lg3)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE) )
+  
+  mse_lg = rbind(mse_lg, temp)
+  
+  ## variance 
+  
+  temp = cbind(apply(result$s0, 2, sd, na.rm=TRUE),
+               apply(result$s1, 2, sd, na.rm=TRUE),
+               apply(result$s2, 2, sd, na.rm=TRUE),
+               apply(result$s3, 2, sd, na.rm=TRUE))
+  
+  S_est_sd = rbind(S_est_sd, temp)
+  
+  ## variance 
+  temp = cbind( apply(result$s_lg0, 2, sd, na.rm=TRUE),
+                apply(result$s_lg1, 2, sd, na.rm=TRUE),
+                apply(result$s_lg2, 2, sd, na.rm=TRUE),
+                apply(result$s_lg3, 2, sd, na.rm=TRUE))
+  
+  S_est_sd_lg = rbind(S_est_sd_lg, temp)
+}
+```
+
+
+
+## Results 
+
+**Simulation settings**
+
+The survival time and the censor time were jointly simulated from the joint distribution above. The parameter $\theta$ is chosen as 1, 1.5, 2, and 5. 
+
+Sample size: 200
+
+Iteration time: 500
+
+
+```{R echo =FALSE}
+# S_est_diff = c(); S_est_diff_lg = c()
+# S_est_sd = c(); S_est_sd_lg = c()
+colnames(S_est_diff_lg) = c('KM','Exp m()','Dikta 1', 'Dikta 2')
+x = cbind(add_table_name(S_est_diff), round(S_est_diff_lg,5))
+kable(x, "latex", longtable = T, align="c", 
+      caption = 'Mean absolute difference between estimated  and true S()',
+      booktabs=TRUE, escape = F)  %>% 
+    group_rows("theta = 1", 1, 5) %>%
+    group_rows("theta = 1.5", 6, 10) %>%
+    group_rows("theta = 2", 11, 15) %>%
+    group_rows("theta = 5", 16, 20) %>%
+  add_header_above(header = c(" " = 1,
+                              "With true m()" = 4,
+                              "With estimated m()" = 4))
+```
+
+
+```{R echo =FALSE}
+# S_est_diff = c(); S_est_diff_lg = c()
+# S_est_sd = c(); S_est_sd_lg = c()
+colnames(mse_lg) = c('KM','Exp m()','Dikta 1', 'Dikta 2')
+x = cbind(add_table_name(mse1), round(mse_lg,5))
+kable(x, "latex", longtable = T, align="c", 
+      caption = 'MSE',
+      booktabs=TRUE, escape = F)  %>% 
+    group_rows("theta = 1", 1, 5) %>%
+    group_rows("theta = 1.5", 6, 10) %>%
+    group_rows("theta = 2", 11, 15) %>%
+    group_rows("theta = 5", 16, 20) %>%
+  add_header_above(header = c(" " = 1,
+                              "With true m()" = 4,
+                              "With estimated m()" = 4))
+```
+
+```{R echo =FALSE}
+# S_est_diff = c(); S_est_diff_lg = c()
+# S_est_sd = c(); S_est_sd_lg = c()
+colnames(S_est_sd_lg) = c('KM','Exp m()','Dikta 1', 'Dikta 2')
+x = cbind(add_table_name(S_est_sd), round(S_est_sd_lg,5))
+kable(x, "latex", longtable = T, align="c", 
+      caption = 'Standard deviations of the estimated S()',
+      booktabs=TRUE, escape = F)  %>% 
+    group_rows("theta = 1", 1, 5) %>%
+    group_rows("theta = 1.5", 6, 10) %>%
+    group_rows("theta = 2", 11, 15) %>%
+    group_rows("theta = 5", 16, 20) %>%
+  add_header_above(header = c(" " = 1,
+                              "With true m()" = 4,
+                              "With estimated m()" = 4))
+```
+
+##### The estimate of $m()$
+
+```{R echo = FALSE}
+M_diff_m = matrix(M_diff_m, 1,4)
+rownames(M_diff_m) = NULL
+colnames(M_diff_m) = c(1,1.5,2,5)
+kable(M_diff_m, "latex", longtable = T, align="c", 
+      caption = 'mean absolute difference between hat m() and true m()',
+      booktabs=TRUE, escape = F) 
+```
+
+The row name shows the $\theta$ value 
+
+```{R echo = FALSE}
+M_diff_sd = matrix(M_diff_sd, 1, 4)
+rownames(M_diff_sd) = NULL
+colnames(M_diff_sd) = c( 1,1.5,2,5)
+kable(M_diff_sd, "latex", longtable = T, align="c", 
+      caption = 'standard deviation of estimated m()',
+      booktabs=TRUE, escape = F) 
+```
+
+The row name shows the $\theta$ value 
+
+```{R echo = FALSE}
+
+The_est_the = matrix(The_est_the, 1, 4)
+rownames(The_est_the) = NULL
+colnames(The_est_the) = c( 1,1.5,2,5)
+kable(The_est_the, "latex", longtable = T, align="c", 
+      caption = 'estimated theta from logitic regression',
+      booktabs=TRUE, escape = F) 
+
+```
+
+The row name shows the true $\theta$ value 
+
+
+
+
+**The survival function plots:**
+
+
+```{r fig.width=4.5, fig.height=4.5,echo=FALSE,  fig.align = "center"}
+img <- readPNG("/Users/yaolanqiu/Desktop/NYU/Research/Survival/M variance quantile 20191124/example5/200.png")
+ grid.raster(img)
+```
+
+

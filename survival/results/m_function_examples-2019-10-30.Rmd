@@ -1,0 +1,142 @@
+---
+title: "m() function's consistency"
+date: 2019-10-30
+fontsize: 12pt
+output: 
+  pdf_document:
+    toc: true # table of content true
+    toc_depth: 2
+header-includes:
+    - \usepackage[most]{tcolorbox}
+    - \definecolor{light-yellow}{rgb}{1, 0.95, 0.7}
+    - \newtcolorbox{myquote}{colback=light-yellow,grow to right by=-10mm,grow to left by=-10mm, boxrule=0pt,boxsep=0pt,breakable}
+    - \newcommand{\todo}[1]{\begin{myquote} \textbf{Theroem} \emph{#1} \end{myquote}}
+---
+
+
+ 
+
+# 1. MLE function derivation
+
+**To make things easy, I just consider the one dimension scenario at this time.**
+
+We denote $Y_i, i = 1, ..., N$ are the independent, identically, distributed (iid) lifetimes, whose corresponding cumulative distriubtion function (CDF) is $F$, probability distribution function (PDF) is $f$; the censoring time is defined as $C_i, i = 1,..., N$. $C_i$s are also iid, with CDF denoted as $G$ and PDF denoted as $g$. We set the censors happen on the right and the ovserved time is $Z_i = Y_i \wedge C_i$, whose CDF is $H$ and PDF is $h$. The $\delta_i = I_{[T_i \leq C_i]}$ is the status indicator, which shows whether subject $i$ is censored ($\delta_i = 0$) or not ($\delta_i = 0$). The corresponding hazard function of lifetime is $\lambda_F$ and cumulative hazard function is $\Lambda_F$. 
+
+Instead of the strong assumption of independent between $Y_i$ and $C_i$, we proposed that $T \perp \!\!\! \perp C$ at a small neighborhood, where $T = C$. And define: 
+$$m_{\theta}(t) = P(\delta = 1| Z = z ) =\lambda_F(t) / \lambda_H(t)$$
+Giving observed $(\delta_1, Z_1),(\delta_2, Z_2), ..., (\delta_n, Z_n)$, the likelihood function can be written as: 
+$$L({\theta}) = \prod_{i = 1}^{n} m_{\theta} (z_i)^{\delta_i} (1 - m_{\theta}(z_i))^{1 - \delta_i}\lambda_H(z_i) S_H(z_i)$$
+where $f_{\theta}(\delta_i, z_i) = \big[ m_{\theta}(z_i)  \big]^{\delta_i }  \big[ (1 - m_{\theta}(z_i) )\big]^{1 - \delta_i } \lambda_H(z_i) S_H(z_i)$
+And 
+$$\begin{aligned}
+ \log(L({\theta})) = \sum_{i = 1}^{n} \big[ \delta_i \log \big(m_{\theta} (z_i) \lambda_H(z_i) S_H(z_i)\big) + (1 - \delta_i) \log((1 - m_{\theta}(z_i) )\lambda_H(z_i) S_H(z_i))  \\
+\end{aligned}$$
+
+Let 
+
+* $w_1(z_i;\theta) = m_{\theta} (z_i) \lambda_H(z_i) S_H(z_i) = f_{\theta}(1, z_i)$, 
+
+* $w_2(z_i;\theta) = (1 - m_{\theta}(z_i) )\lambda_H(z_i) S_H(z_i) = f_{\theta}(0, z_i)$
+
+Then 
+$$\log(L({\theta})) = \sum_{i= 1}^n \delta_i \log(w_1(z_i;\theta)) + \sum_{i= 1}^n (1-\delta_i) \log(w_2(z_i;\theta))$$
+
+
+# 2. $L({\theta}) \leq L({\theta_0})$
+
+
+Let $\theta_0$ be the $\theta$ that can maximize the likelihood function $L({\theta})$. Let $\hat \theta_n$ denote the maximum likelihood estimation, which maximize $L_n({\theta})$. 
+
+**Lemma 1:** We have that for any $\theta$, 
+$$L({\theta}) \leq L({\theta_0})$$
+
+*Proof:*
+
+Since 
+$$L({\theta}) \leq L({\theta_0})$$
+$$\log(L({\theta})) \leq log(L({\theta_0}))$$
+Then 
+$$\begin{aligned}
+\log(L({\theta_0})) - log(L({\theta})) = & \sum_{i= 1}^n \delta_i \log(w_1(z_i;\theta_0)) + \sum_{i= 1}^n (1-\delta_i) \log(w_2(z_i;\theta_0)) \\
+& - \sum_{i= 1}^n \delta_i \log (w_1(z_i;\theta)) + \sum_{i= 1}^n (1-\delta_i) \log(w_2(z_i;\theta)) \\
+= & \sum_{i= 1}^n \delta_i \log(\frac{w_1(z_i;\theta_0)}{w_1(z_i;\theta)}) + \sum_{i= 1}^n (1-\delta_i) \log(\frac{w_2(z_i;\theta_0)}{w_2(z_i;\theta)}) 
+\end{aligned}$$
+And by LLN, 
+$$\frac{1}{n} \sum_{i= 1}^n \delta_i \log(\frac{w_1(z_i;\theta_0)}{w_1(z_i;\theta)})  \xrightarrow{p} \Delta E_{\theta_0} \big(\log(\frac{w_1(z;\theta_0)}{w_1(z;\theta)}) \big) $$
+<!-- $$\sum_{i= 1}^n \delta_i \log(\frac{m_{\theta_0} (z_i) \lambda_H(z_i) S_H(z_i)}{m_{\theta} (z_i) \lambda_H(z_i) S_H(z_i)}) \xrightarrow{p} \Delta E_{\theta_0} \big(\log(\frac{m_{\theta_0} (z) \lambda_H(z) S_H(z)}{m_{\theta} (z) \lambda_H(z) S_H(z)}) \big)$$ -->
+where $\Delta = \frac{\sum_{i=1}^n \delta_i}{n}$. 
+
+Similiarly, 
+$$\frac{1}{n} \sum_{i= 1}^n (1-\delta_i) \log(\frac{w_2(z_i;\theta_0)}{w_2(z_i;\theta)}) \xrightarrow{p} (1-\Delta) E_{\theta_0} \big( \log(\frac{w_2(z;\theta_0)}{w_2(z;\theta)}) \big)$$
+<!-- $$\sum_{i= 1}^n (1-\delta_i) \log(\frac{(1-m_{\theta_0} (z_i) )\lambda_H(z_i) S_H(z_i)}{(1-m_{\theta} (z_i)) \lambda_H(z_i) S_H(z_i)}) \xrightarrow{p} (1-\Delta) E_{\theta_0} \big(\log(\frac{(1-m_{\theta_0} (z) ) \lambda_H(z) S_H(z)}{(1-m_{\theta} (z) )\lambda_H(z) S_H(z)}) \big)$$ -->
+And 
+\begin{equation}
+E_{\theta_0}  \big(\log(\frac{w_1(z;\theta_0)}{w_1(z;\theta)}) \big) =  \int \log(\frac{w_1(z;\theta_0)}{w_1(z;\theta)}) f_{w_1}(z;\theta) dz = \int \log(\frac{w_1(z;\theta_0)}{w_1(z;\theta)}) w_1(z;\theta_0) dz
+\end{equation}
+
+Recall Kullback–Leibler divergence, 
+$$D_{KL} (F||G) = \int f \log(\frac{f}{g}) \geq 0$$
+Therefore, equation (1) $\geq 0$. Also, $(1-\Delta) E_{\theta_0} \big( \log(\frac{w_2(z;\theta_0)}{w_2(z;\theta)}) \big) \geq 0$. Therefore, $\log(L({\theta_0})) - log(L({\theta})) \geq 0$, $L({\theta_0}) \geq L({\theta})$. 
+
+
+# 3. Asymptotic normality of $\hat{\theta}_n$
+
+
+Let 
+
+* $w_1(z_i;\theta) =\big(m_{\theta} (z_i) \lambda_H(z_i) S_H(z_i) \big)$, 
+
+* $w_2(z_i;\theta) = \big((1 - m_{\theta}(z_i) )\lambda_H(z_i) S_H(z_i) \big)$
+
+Then 
+$$\log(L({\theta})) = \sum_{i= 1}^n \delta_i \log w_1(z_i;\theta) + \sum_{i= 1}^n (1-\delta_i) \log w_2(z_i;\theta)$$. 
+Let 
+
+* $l_1(\theta) = \Delta E_{\theta} (\log w_1(z;\theta)) = \Delta \int \log w_1(z;\theta) f_{\theta} (1,z) dz$
+
+* $l_2(\theta) = (1 - \Delta) E_{\theta} (\log w_2(z;\theta)) = (1 - \Delta) \int \log w_2(z;\theta) f_{\theta} (0,z) dz$
+
+* $l_{1,n} = \frac{1}{n} \sum_{i =1}^n \delta_i \log w_1(z_i;\theta)$, $l_{2,n} = \frac{1}{n} \sum_{i =1}^n (1 - \delta_i)\log w_2(z_i;\theta)$
+
+By LLN
+$$l_{1,n}(\theta) \xrightarrow{p} l_1(\theta), l_{2,n}(\theta) \xrightarrow{p} l_2(\theta)$$
+
+The Taylor expension of $l_{i,n}(\theta)$ (i = 1, 2) at $\theta_0$ is 
+$$l_{i,n}(\theta) = l_{i,n}(\theta_0) + \frac{l_{i,n}^{\prime}(\theta_0)}{1!} (\theta - \theta_0) + \frac{l_{i,n}^{\prime \prime}(\theta_0)}{2!} (\theta - \theta_0)^2 +  o \big((\theta - \theta_0)^2 \big)$$
+$$l_{i,n}(\theta) - l_{i,n}(\theta_0) = u_{i,n}(\theta_0) (\theta - \theta_0) + \frac{1}{2} u_{i,n}^{\prime}(\theta_0) (\theta - \theta_0)^2 + R_n$$
+where 
+$$R_n = o \big((\theta - \theta_0)^2 \big)$$
+$u_{i,n}(\theta_0)$ is the score function, which is the first derivative of the log likelihood function:
+$$u_{i,n}(\theta_0) = \frac{dl_n(\theta)}{d \theta}|_{\theta = \theta_0}$$
+<!-- $I_n(\theta)$ is the Fisher information, which is the negative second derivative of log likelihood function: -->
+<!-- $$I_n(\theta) = - \frac{d^2 l_n(\theta)}{d \theta^2}|_{\theta = \theta_0}$$ -->
+
+The Taylor expension of the score fucntion $u_{i,n}(\theta)$ at $\theta_0$ is: 
+$$u_{i,n}(\theta) = u_{i,n}(\theta_0) + u_{i,n}^{\prime} (\theta_0) (\theta - \theta_0) + r_n$$
+where, 
+$$r_n = o \big(\theta - \theta_0 \big)$$
+$$u_{i,n}^{\prime} (\theta_0) = \frac{d^2 l_{i,n}(\theta)}{d \theta^2}|_{\theta = \theta_0}$$ 
+<!-- = -I_n(\theta_0)$$ -->
+Besidse, we have the facts when we prove $L({\theta}) \leq L({\theta_0})$: 
+
+* By defination, $\hat{\theta}_n$ is the maximizer of $l_{i,n}(\theta)$ and $u_{i,n}(\hat{\theta}_n) = 0$, $i = 1,2$
+
+* By defination, ${\theta_0}$ is the maximizer of $l_{i,n}(\theta)$ and $u_{i,n}(\theta_0) = 0$, $i = 1,2$
+
+
+<!-- For the MLE $\hat{\theta}_n$, $u_n(\hat{\theta}_n) = 0$ -->
+Therefore, 
+$$\begin{aligned}
+(\hat{\theta}_n - \theta_0) = - \frac{u_{i,n}(\theta_0)}{u^{\prime}_{i,n}(\theta_0)} + r_{n2}
+\end{aligned}$$
+$$\sqrt{n}(\hat{\theta}_n - \theta_0) \approx \sqrt{n} \frac{u_{i,n}(\theta_0)}{u^{\prime}_{i,n}(\theta_0)}$$
+where $r_{n2} = - \frac{r_n}{u^{\prime}_{i,n}(\theta_0)} \rightarrow 0$. 
+
+Therefore, we need to look at the distributions of $u_{i,n}(\theta_0)$ and $u^{\prime}_{i,n}(\theta_0)$
+
+We can derivate it following the same way. However, does the fisher information the same for $l_1$ and $l_2$? No? 
+
+
+
+
+

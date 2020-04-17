@@ -1,0 +1,29 @@
+---
+title: "Summary table of examples"
+date: 2020-01-13
+geometry: margin=1.2cm
+classoption: landscape
+output: pdf_document
+fontsize: 12pt
+---
+
+| | Joint distribution   | $S_T$  | $m(t)$  | $\rho(t)$ |
+|:-:|:------------------------------------|:--------------------------:|:-----------:|:-----------:|
+|E1|$S_{T,C} (t,s) = (1 - t) (1 - s) (1 + \frac{C_0}{8} ts (t - s) ( t+s - 1))$, $(t,s) \in [0,1]\times [0,1]$ | $S_T(t) = t$ | $0.5$  |  $\frac{ C_0 (2t-1)(t-1)^2t+ 8}{C_0 t^2 (t -1) (2t - 1) + 8}$ | 
+| |  |    |   |   |
+|E2| $f_{T,C}(t,s)= \begin{cases}  e^{- t - s} & t \leq s \\\rho e^{ - \rho t + (\rho - 2)s} &  t > s \end{cases}$ | $S_T(t) = \frac{ \rho - 1}{ \rho - 2} \exp(-2t) - \frac{1}{\rho - 2} \exp(-\rho t)$ | $\frac{1}{2} \frac{(2 \rho - 2)  \exp(-2t) - \rho \exp(-\rho t)}{(\rho - 1)  \exp(-2t) - \exp(-\rho t)}$ | $\rho$  | 
+| |  |    |   |   |
+|E3| $S_{T,C}(t,s) = \begin{cases} e^{- \theta t}  e^{-(e^{ \theta s} - 1)\big( (\theta t- \theta s)^2 + 1\big)} & t \geq s \\ e^{-\theta t} e^{-(e^{\theta s} - 1)} & t < s \end{cases}$ |  $S_T (t) = e^{- \theta t}$ | $\frac{1}{1 + e^{\theta t}}$  | 1  | 
+| |  |    |   |   |
+|E4|  $S_{T,C}(t,s) = \begin{cases} e^{-\theta t}  e^{- (\theta s)^k \big( ( \theta t -  \theta s)^2 + 1\big)} & t \geq s \\ e^{- \theta t} e^{- (\theta s)^k} & t < s \end{cases}$ |  $S_{T}(t) = \theta e^{-\theta t}$ |$\frac{1}{1 + k(\theta x)^{k-1}}$| 1 |
+| |  |    |   |   |
+|E5| $S_{T,C}(t,s) = \begin{cases} e^{-\theta x}  e^{-(e^{\theta y} - 1)\big( (x-y) + 1\big)} & x \geq y \\ e^{-\theta x}  e^{-(e^{\theta y} - 1)} & x < y \end{cases}$ | $S_{T}(t) = e^{- \theta t}$ | $\frac{1}{1 + e^{\theta t}}$ | 1  | 
+
+
+Based on previous simulations, 
+
+* when the independent assumption is true, the bias, standard deviation and MSE of semiparametric methods are smaller than kaplan meier estimator. 
+
+* when the independent assumption is not true, while the diagnoal independence is true, most of the the bias, standard deviation and MSE of semiparametric methods are smaller than kaplan meier estimator. However, it is hard to have a better performance at the 50$\%$ quantile
+ 
+

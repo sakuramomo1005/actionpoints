@@ -1,0 +1,560 @@
+---
+title: "Example 4- Exponential and Weibull"
+output: pdf_document
+fontsize: 12pt
+---
+
+```{R include = FALSE}
+library(knitr)
+library(kableExtra)
+
+```
+
+
+
+Consider the joint distribution who has: 
+$$
+P(T \geq x, C \geq y) = S(x,y) =
+\begin{cases}
+e^{-\theta x}  e^{- (\theta y)^k \big( ( \theta x-  \theta y)^2 + 1\big)} & x \geq y \\
+e^{- \theta x} e^{- (\theta y)^k} & x < y
+\end{cases}
+$$
+Then
+
+* $S_T(x) = P(T \geq x, C \geq 0) = S(x, 0) = e^{- \theta x}$, $f_T(x) = \frac{1 - S_T(x)}{x} =\theta e^{- \theta x}$
+
+* $S_C(x) = P(T \geq 0, C \geq x) = S(0, x) = e^{- \theta 0} e^{- (\theta x)^k} = e^{- (\theta x)^k}$,  $f_C(x) = \frac{1 - S_C(x)}{x} = k \theta (\theta y)^{k-1} e^{- (\theta x)^k}$
+
+The death time is from an exponential distribution with paramter $\theta$, the censor time is from a Weibull distribution with shape parameter $k$ and scale parameter $1/\theta$. 
+
+Beisdes,
+
+* $S_Z(x) = P(T > x, C > x) = e^{- \theta x - (\theta x)^k}$, $f_Z(x) = (\theta + k \theta (\theta x)^{k-1}) e^{- \theta x - (\theta x)^k}$
+
+Therefore the $m()$ function is
+$$m(x) = \frac{f_T(x)/S_T(x)}{f_Z(X)/S_Z(x)} = \frac{\theta e^{- \theta x}/ e^{- \theta x} }{ (\theta + k \theta (\theta x)^{k-1}) e^{- \theta x - (\theta x)^k}/e^{- \theta x - (\theta x)^k}} = \frac{1}{1 + k(\theta x)^{k-1}}$$
+We could also transform $m()$ function as: 
+$$m(x) = \frac{1}{1 + \exp(\log(k(\theta x)^{k-1}))} =\frac{1}{1 + \exp( \log(k) + (k-1) \log(\theta) + (k-1) \log(x))}$$
+We can then estimate the $k$ and $\theta$ by fitting logistic regression. 
+
+And when $x < y$, the pdf is 
+$$f_{T,C}(x,y) = \frac{\partial^2}{\partial x \partial y} S(x,y) = \frac{\partial^2}{\partial x \partial y} e^{- \theta x} e^{- (\theta y)^k} = k\theta^{k+1} y^{k-1} \exp(-\theta x- (\theta y)^k)$$
+Then 
+$$\begin{aligned}
+\psi(x) = & \int_x^\infty f_{T,C}(x,y) dy \\
+= & \int_x^\infty  k\theta^{k+1} y^{k-1} \exp(-\theta x- (\theta y)^k) dy \\
+=& \theta \exp(-\theta x- (\theta x)^k)
+\end{aligned}$$
+The $\rho(x)$ is:
+$$\rho(x) = \frac{f_T(x)/\psi(x) - 1}{S(x)/S_Z(x) - 1} = \frac{\theta \exp({- \theta x})/ (\theta \exp(-\theta x- (\theta x)^k)) -1}{\exp({- \theta x}) / exp({- \theta x - (\theta x)^k}) -1}  =1$$
+
+# Data generation
+
+When $x < y$, (death time $<$ censor time), the death time is generated from an exponentaion with parameter $\theta$, the censor time is independently generated from a Weibull distribution. The pairs that $x < y$ are selected. 
+
+
+
+When $x > y$, firstly generate death time  an exponentaion with parameter $\theta$. 
+Given a known death time, generate censor time from the conditional distribution: 
+$$\begin{aligned}
+F_{C|T}(y | x) = & \int_0^y f_{C|T}(v|x) dv \\
+= & \int_0^y \frac{\partial }{\partial y} \frac{\partial F_{T,C}(x,y)}{\partial x f_T(x)} |_{y = v} dv \\
+= & \frac{\partial F_{T,C}(x,y)}{\partial x f_T(x)} |_{0}^y \\
+= & (2 \theta (\theta y)^k(y-x) - 1) \exp(- (\theta y)^k \big( ( \theta x-  \theta y)^2 + 1\big)) |_{0}^y \\
+= & 1 - (2 \theta (\theta y)^k(x -y) + 1) \exp(- (\theta y)^k \big( ( \theta x-  \theta y)^2 + 1\big))
+\end{aligned}$$
+
+The censoring percentage 
+$$\begin{aligned}P(T < C) = & \int_0^\infty \int_0^y f_{T.C}(x, y)dx dy = \int_0^\infty \int_0^y k \theta^{k+1} y^{k-1}e^{-\theta x - (\theta y)^k} dx dy \\
+= & \int_0^\infty  k \theta^{k} y^{k-1} (1 - e^{-\theta y}) e^{-(\theta y)^k} dy
+\end{aligned}$$
+
+To make things easy, we can set $k = 2$, then 
+$$\begin{aligned}
+P(T < C) = & \int_0^\infty  2 \theta^{2} y (1 - e^{-\theta y}) e^{-(\theta y)^2} dy \\
+= & \int_0^\infty 2 \theta^{2} y e^{-(\theta y)^2} - 2 \theta^{2} ye^{-\theta y-(\theta y)^2}dy \\ 
+= & -e^{-(\theta y)^2} |_0^\infty - \int_0^\infty 2 \theta^{2} ye^{-\theta y-(\theta y)^2}dy \\
+\approx & 0.546
+\end{aligned}$$
+
+
+```{R include = FALSE}
+setwd('/Users/yaolanqiu/Desktop/NYU/Research/Survival/M variance 20191117')
+
+theta_list = c(1,2)
+
+the_est1 = c()
+the_est2 = c()
+m_est = c()
+m_diff = c()
+em_diff = c()
+qq_list = list()
+eqq_list = list()
+vv_list = list()
+evv_list = list()
+
+for(i in 1:2){
+  names = paste('theta_3_', theta_list[i], '.RData', sep ='')
+  load(names)
+  
+  
+  # theta estimate 
+  the_est1 = c(the_est1, mean(abs( result$theta_est1 )))
+  the_est2 = c(the_est2, mean(abs( result$theta_est2 )))
+  #hist(abs(-result$theta_est1 -  log(theta_list[i])), breaks = 50)
+  
+  range(result$theta_est1)
+  sd(result$theta_est1)
+  #hist(abs(-result$theta_est -  theta_list[i]), breaks = 50)
+  
+  # m estimate 
+  m_est = c(m_est, mean(result$m_diff))
+  sd(result$m_diff)
+  range(result$m_diff)
+  hist(result$m_diff, breaks = 50)
+  
+  # mean estimation 
+  m_data = data.frame(km = result$diff1, m1 = result$diff2, m2 = result$diff3, m3 = result$diff4) 
+  em_data = data.frame(km = result$ediff1, m1 = result$ediff2, m2 = result$ediff3, m3 = result$ediff4) 
+  
+  m_diff = rbind(m_diff, apply(m_data, 2, mean))
+  em_diff = rbind(em_diff, apply(em_data, 2, mean))
+  
+  #apply(m_data[1:250, ], 2, mean)
+  #apply(em_data[1:250, ], 2, mean)
+  
+  ## 
+  qq = c()
+  qq = rbind(qq, apply(result$qq1,2,sd), 
+             apply(result$qq2,2,sd),
+             apply(result$qq3,2,sd),
+             apply(result$qq4,2,sd),
+             apply(result$qq5,2,sd),
+             apply(result$qq6,2,sd),
+             apply(result$qq7,2,sd))
+  rownames(qq) = c('10th', '20th', '50th', '125th', '250th', '325th', '400th')
+  colnames(qq) = c('KM', 'new m()', 'Dikta1', 'Dikta2')
+  round(qq, 5)
+  
+  qq_list[[i]] = qq
+  
+  eqq = c()
+  eqq = rbind(eqq, apply(result$eqq1,2,sd), 
+              apply(result$eqq2,2,sd),
+              apply(result$eqq3,2,sd),
+              apply(result$eqq4,2,sd),
+              apply(result$eqq5,2,sd),
+              apply(result$eqq6,2,sd),
+              apply(result$eqq7,2,sd))
+  rownames(eqq) = c('10th', '20th', '50th', '125th', '250th', '325th', '400th')
+  colnames(eqq) = c('KM', 'new m()', 'Dikta1', 'Dikta2')
+  round(eqq, 5)
+  
+  eqq_list[[i]] = eqq
+  
+  plot(1:7, qq[,1], type ='l', ylim = c(0, 0.025), xaxt = "n",
+       xlab = 'quantile', ylab = 'standard deviation', main = paste('theta =', theta_list[i]))
+  lines(1:7, qq[,2], col = 2, lty = 2, type ='l')
+  lines(1:7, qq[,3], col = 3, lty = 3, type ='l')
+  lines(1:7, qq[,4], col = 4, lty = 4, type ='l')
+  axis(1, at=1:7, labels= c('10th', '20th', '50th', '125th', '250th', '325th', '400th'))
+  #axis(1, at=1:7, labels= c(10, 20, 50, 125, 250, 325, 400))
+  legend('topleft', legend = c('KM','exp() m()', 'Dikta 1', 'Dikta2'), lty = 1:4, col = 1:4, cex = 0.9)
+  
+  plot(1:7, eqq[,1], type ='l', ylim = c(0, 0.025), xaxt = "n",
+       xlab = 'quantile', ylab = 'standard deviation', main = paste('theta =', theta_list[i], '(logistic regression estimated)'))
+  lines(1:7, eqq[,2], col = 2, lty = 2, type ='l')
+  lines(1:7, eqq[,3], col = 3, lty = 3, type ='l')
+  lines(1:7, eqq[,4], col = 4, lty = 4, type ='l')
+  axis(1, at=1:7, labels= c('10th', '20th', '50th', '125th', '250th', '325th', '400th'))
+  #axis(1, at=1:7, labels= c(10, 20, 50, 125, 250, 325, 400))
+  legend('topleft', legend = c('KM','exp() m()', 'Dikta 1', 'Dikta2'), lty = 1:4, col = 1:4, cex = 0.9)
+  
+  
+  vv1 = rbind(apply(result$qq1,2,sd)[2:4] / apply(result$qq1,2,sd)[1], 
+              apply(result$qq2,2,sd)[2:4] / apply(result$qq2,2,sd)[1], 
+              apply(result$qq3,2,sd)[2:4] / apply(result$qq3,2,sd)[1], 
+              apply(result$qq4,2,sd)[2:4] / apply(result$qq4,2,sd)[1], 
+              apply(result$qq5,2,sd)[2:4] / apply(result$qq5,2,sd)[1], 
+              apply(result$qq6,2,sd)[2:4] / apply(result$qq6,2,sd)[1],
+              apply(result$qq7,2,sd)[2:4] / apply(result$qq7,2,sd)[1])
+  
+  rownames(vv1) = c('10th', '20th', '50th', '125th', '250th', '325th', '400th')
+  colnames(vv1) = c('new m()', 'Dikta1', 'Dikta2')
+  
+  round(vv1,4)
+  vv_list[[i]] = vv1
+  
+  evv1 = rbind(apply(result$eqq1,2,sd)[2:4] / apply(result$eqq1,2,sd)[1], 
+               apply(result$eqq2,2,sd)[2:4] / apply(result$eqq2,2,sd)[1], 
+               apply(result$eqq3,2,sd)[2:4] / apply(result$eqq3,2,sd)[1], 
+               apply(result$eqq4,2,sd)[2:4] / apply(result$eqq4,2,sd)[1], 
+               apply(result$eqq5,2,sd)[2:4] / apply(result$eqq5,2,sd)[1], 
+               apply(result$eqq6,2,sd)[2:4] / apply(result$eqq6,2,sd)[1],
+               apply(result$eqq7,2,sd)[2:4] / apply(result$eqq7,2,sd)[1])
+  
+  rownames(evv1) = c('10th', '20th', '50th', '125th', '250th', '325th', '400th')
+  colnames(evv1) = c('new m()', 'Dikta1', 'Dikta2')
+  
+  round(evv1,4)
+  
+  evv_list[[i]] = evv1
+}
+
+
+new_m = c()
+dikta1 = c()
+dikta2 = c()
+
+enew_m = c()
+edikta1 = c()
+edikta2 = c()
+
+for(i in 1:2){
+  new_m = cbind(new_m, vv_list[[i]][,1])
+  dikta1 = cbind(dikta1, vv_list[[i]][,2])
+  dikta2 = cbind(dikta2, vv_list[[i]][,3])
+  
+  enew_m = cbind(enew_m, evv_list[[i]][,1])
+  edikta1 = cbind(edikta1, evv_list[[i]][,2])
+  edikta2 = cbind(edikta2, evv_list[[i]][,3])
+}
+
+```
+
+
+
+## Data generation, check margnial
+
+For example, when theta = 1, 
+
+```{R include = FALSE}
+for(functions in 1){
+  Fc_t = function(y,x){
+    res = 1 - (2*theta*(theta*y)^k*(x-y) + 1)*exp(-theta^k*y^k*((theta*x-theta*y)^2 + 1))
+    return(res)
+  }
+  inverse_fct = function(a,y){
+    res1 = c()
+    for(i in seq(0, 1, 0.1)){
+      res1 = c(res1, Fc_t(i, y))
+    }
+    temp = seq(0, 1, 0.1)[which(abs(res1 - a) == min(abs(res1 - a)))[1]]
+    
+    res2 = c()
+    for(i in seq((temp - 0.1), (temp+0.1), 0.01)){
+      res2 = c(res2, Fc_t(i, y))
+    }
+    temp = seq((temp - 0.1), (temp+0.1), 0.01)[which(abs(res2 - a) == min(abs(res2 - a)))[1]]
+    
+    res3 = c()
+    for(i in seq((temp - 0.01), (temp+0.01), 0.001)){
+      res3 = c(res3, Fc_t(i, y))
+    }
+    temp = seq((temp - 0.01), (temp+0.01), 0.001)[which(abs(res3 - a) == min(abs(res3 - a)))[1]]
+    
+    res4 = c()
+    for(i in seq((temp - 0.001), (temp+0.001), 0.0001)){
+      res4 = c(res4, Fc_t(i, y))
+    }
+    temp = seq((temp - 0.001), (temp+0.001), 0.0001)[which(abs(res4 - a) == min(abs(res4 - a)))[1]]
+    return(temp)
+  }
+  m = function(x){
+    return(1/(1 + k * (theta * x)^(k-1)))
+  }
+  m0 = function(x){
+    return(1/(1 + k * (theta * x)^(k-1)))
+  }
+  ## hazard function of observed time, calculated with tie
+  lambda_H = function(t){
+    i = which(abs(unique(data$time) - t) == min(abs(unique(data$time) - t)))
+    if(unique(data$time)[i] > t & i > 1 ){i = i - 1}
+    h = (fit_km$n.event[i] + fit_km$n.censor[i])/ fit_km$n.risk[i]
+    return(h)
+  }
+  
+  ## cumulative hazard function of observed time, calculated with tie
+  Lambda_H = function(t){
+    i = which(abs(unique(data$time) - t) == min(abs(unique(data$time) - t)))[1]
+    if(unique(data$time)[i] > t & i > 1){i = i -1}
+    HH = c()
+    for(ii in 1:i){
+      HH = c(HH, (fit_km$n.event[ii]+fit_km$n.censor[ii])/fit_km$n.risk[ii])
+    }
+    return(sum(HH))
+  }
+  
+  ## hazard 
+  lambda_F = function(t){
+    h = lambda_H(t) * m(t)
+    return(h)
+  }
+  
+  ## cumulative hazard
+  Lambda_F = function(t){
+    i = which(abs(unique(data$time) - t) == min(abs(unique(data$time) - t)))[1]
+    if(unique(data$time)[i] > t & i > 1){i = i -1}
+    HH = c()
+    for(ii in 1:i){
+      HH = c(HH, lambda_F(unique(data$time)[ii]))
+    }
+    return(sum(HH))
+  }
+  
+  ## estimate the S() with m function
+  S_est = function(t){
+    return(exp(-Lambda_F(t)))
+  }
+  
+  ##########################################
+  # m function (Gerhard method)
+  Ri = function(t){
+    return(sum(data$time <= t))
+  } 
+  m_est_old1 = function(t){
+    res = 1
+    for(i in 1:Ri(t)){
+      res = res * ((n - i)/(n - i + 1))^(m(data$time[i]))
+    }
+    return(res)
+  }
+  m_est_old2 = function(t){
+    res = 1
+    for(i in 1:Ri(t)){
+      res = res * ((n - i)/(n - i + m(data$time[i])))
+    }
+    return(res)
+  }
+  
+}
+weibull = function(x, shape, scale){
+  return(
+    shape/scale * (x /scale)^(shape-1) * exp(-(x/scale)^shape))
+}
+
+set.seed(123)
+k = 2
+theta = 2
+
+shape = k
+scale = 1/theta
+
+for(datageneration in 1){
+  # when x < y
+  x = rexp(2000, theta)
+  y = rweibull(2000, shape=shape, scale=scale)
+  data2 = data.frame(death = x, censor = y)
+  data2 = data2[data2$death < data2$censor, ]
+  data2 = data2[sample(1:dim(data2)[1])[1:273],]
+  rownames(data2) = NULL
+  head(data2)
+  data2$time = ifelse((data2$death < data2$censor), data2$death, data2$censor)
+  data2$status = ifelse(data2$death < data2$censor, 1, 0)
+  # 
+  # sum(data2$death < data2$censor) 
+  # hist(x, breaks = 100)
+  # hist(y, breaks = 100)
+  
+  # when x > y
+  x = rexp(2000, theta)
+  c1 = c()
+  for(i in 1:length(x)){
+    # bars = Fc_t(t1[i],t1[i])
+    # xx = runif(1,0,bars)
+    xx = runif(1,0,1)
+    c1 = c(c1, inverse_fct(xx, x[i]))
+  }
+  # get the pairs that x > y. 
+  data1 = data.frame(death = x, censor = c1)
+  data1$time = ifelse( (data1$death < data1$censor), data1$death, data1$censor)
+  data1$status = ifelse(data1$death < data1$censor, 1, 0)
+  data1 = data1[(data1$time >0 & data1$status == 0), ]
+  data1 = data1[sample(1:dim(data1)[1])[1:227],]
+  
+  data = rbind(data1, data2)
+  data = data[order(data$time),]
+  head(data)
+  rownames(data) = NULL
+}
+
+```
+
+
+* Histogram of $T$ estimation
+
+The red line is the true density of $T$
+
+```{R fig.width=6, fig.height=4,echo=FALSE,  fig.align = "center"}
+hist(data$death, freq = FALSE, breaks = 100, xlab = 'death time', main = NULL)
+lines(seq(0,7,0.1), theta* exp(- theta * seq(0,7,0.1)), col = 2)
+```
+
+* Histogram of $C$ estimation
+
+The red line is the true density of $C$
+
+```{R fig.width=6, fig.height=4,echo=FALSE,  fig.align = "center"}
+hist(data$censor, freq = FALSE, breaks = 100, xlab = 'censor time', main = NULL)
+lines(seq(0,7,0.1),weibull(seq(0,7,0.1),shape, scale))
+```
+
+
+# Results
+
+## Estimation of $\theta$ by logistic regression
+
+```{R echo = FALSE}
+the_est1 = matrix(the_est1, 1,2)
+colnames(the_est1) = c(1,2)
+rownames(the_est1) = 'Estimated intercept'
+kable(round(the_est1,4), booktabs=TRUE, "latex", align="c", longtable = T, escape = F)
+the_est2 = matrix(the_est2, 1,2)
+colnames(the_est2) = c(1,2)
+rownames(the_est2) = 'Estimated slope'
+kable(round(the_est2,4), booktabs=TRUE, "latex", align="c", longtable = T, escape = F)
+```
+
+
+
+
+## Estimation of $m()$ by logistic regression
+
+Plug in the estimated $\hat \theta$ to get the estimated $\hat m(t)$. Calculate the mean absolute difference between true $m(t)$ and $\hat m(t)$.
+
+```{R echo = FALSE}
+m_est = matrix(m_est, 1,2)
+colnames(m_est) = c(1,2)
+rownames(m_est) = '|hat m(t) - m(t)|'
+kable(round(m_est,4), booktabs=TRUE,"latex", align="c", longtable = T, escape = F)
+```
+
+
+## Estimation of $S(t)$ with true $m(t)$
+
+```{R echo = FALSE}
+colnames(m_diff) = c('KM', 'new m()', 'Dikta1', 'Dikta2')
+rownames(m_diff) = c(1,2)
+m_diff = round(m_diff,4)
+kable(m_diff,booktabs=TRUE, "latex", align="c", longtable = T, escape = F)
+```
+
+## Estimation of $S(t)$ with logistic regression estimated $m(t)$
+
+```{R echo = FALSE}
+colnames(em_diff) = c('KM', 'new m()', 'Dikta1', 'Dikta2')
+rownames(em_diff) = c(1,2)
+em_diff = round(em_diff,4)
+kable(em_diff, booktabs=TRUE,"latex", align="c", longtable = T, escape = F)
+```
+
+
+
+
+## Variances of the quantiles of $S(t)$ 
+
+Let's look at the variance of the estimation: S(t) at the '10th', '20th', '50th', '125th', '250th', '325th', '400th' out of 500 subjects. 
+
+The following table shows the fraction of standard deviation of new methods over Kaplan Meier estiamter: $\frac{v}{v_{km}}$. 
+
+
+#### 1. Estimated by $\lambda_F(t) = m(t) \lambda_H(t)$ ($\frac{v}{v_{km}}$)
+
+```{R echo = FALSE}
+new_m = cbind(new_m, enew_m)
+colnames(new_m) = c(1,2,1,2)
+new_m = round(new_m, 4)
+kable(new_m, "latex", align="c", booktabs=TRUE, escape = F,  
+      linesep = NULL, longtable = T) %>%
+  add_header_above(header = c(" " = 1,
+                              " With true m()" = 2,
+                              " Logistic estimated m()" = 2))
+```
+
+
+
+#### 2. Estimated by Dikta's 1st formula  ($\frac{v}{v_{km}}$)
+ 
+```{R echo = FALSE}
+new_m = cbind(dikta1, edikta1)
+colnames(new_m) = c(1,2,1,2)
+new_m = round(new_m, 4)
+kable(new_m, "latex", align="c", booktabs=TRUE, escape = F,  linesep = NULL, longtable = T) %>%
+  add_header_above(header = c(" " = 1,
+                              " With true m()" = 2,
+                              " Logistic estimated m()" = 2))
+```
+
+
+#### 3. Estimated by Dikta's 2nd formula  ($\frac{v}{v_{km}}$)
+
+```{R echo = FALSE}
+new_m = cbind(dikta2, edikta2)
+colnames(new_m) = c(1,2,1,2)
+new_m = round(new_m, 4)
+kable(new_m, "latex", align="c", booktabs=TRUE, escape = F, linesep = NULL,  longtable = T) %>%
+  add_header_above(header = c(" " = 1, 
+                              " With true m()" = 2,
+                              " Logistic estimated m()" = 2))
+```
+
+## Plots of the variances
+
+```{R fig.width=8, fig.height=4, echo=FALSE,  fig.align = "center"}
+
+qq =qq_list[[1]]
+eqq= eqq_list[[1]]
+par(mfrow = c(1,2))
+
+  plot(1:7, qq[,1], type ='l', ylim = c(0, 0.025), xaxt = "n",
+       xlab = 'quantile', ylab = 'standard deviation', main = paste('theta =', theta_list[i]))
+  lines(1:7, qq[,2], col = 2, lty = 2, type ='l')
+  lines(1:7, qq[,3], col = 3, lty = 3, type ='l')
+  lines(1:7, qq[,4], col = 4, lty = 4, type ='l')
+  axis(1, at=1:7, labels= c('10th', '20th', '50th', '125th', '250th', '325th', '400th'))
+  #axis(1, at=1:7, labels= c(10, 20, 50, 125, 250, 325, 400))
+  legend('topleft', legend = c('KM','exp() m()', 'Dikta 1', 'Dikta2'), lty = 1:4, col = 1:4, cex = 0.9)
+  
+  plot(1:7, eqq[,1], type ='l', ylim = c(0, 0.025), xaxt = "n",
+       xlab = 'quantile', ylab = 'standard deviation', main = paste('theta =', theta_list[i], '(logistic regression estimated)'))
+  lines(1:7, eqq[,2], col = 2, lty = 2, type ='l')
+  lines(1:7, eqq[,3], col = 3, lty = 3, type ='l')
+  lines(1:7, eqq[,4], col = 4, lty = 4, type ='l')
+  axis(1, at=1:7, labels= c('10th', '20th', '50th', '125th', '250th', '325th', '400th'))
+  #axis(1, at=1:7, labels= c(10, 20, 50, 125, 250, 325, 400))
+  legend('topleft', legend = c('KM','exp() m()', 'Dikta 1', 'Dikta2'), lty = 1:4, col = 1:4, cex = 0.9)
+  
+
+```
+
+
+```{R fig.width=8, fig.height=4, echo=FALSE,  fig.align = "center"}
+
+qq =qq_list[[2]]
+eqq= eqq_list[[2]]
+
+par(mfrow = c(1,2))
+
+  plot(1:7, qq[,1], type ='l', ylim = c(0, 0.025), xaxt = "n",
+       xlab = 'quantile', ylab = 'standard deviation', main = paste('theta =', theta_list[i]))
+  lines(1:7, qq[,2], col = 2, lty = 2, type ='l')
+  lines(1:7, qq[,3], col = 3, lty = 3, type ='l')
+  lines(1:7, qq[,4], col = 4, lty = 4, type ='l')
+  axis(1, at=1:7, labels= c('10th', '20th', '50th', '125th', '250th', '325th', '400th'))
+  #axis(1, at=1:7, labels= c(10, 20, 50, 125, 250, 325, 400))
+  legend('topleft', legend = c('KM','exp() m()', 'Dikta 1', 'Dikta2'), lty = 1:4, col = 1:4, cex = 0.9)
+  
+  plot(1:7, eqq[,1], type ='l', ylim = c(0, 0.025), xaxt = "n",
+       xlab = 'quantile', ylab = 'standard deviation', main = paste('theta =', theta_list[i], '(logistic regression estimated)'))
+  lines(1:7, eqq[,2], col = 2, lty = 2, type ='l')
+  lines(1:7, eqq[,3], col = 3, lty = 3, type ='l')
+  lines(1:7, eqq[,4], col = 4, lty = 4, type ='l')
+  axis(1, at=1:7, labels= c('10th', '20th', '50th', '125th', '250th', '325th', '400th'))
+  #axis(1, at=1:7, labels= c(10, 20, 50, 125, 250, 325, 400))
+  legend('topleft', legend = c('KM','exp() m()', 'Dikta 1', 'Dikta2'), lty = 1:4, col = 1:4, cex = 0.9)
+  
+
+```
+
+

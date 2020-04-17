@@ -1,0 +1,429 @@
+---
+title: "Some results based on the m(t) function"
+date: 2019-10-14
+output: 
+  pdf_document:
+    toc: true # table of content true
+    toc_depth: 2
+fontsize: 12pt
+header-includes:
+  - \usepackage{color}
+---
+
+
+# Introduction: the new assumption for a semi-parameteric model
+
+We denote $Y_i, i = 1, ..., N$ are the independent, identically, distributed (iid) lifetimes, whose corresponding cumulative distriubtion function (CDF) is $F$, probability distribution function (PDF) is $f$; the censoring time is defined as $C_i, i = 1,..., N$. $C_i$s are also iid, with CDF denoted as $G$ and PDF denoted as $g$. We set the censors happen on the right and the ovserved time is $Z_i = Y_i \wedge C_i$, whose CDF is $H$ and PDF is $h$. The $\delta_i = I_{[T_i \leq C_i]}$ is the status indicator, which shows whether subject $i$ is censored ($\delta_i = 0$) or not ($\delta_i = 0$). The corresponding hazard function of lifetime is $\lambda_F$ and cumulative hazard function is $\Lambda_F$. 
+
+Instead of the strong assumption of independent between $Y_i$ and $C_i$, we proposed that $T \perp \!\!\! \perp C$ at a small neighborhood, where $T = C$. That is, we have 
+\begin{equation}
+\lim_{dt \rightarrow 0} P(C > t, T \geq t + dt) = P(C > t) P(T \geq t + dt)
+\end{equation}
+As well as
+\begin{equation}
+P(C > t, T \geq t)  = P(C > t) P(T \geq t)
+\end{equation}
+
+With this  assumption, we can show: 
+\begin{equation}
+\begin{aligned}
+P(C > t| T = t) = & \lim_{dt \rightarrow 0} P(C > t| t \leq T  < t + dt) \\
+= & \lim_{dt \rightarrow 0} \frac{P(C > t , t \leq T  < t + dt)}{P(t \leq T  < t + dt)} \\
+= & \lim_{dt \rightarrow 0} \frac{P(C > t, T \geq t) - P(C > t, T > t + dt)}{P(T \geq t) - P(T > t +dt)} \\
+=& \lim_{dt \rightarrow 0} \frac{P(C > t) \big(  P(T \geq t) - P( T > t + dt)\big)}{P(T \geq t) - P(T > t +dt)} \\
+= & P(C > t)
+\end{aligned}
+\end{equation}
+
+And since indpendent, 
+$$P(C > t | T > t) = \frac{P(C > t, T > t)}{P(T > t)} = \frac{P(C > t)P(T > t)}{P(T > t)} = P(C > t)$$
+Therefore, 
+\begin{equation}
+P(C > t | T > t) = P(C > t| T = t) 
+\end{equation}
+Given (Eq 1), we could derive that 
+$$\begin{aligned}
+P(\delta = 1|X = t) = \frac{P(C > t, T = t)}{P(X = t)} = & \frac{P(T = t)}{P(X = t)} \frac{P(C > t, T > t)}{P(T > t)} 
+= \frac{f(t)S_x(t)}{h(t)S(t)} = \frac{\lambda_F(t)}{\lambda_H(t)}
+\end{aligned}$$
+where $\lambda_H(t)$ is the hazard function corresponding to $Z$, which is known as crude hazard rate as well. 
+
+We may define $m(t) =P(\delta = 1|X = t) = E(\delta|X = t)$. Then 
+\begin{equation}
+m(t) = \frac{\lambda_F(t)}{\lambda_H(t)}
+\end{equation}
+which is the same parameter defined in Dikta's papers. Therefore, the independence between $Y$ and $C$ is not the necessory condition for equation (2).
+
+
+# The "if and only if" relationship between $\rho(t)$ and diagonial independence
+
+Recall the definition of $\rho(t)$ in Slud's paper: 
+\begin{equation}
+\rho(t) = \lim_{\delta \rightarrow 0} \frac{P(t<T < t + \delta| T > t, C \leq t)}{P(t<T < t + \delta| T > t, C > t)} 
+\end{equation}
+The $\rho(t) = 1$ is equivalent to the independnet condition. 
+
+*Proof*
+
+* If $\lim_{dt \rightarrow 0} P(C > t, T \geq t + dt) = P(C > t) P(T \geq t + dt)$
+
+Then 
+$$\begin{aligned}
+& \lim_{\delta \rightarrow 0} P(t<T < t + \delta| T > t, C \leq t) =   \lim_{\delta \rightarrow 0} \frac{P(t<T < t + \delta,  C \leq t)}{P(T > t, C \leq t)} \\
+= & \lim_{\delta \rightarrow 0} \frac{P(t<T < t + \delta) - P(t<T < t + \delta,  C > t)}{P(T > t) - P(T > t, C > t)} \\
+= & \lim_{\delta \rightarrow 0} \frac{P(T > t) - P(T > t + \delta) - P(T > t, C > t) + P(T > t + \delta, C > t)}{P(T > t) - P(T > t, C > t)} \\
+= & \lim_{\delta \rightarrow 0} \frac{P(T > t) - P(T > t + \delta) - P(T > t)P(C > t) + P(T > t + \delta)P(C > t)}{P(T > t) - P(T > t)P(C > t)} \\
+= & \lim_{\delta \rightarrow 0} \frac{(P(T > t) - P(T > t + \delta))(1 - P(C > t))}{P(T > t)(1 - P(C > t))} \\
+= & \lim_{\delta \rightarrow 0} \frac{P(T > t) - P(T > t + \delta)}{P (T > t)}
+\end{aligned}$$
+On the other hand 
+$$\begin{aligned}
+\lim_{\delta \rightarrow 0} P(t<T < t + \delta| T > t, C > t) = & \lim_{\delta \rightarrow 0} \frac{P(t<T < t + \delta,  C > t)}{P(T > t, C > t)} \\
+= & \lim_{\delta \rightarrow 0} \frac{P(T > t , C > t) - P(T > t + \delta, C > t)}{P(T > t) P(C > t)} \\
+= & \lim_{\delta \rightarrow 0} \frac{P(T > t) P(C > t) - P(T > t + \delta) P(C > t)}{P(T > t) P(C > t)} \\
+= & \lim_{\delta \rightarrow 0} \frac{P(T > t) - P(T > t + \delta)}{P (T > t)}
+\end{aligned}$$
+Therefore, under the condition $\lim_{dt \rightarrow 0} P(C > t, T \geq t + dt) = P(C > t) P(T \geq t + dt)$, 
+
+
+$$\lim_{\delta \rightarrow 0} P(t<T < t + \delta| T > t, C \leq t) =\lim_{\delta \rightarrow 0} \frac{P(T > t) - P(T > t + \delta)}{P (T > t)} = \lim_{\delta \rightarrow 0} P(t<T < t + \delta| T > t, C > t)$$
+$$\rightarrow \rho(t) = \lim_{\delta \rightarrow 0} \frac{P(t<T < t + \delta| T > t, C \leq t)}{P(t<T < t + \delta| T > t, C > t)} = 1$$
+
+* If $\rho(t) = \lim_{\delta \rightarrow 0} \frac{P(t<T < t + \delta| T > t, C \leq t)}{P(t<T < t + \delta| T > t, C > t)} = 1$
+
+$$\begin{aligned}
+& \lim_{\delta \rightarrow 0} \frac{P(t<T < t + \delta| T > t, C \leq t)}{P(t<T < t + \delta| T > t, C > t)} = 1 \\
+\rightarrow &  \lim_{\delta \rightarrow 0} \frac{P(P(t<T < t + \delta, C \leq t)}{P(T > t, C \leq t)} = \lim_{\delta \rightarrow 0} \frac{P(t<T < t + \delta, C > t)}{P(T > t,C > t)} \\
+\rightarrow \\
+& \lim_{\delta \rightarrow 0} \frac{P(t<T < t + \delta) - (P(T> t, C > t) - P(T > t + dt,C>t))}{P(T > t) - P(T > t, C > t)} = \\
+& \lim_{\delta \rightarrow 0} \frac{P(T > t,C > t) - P(T > t + \delta,C > t)}{P(T > t,C > t) }
+\end{aligned}$$
+That is,
+$$\begin{aligned}
+& P(T > t,C > t) \big[ P(t<T < t + \delta) - (P(T> t, C > t) + P(T > t + dt,C>t)) \big] \\
+& = \big[ P(T > t) - P(T > t, C > t) \big]\big[ P(T > t,C > t) - P(T > t + \delta,C > t)\big] \\
+& \rightarrow \\
+&  P(T > t,C > t)P(t<T < t + \delta) - P(T > t,C > t)^2 + P(T > t,C > t)P(T > t + dt,C>t) \\
+& = P(T > t)P(T > t,C > t) - P(T > t,C > t)^2 - \\
+& P(T > t) P(T > t + \delta,C > t) + P(T > t, C > t) P(T > t + \delta,C > t) \\
+& \rightarrow \\
+& P(T > t,C > t)P(t<T < t + \delta) = P(T > t,C > t)P(T > t) - P(T > t,C > t) P(T > t + \delta) \\
+& = P(T > t)P(T > t,C > t)  + P(T > t) P(T > t + \delta,C > t)
+\end{aligned}$$
+That is 
+$$P(T > t,C > t) P(T > t + \delta)  =  P(T > t) P(T > t + \delta,C > t)$$
+$$P(C > t | T > t) = P(C > t | T > t  + \delta)$$
+Therefore, if $\rho(t) = 1$, we should have that $T \perp \!\!\! \perp C$ at a small neighborhood, where $T = C$, which is $P(C > t | T > t) = P(C > t | T > t  + \delta)$. 
+
+
+# The relationship between $\rho(t)$ and $m(t)$
+
+$\rho(t) = \frac{f(t)/\psi(t) - 1}{S(t)/S_x(t) -1}$
+
+$$\begin{aligned}
+\psi(t) = & \int_t^{\infty} f(t,s) ds \\
+= & \int_t^{\infty} f(s|t) f(t) ds = f(t) P(C > t | T = t) \\
+= & f(t) \frac{P(C> t, T = t)}{P(T = t)}  \\
+= & m(t) \frac{P(X = t)}{P(T=t)}
+\end{aligned}$$
+Therefore,
+$$\rho(t) = \frac{f(t) / \big( m(t) \frac{P(X = t)}{P(T=t)}\big) -1}{S(t)/S_x(t) -1}$$
+
+(Question: is there a way to write it into simpler version or odds ratio version?)
+
+
+# Maximum likelihood 
+
+Under our new assumption, 
+$$m_{\theta}(t) = P(\delta = 1| Z = z ) =\lambda_F(t) / \lambda_H(t)$$
+And the $Z$, which is the observated time, has pdf $f_H(z) = \lambda_H(z) S_H(z)$. The likelihoood function can be written as: 
+$$L_{\theta} = \prod_{i = 1}^{n} m_{\theta} (z_i)^{\delta_i} (1 - m_{\theta}(z_i))^{1 - \delta_i}\lambda_H(z_i) S_H(z_i)$$
+where $f_{\theta}(\delta_i, z_i) = \big[ m_{\theta}(z_i) \lambda_H(z_i) S_H(z_i) \big]^{\delta_i }  \big[ (1 - m_{\theta}(z_i) )  \lambda_H(z_i) S_H(z_i) \big]^{1 - \delta_i }$
+And 
+$$l_{\theta}= \log(L_{\theta}) = \sum_{i = 1}^{n} \big[ \delta_i \log (m_{\theta} (z_i) \lambda_H(z_i) S_H(z_i)) + (1 - \delta_i) \log((1 - m_{\theta}(z_i))\lambda_H(z_i) S_H(z_i)) \big]$$
+
+
+
+We may show that the true $\theta_0^{*}$ is the one that maximize the likelihood function. 
+
+
+*Proof:*
+
+Suppose $\theta_0^{*}$ is the true vaue of $\theta$. Suppose $f_H^{*} (z)$ is the true density. We would like to prove that 
+$$l_{\theta_0^{*}} = {sup} l_{\theta}$$
+Which equivalent to 
+$$\begin{aligned}
+& \sum_{i = 1}^{n} \big[ \delta_i \log (m_{\theta_0^{*}} (z_i) f_H(z_i))+ (1 - \delta_i) \log((1 - m_{\theta_0^{*}}(z_i))f_H(z_i)) \big] \\
+& - \sum_{i = 1}^{n} \big[ \delta_i \log (m_{\theta} (z_i) f_H(z_i)) + (1 - \delta_i) \log((1 - m_{\theta}(z_i))f_H(z_i)) \big]  \geq 0 \\
+\rightarrow & \frac{1}{n} \sum_{i = 1}^{n} \delta_i \log \big( \frac{m_{\theta_0^{*}} (z_i) f_H(z_i)}{m_{\theta} (z_i) f_H(z_i)} \big) + \frac{1}{n }\sum_{i = 1}^{n} (1 - \delta_i )\log \big( \frac{(1 - m_{\theta_0^{*}} (z_i)) f_H(z_i)}{ ( 1 - m_{\theta} (z_i) )f_H(z_i)} \big) \geq 0
+\end{aligned}$$
+Based on Law of Large Number (LLN), 
+$$\frac{1}{n} \sum_{i = 1}^{n} \log \big( \frac{m_{\theta_0^{*}} (z_i) f_H^{*}(z_i)}{m_{\theta} (z_i) f_H(z_i)}) \rightarrow E(\log \big( \frac{m_{\theta_0^{*}} (z_i) f_H^{*}(z_i)}{m_{\theta} (z_i) f_H(z_i)}))$$
+Since 
+$$\begin{aligned}
+E(\log \big( \frac{m_{\theta_0^{*}} (z_i) f_H^{*}(z_i)}{m_{\theta} (z_i) f_H(z_i)})) = \int_0^{\infty} \log \big( \frac{m_{\theta_0^{*}} (z_i) f_H^{*}(z_i)}{m_{\theta} (z_i) f_H(z_i)})   [m_{\theta_0^{*}} (z_i) f_H^{*}(z_i)] dz_i
+\end{aligned}$$
+According to Kullback–Leibler divergence, 
+$$D_{KL} (F||G) = \int f \log(\frac{f}{g}) \geq 0$$
+Therefore, 
+$$E(\log \big( \frac{m_{\theta_0^{*}} (z_i) f_H^{*}(z_i)}{m_{\theta} (z_i) f_H(z_i)})) \geq 0$$
+Similiarly, 
+$$\frac{1}{n }\sum_{i = 1}^{n} (1 - \delta_i )\log \big( \frac{(1 - m_{\theta_0^{*}} (z_i)) f_H(z_i)}{ ( 1 - m_{\theta} (z_i) )f_H(z_i)} \big) \rightarrow  (1 - \delta_i ) E(\log \big( \frac{(1 - m_{\theta_0^{*}} (z_i)) f_H(z_i)}{ ( 1 - m_{\theta} (z_i) )f_H(z_i)} \big)) \geq 0$$
+Therefore, $l_{\theta_0^{*}} \geq  l_{\theta}$ for any other $\theta$ that is not the true $\theta_0^{*}$. 
+
+The true $\theta_0^{*}$ maximizes the likelihood function. 
+
+<!-- Therefore, we need to prove that $\log \frac{\prod_{i = 1}^{n} m_{\theta} (z_i)^{\delta_i} (1 - m_{\theta}(z_i))^{1 - \delta_i}\lambda_H(z_i) S_H(z_i)}{\prod_{i = 1}^{n} m_{\theta} (z_i)^{\delta_i} (1 - m_{\theta}(z_i))^{1 - \delta_i}\lambda_H(z_i) S_H(z_i)} \geq 0$ -->
+
+
+# Simulation 
+
+
+## Example 1 
+
+For a joint pdf function $f_{T1, T2}(t_1, t_2)$, if it equals to 
+$$f_{T1, T2}(x,y) = 16 (x - \frac{1}{2}) (y - \frac{1}{2}) (x - y) (x - y + 1) + 1$$
+\color{blue}
+
+Actually, the $f_{T1, T2}(x,y) = C_0 (x - \frac{1}{2}) (y - \frac{1}{2}) (x - y) (x - y + 1) + 1$, the $C_0$ can be any positive number to make it work
+
+\color{black}
+
+Then we have survival function $S_{T_1, T_2} = P(T_1 >t_1, T_2> t_2)$ as:
+$$\begin{aligned}
+S_{T_1, T_2} = & P(T_1 >t_1, T_2> t_2) =\int_{t_2}^{1} \int_{t_1}^{1}  f_{T_1, T_2}(x,y) dx dy \\
+ = & \int_{t_2}^{1} \int_{t_1}^{1}  f_{T_1, T_2}(x,y) dx dy \\
+ = & \int_{t_2}^{1} \int_{t_1}^{1} \big[ 16 (x - \frac{1}{2}) (y - \frac{1}{2}) (x - y) (x - y + 1) + 1 \big] dx dy \\
+ = &  \int_{t_2}^{1} \big \{ 4 (y - \frac{1}{2}) \big[x^4 - 2x^3 + (-2 y^2 + 2y + 1) x^2 + (2y^2 - 2y )x \big] + x\big \} |_{t_1}^1 dy \\
+ = & \int_{t_2}^{1} \big \{ (2 -4y) t_1^4 + (8y - 4) t_1 ^3 + (8 y^3 - 12 y^2 + 2) t_1^2  +(-8y^3 + 12 y ^2 - 4y - 1) t_1 + 1 \big \}dy \\
+ = & (t_1 - 1) y (2 t_1 y^3 - 4 t_1 y^2 +(-2 t_1^3 + 2 t_1 ^2 + 2 t_1)y + 2 t_1 ^ 3 - 2 t_1 ^2 - 1)  |_{t_2}^1 \\
+ = & (1 - t_1) (1 - t_2) (1 - 2 t_1 t_2 (t_2 - t_1) (t _ 1 + t_2 - 1))
+\end{aligned}$$
+The marginal function for the survival time and censoring time are all uniform distributions: 
+$$\begin{aligned} 
+f_{t_1} (x) = & \int_0^1 f_{t_1,t_2} (x,y) dy \\
+= & \big \{ y - 4 (x - \frac{1}{2}) (y^4 - 2y^3 + (-2 x^2 + 2x + 1) y^2 + (2x^2 - 2x) y)\big \} |_{0}^1 \\
+= 1
+\end{aligned}$$
+$$\begin{aligned} 
+f_{t_2} (y) = & \int_0^1 f_{t_1,t_2} (x,y) dx \\
+= & \big \{ 4 (y - \frac{1}{2}) \big[x^4 - 2x^3 + (-2 y^2 + 2y + 1) x^2 + (2y^2 - 2y )x \big] + x\big \} |_{0}^1 \\
+= 1
+\end{aligned}$$
+That is,
+$$f_{T_1}(t_1) = I_{[0,1]}(t_1), \text{ } f_{T_2}(t_2) = I_{[0,1]}(t_2)$$
+$$P(T_1 > t_1) = 1 - t_1, \text{ } P(T_2 > t_2) = 1 - t_2$$
+
+Therefore, the hazard rate function $\lambda_F$ for the survival time is: 
+
+* $S_F(t) = 1 - t$, $\Lambda_F(t) = - log(1-t)$, $\lambda_F(t) = \frac{1}{1-t}$
+
+The hazard rate function $\lambda_H$ for the observed time is: 
+
+* $S_H(t) = P(Z > t) = (1-t)^2$, $\Lambda_H(t) = - 2log(1-t), \lambda_H(t) = \frac{2}{1-t}$
+
+Then $$m(t) = \frac{\lambda_F(t)}{\lambda_H(t)} = 0.5$$
+
+Let's make a simulation to show it works. 
+
+#### Data generation
+
+$T_2$ is generated from the UNI(0,1). 
+
+Given $T_2$, $T_1$ is generated from $f_{T_1|T_2}(x|y) = \frac{f_{T_1, T_2}(x,y)}{f_{T_2}(y)} = f_{T_1, T_2}(x,y)$, since $f_{T_2}(y) = 1$. 
+
+Then $F_{T_1|T_2}(x|y) =  x((4y - 2)x^3 + (4 - 8y)x^2 +(-8y^3 + 12y^2 - 2)x + 8y^3 - 12y^2 + 4y + 1)$. Then sample $x$ by inverse probability sampling. 
+
+#### Results: 
+
+Censoring percentage: 52.5$\%$
+
+```{R include = FALSE}
+library(survival)
+
+# sample y 
+
+set.seed(123)
+
+Fx = function(x){return(x)}
+Sx = function(x){return(1-x)}
+
+Fx_y = function(x, y){
+  res = x * ((4*y-2) * x^3 + (4 - 8*y)*x^2 +(-8 * y^3 + 12*y^2 - 2) * x + 8 * y^3 - 12*y^2 + 4 * y + 1 )
+  return(res)
+}
+
+inverse_fxy = function(a,y){
+  res1 = c()
+  for(i in seq(0.00001, 1, 0.1)){
+    res1 = c(res1, Fx_y(i, y))
+  }
+  temp = seq(0.00001, 1, 0.1)[which(abs(res1 - a) == min(abs(res1 - a)))]
+ 
+  res2 = c()
+  for(i in seq((temp - 0.1), (temp+0.1), 0.01)){
+    res2 = c(res2, Fx_y(i, y))
+  }
+  temp = seq((temp - 0.1), (temp+0.1), 0.01)[which(abs(res2 - a) == min(abs(res2 - a)))]
+  
+  res3 = c()
+  for(i in seq((temp - 0.01), (temp+0.01), 0.001)){
+    res3 = c(res3, Fx_y(i, y))
+  }
+  temp = seq((temp - 0.01), (temp+0.01), 0.001)[which(abs(res3 - a) == min(abs(res3 - a)))]
+  
+  res4 = c()
+  for(i in seq((temp - 0.001), (temp+0.001), 0.0001)){
+    res4 = c(res4, Fx_y(i, y))
+  }
+  temp = seq((temp - 0.001), (temp+0.001), 0.0001)[which(abs(res4 - a) == min(abs(res4 - a)))]
+  return(temp)
+}
+
+# sample x
+y = runif(200, 0, 1)
+x = c()
+for(i in 1:length(y)){
+  xx = runif(1)
+  x = c(x, inverse_fxy(xx, y[i]))
+}
+
+status = ifelse(x <=y, 1, 0)
+z = ifelse(status == 1, x, y)
+
+data = data.frame(survival = x, censor = y, time = z, status = status)
+data = data[order(data$time),]
+
+```
+
+
+The KM estimator: 
+
+```{r fig2, fig.height = 4, fig.width = 4, fig.align = "center", echo = FALSE}
+
+fit_km = survfit(Surv(time, status) ~ 1, data = data)
+
+
+m = function(x){return(0.5)}
+
+lambda_H = function(t){
+  i = data$time - t == min(data$time - t)
+  h = (fit_km$n.event[i] + fit_km$n.censor[i])/fit_km$n.risk[i]
+  return(h)
+}
+
+Lambda_H = function(t){
+  i = which(abs(data$time - t) == min(abs(data$time - t)))
+  if(data$time[i] > t & i > 1){i = i -1}
+  HH = c()
+  for(ii in 1:i){
+    HH = c(HH, (fit_km$n.event[ii]+fit_km$n.censor[ii])/fit_km$n.risk[ii])
+  }
+  return(sum(HH))
+}
+
+Lambda_F = function(t){
+  return(m(t) * Lambda_H(t)) 
+}
+
+S_est = function(t){
+  return(exp(-Lambda_F(t)))
+}
+
+sest = c()
+for(i in 1:200){
+  sest = c(sest, S_est(data$time[i]))
+}
+
+
+plot(fit_km$time, fit_km$surv, col = 2, lty = 2, type = 'l', ylab = 'survival',
+     xlab = 'time', main='Comparison')
+lines(data$time, Sx(data$time), lwd = 2)
+lines(data$time, sest, col = 6, lty = 3, lwd = 2)
+legend('topright', legend = c('True S(t)', 'KM', 'm(t)'), lty = c(1,2,3), col = c(1,2,6), cex = 0.8)
+```
+
+
+Bias: 
+
+Kaplan Meier: 
+
+```{R}
+mean(abs(fit_km$surv - Sx(fit_km$time)))
+```
+
+Semi parametric model: $m(t) = \frac{\lambda_F(t)}{\lambda_H(t)}$ 
+```{R}
+mean(abs(sest - Sx(fit_km$time)))
+```
+
+If we do not know the $m(t)$ function, but know that it is a constant, i.e. $m(t; \theta) = \theta$,we many estimate the parameter by using the MLE: 
+$$L_n(\theta) = \prod_{i = 1}^n m (\theta)^{\delta_i} (1 - m(\theta))^{\delta_i}$$
+The estimated value is $m(t) = 0.525$. The bias is 
+
+```{R include = FALSE}
+
+m = function(x){return(0.525)}
+sest = c()
+for(i in 1:200){
+  sest = c(sest, S_est(data$time[i]))
+}
+```
+
+```{R echo = FALSE}
+mean(abs(sest - Sx(fit_km$time)))
+```
+
+
+
+## Example 2: Zhiliang Ying's paper 
+
+In Zhiliang Ying's paper, the Joint CDF is: 
+$$
+S(T \geq x, U \geq y) =
+\begin{cases}
+e^{-x}  e^{-(e^{y} - 1)\big( (x-y)^2 + 1\big)} & x \geq y \\
+e^{-x} e^{-(e^{y} - 1)} & x < y
+\end{cases}
+$$
+
+The corresponding marginal distributions: 
+
+* $P(T > x) = P(T > x, U > 0) = e^{-x}  e^{-(e^{0} - 1)\big( (x-0)^2 + 1\big)} = e^{-x}$
+
+* $F_T(x) = 1 - e^{-x}, f_T(x) = e^{-x}$
+
+* $P(U > x) = P(U > x, T > 0) = e^{-0} e^{-(e^{y} - 1)} =  e^{-(e^{y} - 1)}$
+
+* $F_U(x) = 1 - e^{-(e^{y} - 1)}, f_U(x) = e^{1 + y - e^y}$
+
+And the distribution of $X = T \wedge U$ is 
+$$P(X > x) = P(T > x, U > x) = e^{-x}e^{-(e^{x} - 1)}$$
+Therefore, 
+$$F_X(x) = 1 - e^{1-x-e^{x}}, f_X(x) = (1 + e^x)e^{1-x-e^{x}}$$
+The $m()$ function is: 
+$$m(t) = \frac{\lambda_F(t)}{\lambda_H(t)} = \frac{f_T(t)}{S_T(t)}/ \frac{f_X(t)}{S_X(t)} = \frac{e^{-t}}{e^{-t}} / \frac{(1 + e^t)e^{1-t-e^{t}}}{e^{1-t-e^{t}}} = \frac{1}{1 + e^t}$$
+
+
+<!-- $$P(T > x, U > x) = \exp(-x) \exp(-\exp(y) + 1)$$ -->
+
+**The censoring percentage**
+Since
+$$\begin{aligned}
+P(T < x < U) = & P(T < x, U > x) = P(U > x) - P(T > x, U > x) \\
+= & \exp({-(\exp({x}) - 1)}) - \exp(-x) \exp(-\exp(x) + 1) \\
+= & (1 - \exp(-x))\exp({-(\exp({x}) - 1)}) 
+\end{aligned}$$
+Then we can calculate $P(T < U)$ as: 
+$$\begin{aligned}
+P(T < U) = & \int_0^\infty P(T < x < U)  dx \\
+= & \int_0^\infty (1 - \exp(-x))\exp({-(\exp({x}) - 1)})  dx \\ 
+= & [-e(\Gamma(0,e^x)) - \Gamma(-1, e^x) ]|^{\infty}_0 \\
+\approx & 0.2
+\end{aligned}$$
+
+The censoring percentage is 1 - 0.2 = 0.8. 
+
+There was some bug in my simulation for this example. I haven't finished it yet. 
+
+

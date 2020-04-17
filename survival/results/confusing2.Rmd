@@ -1,0 +1,14 @@
+---
+output: pdf_document
+---
+
+
+For the term $\frac{P(t<T < t + dt, C \leq t)}{P(t<T < t + dt, C  > t)}$,
+$$\begin{aligned}
+\frac{P(t<T < t + dt, C \leq t)}{P(t<T < t + dt, C  > t)} = & \frac{P(t<T < t + dt)- P(t<T < t + dt, C  > t)}{P(t<T < t + dt, C  > t)} \\
+= & \frac{P(T > t) - P(T > t + dt) - P(T > t, C > t) + P(T > t + dt, C > t)}{P(T > t, C > t) - P(T > t + dt, C > t)} \\
+= & \frac{P(T > t) - P(T > t + dt) - P(T > t)P(C > t) + P(T > t + dt)P(C > t)}{P(T > t)P(C > t) - P(T > t + dt)P(C > t)} \\
+= & \frac{\big[ P(T > t) - P(T > t + dt) \big] \big[ 1 - P(C > t)\big]}{\big[ P(T > t) - P(T > t + dt) \big]  P(C > t)}
+\end{aligned}$$
+Therefore,when the conditions are true,
+$$\Rightarrow \rho(t) = \lim_{dt \rightarrow 0} \frac{P(t<T < t + dt| T > t, C \leq t)}{P(t<T < t + dt| T > t, C > t)} = \lim_{dt \rightarrow 0}\frac{\big[ P(T > t) - P(T > t + dt) \big] \big[ 1 - P(C > t)\big]}{\big[ P(T > t) - P(T > t + dt) \big]  P(C > t)}  \frac{P(C > t)}{1-P(C > t)} = 1$$

@@ -1,0 +1,638 @@
+---
+title: "Covariates example"
+date: 2019-12-17
+output: pdf_document
+---
+
+
+Suppose the survival time $T$ and the censoring time $C$ are independent given covariates. 
+$$S_T(t|x) = \exp(-(\beta^T x) t)$$
+where that, given the covariates, the survival time follows an exponential distribution. Also can be fitted by a cox model. For the censoring time, 
+$$S_c(t|x) = e^{-{(e^{(\beta^T x) t} - 1)}}$$
+However, this is not a cox ph model. 
+
+We can replace $\beta^T x$ with $\theta$, then 
+$$S_T(t|\theta) = \exp( - \theta t), S_c(t|\theta) = e^{-{(e^{\theta t} - 1)}}$$
+$$P(T > t, C > t | x) = P(T > t | x) P(C > t | x) = e^{-(\beta^T x) t} e^{-{(e^{(\beta^T x) t} - 1)}}$$
+The $m()$ function is: 
+$$m(t|x) = \frac{\lambda_F(t|x)}{\lambda_H(t|x)} = \frac{f_T(t|x)}{S_T(t|x)}/ \frac{f_Z(t|x)}{S_Z(t|x)} = \frac{\theta e^{- \theta t}}{e^{- \theta t}} / \frac{ \theta (1 + e^{\theta t})e^{-e^{\theta t} - \theta t + 1}}{e^{-e^{\theta t} - \theta t + 1}} = \frac{1}{1 + e^{\theta t}}$$
+$$\theta = \beta^T x$$
+Therefore, the $\beta$ can be estimated by fit logistic regression model with 
+$$logit(\delta) \sim (\beta^T x) t$$
+For the censoring percentage, it is not affected by the covariates, since the $P(T < C)$ does not contains $\theta$.
+$$\begin{aligned}
+P(T < C) = & \int_{0}^{\infty} \int_0^y f_{t,c}(x,y) dx dy \\
+= & \int_{0}^{\infty}  \int_0^y \theta^2 e^{-e^{ \theta y} +\theta y - \theta x + 1} dx dy \\
+= & \int_0^\infty \theta (e^{\theta y } -1)e^{1-e^{\theta y}} \\
+= & 1 - e\Gamma(0,1)\\
+\approx & 0.4 
+\end{aligned}$$
+For the true survival time $S_T(t)$ and $f_T(t)$,
+$$f_T(t) = \int_{-\infty}^{\infty} f_T(t|x)g(x)dx,$$
+ where $g(x)$ is the distribution of $\beta^Tx$. 
+
+
+### Simulation
+ 
+Suppose $\beta^Tx = \beta_0 + \beta_1 x_1 + \beta_2 x_2$, where $\beta_0 = 2, \beta_1 = 0.5, \beta_2= 0.5$. 
+$x_1 \sim N(1, 0.5^2), x_2 \sim N(2, 0.5^2)$. 
+
+Suppose $x_1$ and $x_2$ are independent, therefore, $\beta^Tx  \sim N(3.5, 0.5^3)$, i.e. $g(x)$ is known. 
+
+Sample size = 500, 500 iterations were conducted. 
+
+For data generation, 
+
+* Simulate $x_1 \sim N(1, 0.5^2), x_2 \sim N(2, 0.5^2)$ and then calculate the $\theta = \beta_0 + \beta_1 x_1 + \beta_2 x_2$.
+
+* For each $theta$ above, simulate one survival time from $Exp(\theta)$, simulate one cenorsing time from extreme distribution, with cdf $S_c(t|\theta) = e^{-{(e^{\theta t} - 1)}}$
+
+* Combine the survival time and censoring time, calculate the observed time $Z = T \wedge C$ and status indicator $\delta = I(T < C)$
+
+* Save  the dataset with $T, C, Z, x_1, x_2, \theta$
+
+The $\hat S(t)$ was estimated by Kaplan Meier, $exp( -m(t) \lambda_H(t))$, Dikta method 1, Dikta method 2. 
+
+The true $S(t)$
+$$\begin{aligned}
+f_T(t) =& \int_{-\infty}^{\infty} f_T(t|x)g(x)dx \\
+=&\int_{-\infty}^{\infty} \beta^T x \exp(-\beta^T x t) \frac{1}{\sqrt{2\pi \sigma} } \exp(-\frac{1}{2\sigma^2} (x - \mu)^2) dx
+\end{aligned}$$
+However, it is hard to calculate unless $\mu = 0$. But if $\mu = 0$, the $\beta^T  x$ can be easily less then 0, which then cannot simulate $\exp(-\beta^T x)$. 
+
+Howver, the $\exp(-\bar{\beta^T x})$ looks similar with the true $S(t)$
+
+
+<!-- ```{R include = FALSE} -->
+<!-- library(knitr) -->
+<!-- setwd('/Users/yaolanqiu/Desktop/NYU/Research/Survival/3. example3/4. add covariates 2019-12-17') -->
+<!-- load('cov_ind_1216_1.RData') -->
+<!-- temp = cbind(apply(result$s0,2,mean), apply(result$s1,2,mean), -->
+<!-- apply(result$s2,2,mean), apply(result$s3,2,mean)) -->
+<!-- temp2 = cbind(apply(result$s_lg0,2,mean), apply(result$s_lg1,2,mean), -->
+<!-- apply(result$s_lg2,2,mean), apply(result$s_lg3,2,mean)) -->
+
+<!-- temp = cbind(temp, temp2) -->
+<!-- temp = round(temp,3) -->
+<!-- ``` -->
+
+<!-- ```{R echo = FALSE} -->
+<!-- colnames(temp) =  c('KM','Exp m()','Dikta 1', 'Dikta 2', 'KM','Exp m()','Dikta 1', 'Dikta 2') -->
+<!-- kable(temp) -->
+<!-- ``` -->
+
+```{R include = FALSE}
+library(knitr)
+library(kableExtra)
+
+
+setwd('/Users/yaolanqiu/Desktop/NYU/Research/Survival/3. example3/4. add covariates 2019-12-17')
+load('cov_ind_1216_1.RData')
+
+add_table_name = function(data){
+  data = data.frame(data)
+  data = round(data,5)
+  nn = dim(data)[1]
+  nn = round(nn/5)
+  data = cbind(rep(c('t0.1', 't0.25', 't0.5', 't0.75', 't0.9'), nn), data)
+  colnames(data) = c('Quantile','KM','Exp m()','Dikta 1', 'Dikta 2')
+  rownames(data) = NULL
+  return(data)
+}
+
+M_diff_m = c(); M_diff_sd = c()
+The_est_the1 = c();The_est_the0 = c();
+S_est_diff = c(); S_est_diff_lg = c()
+S_est_sd = c(); S_est_sd_lg = c()
+mse1 = c(); mse_lg = c()
+
+  
+  # estimate of m
+  temp_m_diff = result$m_diff
+  M_diff_m = c(M_diff_m, mean(temp_m_diff))
+  M_diff_sd = c(M_diff_sd, sd(temp_m_diff))
+  #hist(temp_m_diff, breaks = 100)
+  
+  # estimate of theta
+  theta1 = -result$b0_est
+  theta2 = -result$b1_est
+  The_est_the0 = c(The_est_the0, mean(theta1))
+  The_est_the1 = c(The_est_the1, mean(theta2))
+  
+  # est of true S and 
+  true_quant = c(0.9, 0.75, 0.5, 0.25, 0.1)
+  #true_quant = 0
+  #true_quant = apply(result$s00,2,mean)
+  # km
+  temp = cbind(
+    apply(abs(result$s0 - matrix(true_quant, 
+                                 dim(result$s0)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE), 
+    # 1
+    apply(abs(result$s1 - matrix(true_quant, 
+                                 dim(result$s1)[1], 5, byrow =  TRUE)),2,
+          mean, na.rm=TRUE), 
+    # 2 
+    apply(abs(result$s2 - matrix(true_quant, 
+                                 dim(result$s2)[1], 5, byrow =  TRUE)),2,
+          mean, na.rm=TRUE),
+    # 3
+    apply(abs(result$s3 - matrix(true_quant, 
+                                 dim(result$s3)[1], 5, byrow =  TRUE)),2,
+          mean, na.rm=TRUE))
+  
+  
+  S_est_diff = rbind(S_est_diff, temp)
+  
+  true_quant = c(0.9, 0.75, 0.5, 0.25, 0.1)
+  #true_quant = apply(result$s00,2,mean)
+  
+  temp = cbind(
+    apply(abs(result$s0 - matrix(true_quant, 
+                                 dim(result$s0)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE), 
+    # 1
+    apply(abs(result$s1 - matrix(true_quant, 
+                                 dim(result$s1)[1], 5, byrow =  TRUE))^2,2,
+          mean, na.rm=TRUE), 
+    # 2 
+    apply(abs(result$s2 - matrix(true_quant, 
+                                 dim(result$s2)[1], 5, byrow =  TRUE))^2,2,
+          mean, na.rm=TRUE),
+    # 3
+    apply(abs(result$s3 - matrix(true_quant, 
+                                 dim(result$s3)[1], 5, byrow =  TRUE))^2,2,
+          mean, na.rm=TRUE))
+  
+  mse1 = rbind(mse1, temp)
+  
+  
+  ## estimated
+  # km 
+  temp = cbind(
+    apply(abs(result$s_lg0 - matrix(true_quant, dim(result$s_lg0)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE), 
+    # 1
+    apply(abs(result$s_lg1 - matrix(true_quant, dim(result$s_lg1)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE), 
+    # 2 
+    apply(abs(result$s_lg2 - matrix(true_quant, dim(result$s_lg2)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE), 
+    # 3
+    apply(abs(result$s_lg3 - matrix(true_quant, dim(result$s_lg3)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE) )
+  
+  S_est_diff_lg = rbind( S_est_diff_lg, temp)
+  
+  temp = cbind(
+    apply(abs(result$s_lg0 - matrix(true_quant, dim(result$s_lg0)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE), 
+    # 1
+    apply(abs(result$s_lg1 - matrix(true_quant, dim(result$s_lg1)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE), 
+    # 2 
+    apply(abs(result$s_lg2 - matrix(true_quant, dim(result$s_lg2)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE), 
+    # 3
+    apply(abs(result$s_lg3 - matrix(true_quant, dim(result$s_lg3)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE) )
+  
+  mse_lg = rbind(mse_lg, temp)
+  
+  ## variance 
+  
+  temp = cbind(apply(result$s0, 2, sd, na.rm=TRUE),
+               apply(result$s1, 2, sd, na.rm=TRUE),
+               apply(result$s2, 2, sd, na.rm=TRUE),
+               apply(result$s3, 2, sd, na.rm=TRUE))
+  
+  S_est_sd = rbind(S_est_sd, temp)
+  
+  ## variance 
+  temp = cbind( apply(result$s_lg0, 2, sd, na.rm=TRUE),
+                apply(result$s_lg1, 2, sd, na.rm=TRUE),
+                apply(result$s_lg2, 2, sd, na.rm=TRUE),
+                apply(result$s_lg3, 2, sd, na.rm=TRUE))
+  
+  S_est_sd_lg = rbind(S_est_sd_lg, temp)
+```
+
+##### Results 
+
+The mean value of the estimations of the quantiles of the KM, exponential m(), Dikta method 1 and Dikta method 2 were calculated. 
+
+The cells in the table are the mean value of the estimations over 500 iterations minus the true quantiles value i.e (0.9, 0.75, 0.5, 0.25, 0.1)
+
+```{R echo =FALSE}
+# S_est_diff = c(); S_est_diff_lg = c()
+# S_est_sd = c(); S_est_sd_lg = c()
+colnames(S_est_diff_lg) = c('KM','Exp m()','Dikta 1', 'Dikta 2')
+x = cbind(add_table_name(S_est_diff), round(S_est_diff_lg,5))
+kable(x, "latex", longtable = T, align="c", 
+      caption = 'Mean absolute difference between estimated  and true S()',
+      booktabs=TRUE, escape = F)  %>%
+  add_header_above(header = c(" " = 1,
+                              "With true m()" = 4,
+                              "With estimated m()" = 4))
+```
+
+
+To make the table easy to look at, I used the column 2,3,4,5 to divide the column 1, column 7,8,9,10 to divide column 6. 
+
+The values that are less than 1 are showing that the methods have less bias than the KM. 
+
+```{R echo =FALSE}
+# S_est_diff = c(); S_est_diff_lg = c()
+# S_est_sd = c(); S_est_sd_lg = c()
+colnames(S_est_diff_lg) = c('KM','Exp m()','Dikta 1', 'Dikta 2')
+x = cbind(add_table_name(S_est_diff/S_est_diff[,1]), round(S_est_diff_lg/S_est_diff_lg[,1],5))
+kable(x, "latex", longtable = T, align="c", 
+      caption = 'Mean absolute difference between estimated  and true S()',
+      booktabs=TRUE, escape = F)  %>% 
+  add_header_above(header = c(" " = 1,
+                              "With true m()" = 4,
+                              "With estimated m()" = 4))
+```
+
+The standard deviation of the estimations of each quantiles are reported in the following table. 
+
+```{R echo =FALSE}
+# S_est_diff = c(); S_est_diff_lg = c()
+# S_est_sd = c(); S_est_sd_lg = c()
+colnames(S_est_sd_lg) = c('KM','Exp m()','Dikta 1', 'Dikta 2')
+x = cbind(add_table_name(S_est_sd), round(S_est_sd_lg,5))
+kable(x, "latex", longtable = T, align="c", 
+      caption = 'Standard deviations of the estimated S()',
+      booktabs=TRUE, escape = F)  %>% 
+  add_header_above(header = c(" " = 1,
+                              "With true m()" = 4,
+                              "With estimated m()" = 4))
+```
+
+To make the table easy to look at, I used the column 2,3,4,5 to divide the column 1, column 7,8,9,10 to divide column 6. 
+
+The values that are less than 1 are showing that the methods have less standard deviation than the KM. 
+
+
+```{R echo =FALSE}
+# S_est_diff = c(); S_est_diff_lg = c()
+# S_est_sd = c(); S_est_sd_lg = c()
+colnames(S_est_sd_lg) = c('KM','Exp m()','Dikta 1', 'Dikta 2')
+x = cbind(add_table_name(S_est_sd/S_est_sd[,1]), round(S_est_sd_lg/S_est_sd_lg[,1],5))
+kable(x, "latex", longtable = T, align="c", 
+      caption = 'Standard deviations of the estimated S()',
+      booktabs=TRUE, escape = F)  %>% 
+  add_header_above(header = c(" " = 1,
+                              "With true m()" = 4,
+                              "With estimated m()" = 4))
+```
+
+The MSE of each estimation
+
+```{R echo =FALSE}
+# S_est_diff = c(); S_est_diff_lg = c()
+# S_est_sd = c(); S_est_sd_lg = c()
+colnames(mse_lg) = c('KM','Exp m()','Dikta 1', 'Dikta 2')
+x = cbind(add_table_name(mse1), round(mse_lg,5))
+kable(x, "latex", longtable = T, align="c", 
+      caption = 'MSE',
+      booktabs=TRUE, escape = F)  %>% 
+  add_header_above(header = c(" " = 1,
+                              "With true m()" = 4,
+                              "With estimated m()" = 4))
+```
+
+
+To make the table easy to look at, I used the column 2,3,4,5 to divide the column 1, column 7,8,9,10 to divide column 6. 
+
+The values that are less than 1 are showing that the methods have less MSE than the KM. 
+
+```{R echo =FALSE}
+# S_est_diff = c(); S_est_diff_lg = c()
+# S_est_sd = c(); S_est_sd_lg = c()
+colnames(mse_lg) = c('KM','Exp m()','Dikta 1', 'Dikta 2')
+x = cbind(add_table_name(mse1/mse1[,1]), round(mse_lg/mse_lg[,1],5))
+kable(x, "latex", longtable = T, align="c", 
+      caption = 'MSE',
+      booktabs=TRUE, escape = F)  %>% 
+  add_header_above(header = c(" " = 1,
+                              "With true m()" = 4,
+                              "With estimated m()" = 4))
+```
+
+
+
+
+
+Estimate of $\beta$
+```{R echo = FALSE}
+temp = c(mean(-result$b0_est), mean(-result$b1_est), mean(-result$b2_est))
+temp = round(temp,3)
+temp = matrix(temp,1,3)
+colnames(temp) = c('True b0 = 2','True b1= 0.5', 'True b2 = 0.5')
+kable(temp, "latex", longtable = T, align="c", 
+      caption = 'MSE',
+      booktabs=TRUE, escape = F)
+```
+
+
+Estimation of $m()$
+```{R}
+mean(result$m_diff)
+```
+
+### Discrete setting
+
+
+Since the pdf of the $S_T(t)$ is not easy to calculate, in previous results with continuous $\beta^T x$ distribution. Let's then make it simple. 
+
+Suppose $\beta^T x = b_0 + b_1 x$, where $b_0 = 1, b_1 = 0.3$, $x \sim$ discrete distribution: 
+```{R echo = FALSE}
+temp = rbind(1:10, 1:10 * 0.3 + 1, 0.1)
+colnames(temp) = NULL
+rownames(temp ) = c('x','beta x','probability')
+kable(temp, "latex", longtable = T, align="c", 
+      caption = 'MSE',
+      booktabs=TRUE, escape = F)
+```
+
+Then the marginal survival time $f_T(t)$ is, 
+$$\begin{aligned}
+f_T(t) = & \sum_{x = 1}^{10} f_T(t | x) g(x)  \\
+= & \frac{1}{10} [1.3 \exp(-1.3 t) + 1.6 \exp(-1.6 t) + 1.9 \exp(-1.9 t) + ... +  4\exp(-4 t)]
+\end{aligned}$$
+$$\begin{aligned}
+F_T(t) = & \int_{-\infty}^{+\infty} f(t)dt  \\
+= & \frac{1}{10} [\exp(-1.3 t) + \exp(-1.6 t) + \exp(-1.9 t) + ... +  \exp(-4 t)]
+\end{aligned}$$
+The other settings are the same as the previous example. 
+
+<!-- ```{R include = FALSE} -->
+
+<!-- load('cov_ind_decrete_1216_1.RData') -->
+
+<!-- temp = cbind(apply(result$s0,2,mean), apply(result$s1,2,mean), -->
+<!-- apply(result$s2,2,mean), apply(result$s3,2,mean)) -->
+<!-- temp2 = cbind(apply(result$s_lg0,2,mean), apply(result$s_lg1,2,mean), -->
+<!-- apply(result$s_lg2,2,mean), apply(result$s_lg3,2,mean)) -->
+
+<!-- temp = cbind(temp, temp2) -->
+<!-- temp = round(temp,3) -->
+<!-- ``` -->
+
+<!-- ```{R echo = FALSE} -->
+<!-- colnames(temp) =  c('KM','Exp m()','Dikta 1', 'Dikta 2', 'KM','Exp m()','Dikta 1', 'Dikta 2') -->
+<!-- kable(temp) -->
+<!-- ``` -->
+
+<!-- Estimation of $m()$ -->
+<!-- ```{R} -->
+<!-- mean(result$m_diff) -->
+<!-- ``` -->
+
+<!-- Estimate of $\beta$ -->
+<!-- ```{R} -->
+<!-- mean(-result$b0_est) -->
+<!-- mean(-result$b1_est) -->
+<!-- ``` -->
+
+##### Results 
+
+```{R include = FALSE}
+
+setwd('/Users/yaolanqiu/Desktop/NYU/Research/Survival/3. example3/4. add covariates 2019-12-17')
+load('cov_ind_decrete_1216_2.RData')
+
+add_table_name = function(data){
+  data = data.frame(data)
+  data = round(data,5)
+  nn = dim(data)[1]
+  nn = round(nn/5)
+  data = cbind(rep(c('t0.1', 't0.25', 't0.5', 't0.75', 't0.9'), nn), data)
+  colnames(data) = c('Quantile','KM','Exp m()','Dikta 1', 'Dikta 2')
+  rownames(data) = NULL
+  return(data)
+}
+
+M_diff_m = c(); M_diff_sd = c()
+The_est_the1 = c();The_est_the0 = c();
+S_est_diff = c(); S_est_diff_lg = c()
+S_est_sd = c(); S_est_sd_lg = c()
+mse1 = c(); mse_lg = c()
+
+
+  
+  # estimate of m
+  temp_m_diff = result$m_diff
+  M_diff_m = c(M_diff_m, mean(temp_m_diff))
+  M_diff_sd = c(M_diff_sd, sd(temp_m_diff))
+  #hist(temp_m_diff, breaks = 100)
+  
+  # estimate of theta
+  theta1 = -result$b0_est
+  theta2 = -result$b1_est
+  The_est_the0 = c(The_est_the0, mean(theta1))
+  The_est_the1 = c(The_est_the1, mean(theta2))
+  
+  # est of true S and 
+  true_quant = c(0.9, 0.75, 0.5, 0.25, 0.1)
+  #true_quant = 0
+  true_quant = apply(result$s00,2,mean)
+  # km
+  temp = cbind(
+    apply(abs(result$s0 - matrix(true_quant, 
+                                 dim(result$s0)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE), 
+    # 1
+    apply(abs(result$s1 - matrix(true_quant, 
+                                 dim(result$s1)[1], 5, byrow =  TRUE)),2,
+          mean, na.rm=TRUE), 
+    # 2 
+    apply(abs(result$s2 - matrix(true_quant, 
+                                 dim(result$s2)[1], 5, byrow =  TRUE)),2,
+          mean, na.rm=TRUE),
+    # 3
+    apply(abs(result$s3 - matrix(true_quant, 
+                                 dim(result$s3)[1], 5, byrow =  TRUE)),2,
+          mean, na.rm=TRUE))
+  
+  
+  S_est_diff = rbind(S_est_diff, temp)
+  
+  true_quant = c(0.9, 0.75, 0.5, 0.25, 0.1)
+  true_quant = apply(result$s00,2,mean)
+  
+  temp = cbind(
+    apply(abs(result$s0 - matrix(true_quant, 
+                                 dim(result$s0)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE), 
+    # 1
+    apply(abs(result$s1 - matrix(true_quant, 
+                                 dim(result$s1)[1], 5, byrow =  TRUE))^2,2,
+          mean, na.rm=TRUE), 
+    # 2 
+    apply(abs(result$s2 - matrix(true_quant, 
+                                 dim(result$s2)[1], 5, byrow =  TRUE))^2,2,
+          mean, na.rm=TRUE),
+    # 3
+    apply(abs(result$s3 - matrix(true_quant, 
+                                 dim(result$s3)[1], 5, byrow =  TRUE))^2,2,
+          mean, na.rm=TRUE))
+  
+  mse1 = rbind(mse1, temp)
+  
+  
+  ## estimated
+  # km 
+  temp = cbind(
+    apply(abs(result$s_lg0 - matrix(true_quant, dim(result$s_lg0)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE), 
+    # 1
+    apply(abs(result$s_lg1 - matrix(true_quant, dim(result$s_lg1)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE), 
+    # 2 
+    apply(abs(result$s_lg2 - matrix(true_quant, dim(result$s_lg2)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE), 
+    # 3
+    apply(abs(result$s_lg3 - matrix(true_quant, dim(result$s_lg3)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE) )
+  
+  S_est_diff_lg = rbind( S_est_diff_lg, temp)
+  
+  temp = cbind(
+    apply(abs(result$s_lg0 - matrix(true_quant, dim(result$s_lg0)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE), 
+    # 1
+    apply(abs(result$s_lg1 - matrix(true_quant, dim(result$s_lg1)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE), 
+    # 2 
+    apply(abs(result$s_lg2 - matrix(true_quant, dim(result$s_lg2)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE), 
+    # 3
+    apply(abs(result$s_lg3 - matrix(true_quant, dim(result$s_lg3)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE) )
+  
+  mse_lg = rbind(mse_lg, temp)
+  
+  ## variance 
+  
+  temp = cbind(apply(result$s0, 2, sd, na.rm=TRUE),
+               apply(result$s1, 2, sd, na.rm=TRUE),
+               apply(result$s2, 2, sd, na.rm=TRUE),
+               apply(result$s3, 2, sd, na.rm=TRUE))
+  
+  S_est_sd = rbind(S_est_sd, temp)
+  
+  ## variance 
+  temp = cbind( apply(result$s_lg0, 2, sd, na.rm=TRUE),
+                apply(result$s_lg1, 2, sd, na.rm=TRUE),
+                apply(result$s_lg2, 2, sd, na.rm=TRUE),
+                apply(result$s_lg3, 2, sd, na.rm=TRUE))
+  
+  S_est_sd_lg = rbind(S_est_sd_lg, temp)
+
+  library(kableExtra)
+  library(knitr)
+
+```
+
+
+The mean value of the estimations of the quantiles of the KM, exponential m(), Dikta method 1 and Dikta method 2 were calculated. 
+
+The cells in the table are the mean value of the estimations over 500 iterations minus the true quantiles value i.e (0.9, 0.75, 0.5, 0.25, 0.1)
+
+```{R echo =FALSE}
+# S_est_diff = c(); S_est_diff_lg = c()
+# S_est_sd = c(); S_est_sd_lg = c()
+colnames(S_est_diff_lg) = c('KM','Exp m()','Dikta 1', 'Dikta 2')
+x = cbind(add_table_name(S_est_diff), round(S_est_diff_lg,5))
+kable(x, "latex", longtable = T, align="c", 
+      caption = 'Mean absolute difference between estimated  and true S()',
+      booktabs=TRUE, escape = F)  %>%
+  add_header_above(header = c(" " = 1,
+                              "With true m()" = 4,
+                              "With estimated m()" = 4))
+```
+
+
+To make the table easy to look at, I used the column 2,3,4,5 to divide the column 1, column 7,8,9,10 to divide column 6. 
+
+The values that are less than 1 are showing that the methods have less bias than the KM. 
+
+```{R echo =FALSE}
+# S_est_diff = c(); S_est_diff_lg = c()
+# S_est_sd = c(); S_est_sd_lg = c()
+colnames(S_est_diff_lg) = c('KM','Exp m()','Dikta 1', 'Dikta 2')
+x = cbind(add_table_name(S_est_diff/S_est_diff[,1]), round(S_est_diff_lg/S_est_diff_lg[,1],5))
+kable(x, "latex", longtable = T, align="c", 
+      caption = 'Mean absolute difference between estimated  and true S()',
+      booktabs=TRUE, escape = F)  %>% 
+  add_header_above(header = c(" " = 1,
+                              "With true m()" = 4,
+                              "With estimated m()" = 4))
+```
+
+The standard deviation of the estimations of each quantiles are reported in the following table. 
+
+```{R echo =FALSE}
+# S_est_diff = c(); S_est_diff_lg = c()
+# S_est_sd = c(); S_est_sd_lg = c()
+colnames(S_est_sd_lg) = c('KM','Exp m()','Dikta 1', 'Dikta 2')
+x = cbind(add_table_name(S_est_sd), round(S_est_sd_lg,5))
+kable(x, "latex", longtable = T, align="c", 
+      caption = 'Standard deviations of the estimated S()',
+      booktabs=TRUE, escape = F)  %>% 
+  add_header_above(header = c(" " = 1,
+                              "With true m()" = 4,
+                              "With estimated m()" = 4))
+```
+
+To make the table easy to look at, I used the column 2,3,4,5 to divide the column 1, column 7,8,9,10 to divide column 6. 
+
+The values that are less than 1 are showing that the methods have less standard deviation than the KM. 
+
+
+```{R echo =FALSE}
+# S_est_diff = c(); S_est_diff_lg = c()
+# S_est_sd = c(); S_est_sd_lg = c()
+colnames(S_est_sd_lg) = c('KM','Exp m()','Dikta 1', 'Dikta 2')
+x = cbind(add_table_name(S_est_sd/S_est_sd[,1]), round(S_est_sd_lg/S_est_sd_lg[,1],5))
+kable(x, "latex", longtable = T, align="c", 
+      caption = 'Standard deviations of the estimated S()',
+      booktabs=TRUE, escape = F)  %>% 
+  add_header_above(header = c(" " = 1,
+                              "With true m()" = 4,
+                              "With estimated m()" = 4))
+```
+
+The MSE of each estimation
+
+```{R echo =FALSE}
+# S_est_diff = c(); S_est_diff_lg = c()
+# S_est_sd = c(); S_est_sd_lg = c()
+colnames(mse_lg) = c('KM','Exp m()','Dikta 1', 'Dikta 2')
+x = cbind(add_table_name(mse1), round(mse_lg,5))
+kable(x, "latex", longtable = T, align="c", 
+      caption = 'MSE',
+      booktabs=TRUE, escape = F)  %>% 
+  add_header_above(header = c(" " = 1,
+                              "With true m()" = 4,
+                              "With estimated m()" = 4))
+```
+
+
+To make the table easy to look at, I used the column 2,3,4,5 to divide the column 1, column 7,8,9,10 to divide column 6. 
+
+The values that are less than 1 are showing that the methods have less MSE than the KM. 
+
+```{R echo =FALSE}
+# S_est_diff = c(); S_est_diff_lg = c()
+# S_est_sd = c(); S_est_sd_lg = c()
+colnames(mse_lg) = c('KM','Exp m()','Dikta 1', 'Dikta 2')
+x = cbind(add_table_name(mse1/mse1[,1]), round(mse_lg/mse_lg[,1],5))
+kable(x, "latex", longtable = T, align="c", 
+      caption = 'MSE',
+      booktabs=TRUE, escape = F)  %>% 
+  add_header_above(header = c(" " = 1,
+                              "With true m()" = 4,
+                              "With estimated m()" = 4))
+```
+
+
+
+Estimate of $\beta$
+```{R}
+temp = c(mean(-result$b0_est), mean(-result$b1_est))
+temp = round(temp,2)
+temp = matrix(temp,1,2)
+colnames(temp) = c('True b0 = 1','True b1= 0.3')
+kable(temp, "latex", longtable = T, align="c", 
+      caption = 'MSE',
+      booktabs=TRUE, escape = F)
+```
+
+
+Estimation of $m()$
+```{R echo = FALSE}
+mean(result$m_diff)
+```

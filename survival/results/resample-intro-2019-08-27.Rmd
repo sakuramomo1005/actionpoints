@@ -1,0 +1,131 @@
+---
+title: "Correct the sampling method" 
+date: 2019-08-27
+output: pdf_document
+---
+
+# The distribtuion 
+
+In the piecewise example in Slud's paper, 
+
+
+To generate examples with the $\rho_i$ value we want, we may use the piecewise example in Slud's paper, whose joint distribution is: 
+$$ f(t,s)=\left\{
+\begin{aligned}
+& f_1(t) f_C(s) & & \text{ } (t \leq s)\\
+& f_C(s) \frac{S_1(s)}{S_2(s)} f_2(t) &  & \text{ } (t > s)
+\end{aligned}
+\right.$$
+
+Let 
+
+* $f_1(t) = exp(-t)$, $S_1(s) = exp(-x)$
+
+* $f_C(s) = exp(-s)$, $S_C(s) = exp(-s)$
+
+* $f_2(t) = \rho exp(-\rho t)$ , $S_2(s) = exp(- \rho t)$
+
+* $\rho(t) = \frac{h_2(t)}{h_1(t)} = \rho$, which is a constant. 
+
+Then 
+$$ f(t,s)=\left\{
+\begin{aligned}
+& exp(-t - s) & & \text{ } (t \leq s)\\
+& \rho exp( - \rho t + (\rho - 2)s)&  & \text{ } (t > s)
+\end{aligned}
+\right.$$
+And 
+$$f(t) = \frac{2 \rho - 2}{\rho - 2} exp(-2t) - \frac{\rho}{\rho - 2} exp(-\rho t)$$
+$$S(t) = \frac{ \rho - 1}{ \rho - 2}exp(-2t) - \frac{1}{\rho - 2} exp(-\rho t)$$
+$$\psi(t) = exp(-2t), \text{ } S_x(t) = exp(-2t)$$
+
+# The sampling method
+
+
+#### For the direction:$s \geq t$:
+
+$$f(s,t) = exp(-s -t), (s \geq t)$$. Let's make it as a pdf, then: 
+$$f(s,t) = 2exp(-s -t), (s \geq t)$$.
+The marginal pdf of $t$ is:
+
+$f_t(t) = \int f(s,t)ds = \int_t^{\infty} 2exp(-s-t) ds = 2exp(-t) [-exp(-s)|^{\infty}_{t}] = 2exp(-t) exp(-t) = 2 exp(-2t)$. 
+
+Therefore, the marginal of t comes from an exponential distribution with $\lambda = 2$. 
+
+We may generate $n$ $t$ from the EXP(2) distribution. Based on each $t$, we can generate $f(s|t)$. 
+
+* PDF: $f(s|t) = \frac{f(s,t)}{f_t(t)} = \frac{2exp(-s -t)}{2 exp(-2t)} = exp(-s + t),  (s \geq t)$
+
+* CDF: $F(s|t) = \int_t^s f(s|t) = \int_t^s exp(-s + t) = 1- exp(-s + t),  (s \geq t)$
+
+Follow the inverse probability sampling method, the $s$ is generated from 
+
+$s = t - ln(1 - x), x \sim UNI(0,1)$, for each $t$. 
+
+
+#### For the direction:$s < t$:
+
+$$f(s,t) = \rho exp( - \rho t + (\rho - 2)s) , (s < t)$$. Let's make it as a pdf, then: 
+$$f(s,t) = 2\rho exp( - \rho t + (\rho - 2)s) , (s < t)$$. 
+
+We may sample $s$ first. The marginal distribution for $s$ is  
+
+$f_s(s) = \int f(s,t) dt = \int_s^{\infty} 2\rho exp( - \rho t + (\rho - 2)s) dt = 2exp(\rho s-2s) exp(-\rho s) = 2 exp(-2s)$
+
+Therefore, the marginal of $s$ comes from an exponential distribution with $\lambda = 2$. 
+
+We may generate $n$ $s$ from the EXP(2) distribution. Based on each $s$, we can generate $f(t|s)$.
+
+
+* PDF: $f(t|s) = \frac{f(s,t)}{f_s(s)} = \frac{2\rho exp( - \rho t + (\rho - 2)s)}{2 exp(-2s)} = \rho exp(-\rho(t-s)),  (s < t)$
+
+* CDF: $F(t|s) = \int_t^s f(t|s) = \int_t^s \rho exp(-\rho(t-s)) = 1- exp(-\rho(t-s)),  (s < t)$
+
+Follow the inverse probability sampling method, the $s$ is generated from 
+
+$t = s - \frac{1}{\rho} ln(1 - x), x \sim UNI(0,1)$, for each $s$. 
+
+
+
+#### The summary table: 
+
+|               | $s \geq t$ | $s < t$  |
+|-------------------------:|---------------------:|---------------------:|
+| $f(t,s)$     | $2exp(-s -t)$ | $2\rho exp( - \rho t + (\rho - 2)s)$|
+| The first sample element |  $t$ | $s$  |
+| The marginal pdf of the first sample element |   $f_t(t) = 2 exp(-2t)$ | $f_s(s) = 2 exp(-2s)$ |
+| The sampling of first element | $t \sim EXP(2)$ | $s \sim EXP(2)$ |
+|The conditional pdf| $f(s/t) = exp(-(s-t))$ | $f(t/s) = \rho exp(-\rho(t-s))$  |    
+|The conditional CDF| $F(s/t) = 1 - exp(-(s-t))$ | $F(t/s) = 1 - exp(-\rho(t-s))$ |
+|The inverse function| $y = t - ln(1-x)$ | $y = s - \frac{1}{\rho} ln(1-x)$|
+| The second element's sampling | $x \sim UNI(0,1)$ , get $s = t - ln(1-x)$ | $x \sim UNI(0,1)$, get $t = s - \frac{1}{\rho} ln(1-x)$|
+
+
+The marginal plots: 
+
+```{R include = FALSE}
+library(png)
+library(grid)
+```
+
+```{r fig.width=4, fig.height=4,echo=FALSE,  fig.align = "center"}
+img <- readPNG("/Users/yaolanqiu/Desktop/NYU/Research/Survival/re-sampling 2019-08-23/1.png")
+grid.raster(img)
+```
+
+# Try MLE
+
+
+Suppose we know the true $f(.), S(.)$ functions
+
+What should the true MLE looks like? 
+
+| ML expression    |  True $\rho = 1$ | True $\rho = 0.1$ | True $\rho = 0.5$ | True $\rho = 3$ |  True $\rho = 10$ |    
+|:--------------------|-------------:|-------------:|-------------:|-------------:|-------------:|
+| $\prod_{i=1}^nf(x_i)^{\delta_i} S(x_i)^{1-\delta_i}$ |      1|     0.9|     0.8|     1|     1|
+| $\prod_{i=1}^nf(x_i)^{\delta_i}$                     |10|    10|    10|    10|    10|
+| $\prod_{i=1}^nf(x_i)$                                |10|    10|    10|    10|    10|
+| $\prod_{i=1}^nS(x_i)^{1-\delta_i}$                   | 0.1|     0.1|     0.1|     0.1|     0.1|
+| $\prod_{i=1}^nS(x_i)$                                | 0.1|     0.1|     0.1|     0.1|     0.1|
+
+

@@ -1,0 +1,216 @@
+---
+title: "S(t) estimated by the accurate ODE solution"
+date: 2019-08-14
+output: pdf_document
+header-includes:
+  - \usepackage{color}
+---
+
+# Estimation of $S(t)$
+
+```{R include = FALSE}
+library(png)
+library(grid)
+```
+
+In previous examples, when the $\rho(t)$ is small, the Slud's equation does not work very well even when the true $\rho(t)$ is known. This may be becasue they estimate the exponential function as $exp(x) \approx 1+x$, and when $\rho(t)$ is small, the term inside the exponential function becomes large and the estimate is not accurate. 
+Therefore, we may apply the $S(t)$ with the exponential function without linearization. 
+
+From Slud's paper, the $S(t)$ has the unique expression: 
+
+\begin{equation} 
+\begin{aligned} 
+S(t) =&  exp \big[ - \int_0^t \frac{\psi(s) \rho(s)}{Sx(s)}ds \big] \big( 1 + 
+ \int_0^t \psi(s) \{\rho(s) - 1\} exp \big[ \int_0^s \frac{\psi(u) \rho(u)}{Sx(u)} du \big] ds\big)
+\end{aligned} 
+\end{equation}
+
+And the term can be estimated as: 
+$$\begin{aligned}
+exp \big[ - \int_0^t \frac{\psi(s) \rho(s)}{Sx(s)} ds \big] = &  exp \big[ - \int_0^t \frac{ \rho(s)}{Sx(s)} d \Psi(s) \big] \\
+= &  exp \big[ - \int_0^t \frac{ \rho(s)}{Sx(s)} P(I = 1) d \frac{\Psi(s)}{P(I = 1)} \big] \\
+= &  exp \big[ - \int_0^t \frac{ \rho(s)}{Sx(s)} P(I = 1) d \Psi_c(s) \big] \\
+\approx & exp \big[ - \frac{1}{n_s}\sum_{ 0 \leq s \leq t} \frac{ \rho(s)}{Sx(s)} P(I = 1)\big]
+\end{aligned}$$
+where $\Psi(t) = P(X < t, I = 1) = P(X < t | I = 1) P (I = 1) = \Psi_c(t) P(I = 1)$
+
+Similiarly, $$exp \big[  \int_0^s \frac{\psi(u) \rho(u)}{Sx(u)} du \big] \approx  exp \big[ \frac{1}{n_u}\sum_{ 0 \leq u \leq s} \frac{ \rho(u)}{Sx(u)} P(I = 1)\big]$$. 
+
+Let $g(s) = exp \big[ \frac{1}{n_s}\sum_{ 0 \leq u \leq s} \frac{ \rho(u)}{Sx(u)} P(I = 1)\big]$
+
+Then equation (1) can be 
+
+\begin{equation} 
+\begin{aligned}
+S(t) = & g(s)^{-1} \times \big(1 + \int_0^t \{\rho(s) - 1\} g(s)  d \Psi(s) \big) \\
+= & g(s)^{-1} \times \big(1 + \int_0^t \{\rho(s) - 1\} g(s) P(I = 1) d \Psi_c(s) \big) \\
+= & g(s)^{-1} \times \big(1 + \sum_{0 \leq s \leq t} \{\rho(s) - 1\} g(s) P(I = 1)
+\end{aligned}
+\end{equation}
+
+\color{blue}
+A question here: 
+
+By using this method, the results do not get estimated very well. I think when we re-write $\int_0^t g(x)f(x) dx$ to $\int_0^t g(x) dF(x) =E(g(x)) \approx \frac{1}{n_x}\sum_{x \in (0,t)}g(x)$, the x need to come from the F(x) distribution. However, we only have the observed time and do not known its distribution. It may be not convenient to estimate it by using the expectation form. 
+
+\color{black}
+I think it may be more convenient to use the Riemann integral idea to estiamte it. 
+For example, 
+$$\int_0^t \frac{\psi(s) \rho(s)}{Sx(s)} ds \approx \frac{1}{n_{\Delta_h}}\sum_{i = 1}^{n_{\Delta_h}} \frac{\psi(\Delta_h i) \rho(\Delta_h i)}{Sx(\Delta_h i)}$$
+Just separate the $(0,t)$, say 100 equal pieces and estiamte. It can return accurate results. 
+
+
+# Result
+
+#### The mean absolute differences table
+
+|               |     0|   0.1|   0.3|   0.5|   0.7|   0.9|     1|    10|   100|
+|:--------------|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|
+|KM             | 0.245| 0.162| 0.081| 0.068| 0.040| 0.046| 0.033| 0.133| 0.154|
+|Slud           | 0.243| 0.110| 0.045| 0.040| 0.026| 0.046| 0.031| 0.019| 0.021|
+|Corrected Slud | 0.243| 0.109| 0.043| 0.036| 0.024| 0.044| 0.030| 0.019| 0.021|
+|No_linear      | 0.005| 0.005| 0.005| 0.005| 0.004| 0.004| 0.004| 0.018| 0.281|
+
+The new estiamtor has the smallest differences with the true value in most of the scenarios. However, when $\rho(t)$ becomes  very  large, e.g. 100, the new estimator doesn't work well.
+
+From the following plots, we may see that the line of the new estimator and the line of the true $S(t)$ are almost the same, except when $\rho = 100$
+
+#### The plots
+
+
+```{r fig.width=8, fig.height=4,echo=FALSE,  fig.align = "center"}
+setwd('/Users/yaolanqiu/Desktop/NYU/Research/Survival/new S(t)')
+img <- readPNG("new plot1.png")
+ grid.raster(img)
+```
+
+
+```{r fig.width=4, fig.height=4,echo=FALSE,  fig.align = "center"}
+setwd('/Users/yaolanqiu/Desktop/NYU/Research/Survival/new S(t)')
+img <- readPNG("new plot2.png")
+ grid.raster(img)
+```
+
+
+# Iteration
+
+I also tried the iteration method to estimate the $\rho$ and $S(t)$. I simulated 200 subjects. The results depend on how may subjects I used to calculate the mean value. 
+
+### Simulation setting 
+
+```{R include = FALSE}
+
+RHO = 10
+f1 = function(t){return(exp(-t))}
+f2 = function(t){return(RHO * exp(-t * RHO))}
+fc = function(s){return(-s)}
+S1 = function(t){return(exp(-t))}
+S2 = function(t){return(exp(-RHO*t))}
+
+f = function(t){
+  res = (2 * RHO - 2) / (RHO - 2) * exp(-2 * t) - RHO / (RHO - 2) * exp(- RHO * t)
+  return(res)
+}
+S = function(t){
+  res = 0.5 * (2 * RHO - 2) / (RHO - 2) * exp(-2 * t) - 1 / (RHO - 2) * exp(- RHO * t)
+  return(res)
+}
+psi = function(t){
+  return(exp(-2 * t))
+}
+Psi = function(t){return(0.5 * (1 - exp(-2 * t)))}
+Sx = function(t){
+  return(exp(-2 * t))
+}
+rou = function(t){
+  return((f(t)/psi(t) - 1)/(S(t)/Sx(t) - 1))
+}
+rho = function(t){
+  return((f(t)/psi(t) - 1)/(S(t)/Sx(t) - 1))
+}
+library(survival)
+```
+
+To make it easy to control, we would like to try Slud's piecewise example, which is: 
+$$ f(t,s)=\left\{
+\begin{aligned}
+& f_1(t) f_C(s) & & \text{ } (t \leq s)\\
+& f_C(s) \frac{S_1(s)}{S_2(s)} f_2(t) &  & \text{ } (t > s)
+\end{aligned}
+\right.$$
+
+We could generate constant $\rho(t)$. Let 
+
+* $f_1(t) = exp(-t)$, $S_1(s) = exp(-x)$
+
+* $f_C(s) = exp(-s)$, $S_C(s) = exp(-s)$
+
+* $f_2(t) = \rho exp(-\rho t)$ , $S_2(s) = exp(- \rho t)$
+
+* $\rho(t) = \frac{h_2(t)}{h_1(t)} = 10$,  which is a constant. 
+
+\color{black}
+Then 
+$$ f(t,s)=\left\{
+\begin{aligned}
+& exp(-t - s) & & \text{ } (t \leq s)\\
+& \rho exp( - 10 t + 8s)&  & \text{ } (t > s)
+\end{aligned}
+\right.$$
+And 
+$$f(t) = \frac{9}{4} exp(-2t) - \frac{5}{4} exp(-10t)$$
+$$S(t) = \frac{9}{8}exp(-2t) - \frac{1}{8} exp(-10 t)$$
+$$\psi(t) = exp(-2t), \text{ } S_x(t) = exp(-2t)$$
+
+#### Scenarios
+
+* Scenario 1:  I tried to calculate the mean by the 1st to 75% quantile subjects' values
+
+* Scenario 2: I tried to calculate the mean by the 20th to 180th subjects' values
+
+* Scenario 3:  I tried to calculate the mean by the 25% quantile to 75% quantile subjects' values
+
+Within those three scenarios, the first scenario's $\rho$ converges the fastest. It can reach to 10. However, after that, it has some turbulence. 
+
+The second and the thrid scenario move very slowly and it seems stop at a $\rho$ around 2. 
+
+However, if we give them a larger initial $\rho$, e.g. 4, it can still move towards to 10. (our initial $\rho$ right now is from the KM and is about 0.8).  
+
+#### The $\rho$ values for iterations
+
+Scenario 1 (89 times iteration): 
+
+```{R include = FALSE}
+setwd("/Users/yaolanqiu/Desktop/NYU/Research/Survival/new S(t)")
+load('result_1toi2.RData')
+```
+
+```{R echo = FALSE}
+round(result$rrr,3)
+```
+
+Scenario 2 (100 times iteration)
+
+```{R include = FALSE}
+load('result_20to180.RData')
+```
+
+```{R echo = FALSE}
+round(result$rrr,3)
+```
+
+Scenario 3 (50 times iteration)
+
+```{R include = FALSE}
+load('result_i1toi2.RData')
+```
+
+```{R echo = FALSE}
+round(result$rrr,3)
+```
+
+
+
+
+
+

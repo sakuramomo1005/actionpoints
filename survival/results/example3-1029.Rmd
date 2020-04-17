@@ -1,0 +1,410 @@
+---
+title: "Example of Independence (Slud piecewise)"
+date: 2019-10-22
+output: pdf_document
+fontsize: 12pt
+---
+
+
+
+### The pairwise example in Slud's paper
+
+The joint distribution is: 
+$$ f(t,s)=\left\{
+\begin{aligned}
+& f_1(t) f_C(s) & & \text{ } (t \leq s)\\
+& f_C(s) \frac{S_1(s)}{S_2(s)} f_2(t) &  & \text{ } (t > s)
+\end{aligned}
+\right.$$
+
+Let 
+
+* $f_1(t) = \exp(-t)$, $S_1(s) = \exp(-x)$
+
+* $f_C(s) = \exp(-s)$, $S_C(s) = \exp(-s)$
+
+* $f_2(t) = \rho \exp(-\rho t)$ , $S_2(s) = ]exp(- \rho t)$
+
+* $\rho(t) = \frac{h_2(t)}{h_1(t)} = \rho$, which is a constant. 
+
+Then 
+$$ f(t,s)=\left\{
+\begin{aligned}
+&  \exp(-t - s) & & \text{ } (t \leq s)\\
+& \rho \exp( - \rho t + (\rho - 2)s)&  & \text{ } (t > s)
+\end{aligned}
+\right.$$
+And 
+$$f(t) = \frac{2 \rho - 2}{\rho - 2} \exp(-2t) - \frac{\rho}{\rho - 2} \exp(-\rho t)$$
+$$S(t) = \frac{ \rho - 1}{ \rho - 2}exp(-2t) - \frac{1}{\rho - 2} \exp(-\rho t)$$
+$$\psi(t) = \exp(-2t)$$
+$$S_x(x) = P(X = T \wedge C > x) = P(T > x, C > x) = P(T > C > x) + P(C > T > x)$$
+$$\begin{aligned}
+S_x(x) = & P(X = T \wedge C > x) = P(T > x, C > x) = P(T > C > x) + P(C > T > x) \\
+= & \int_x^{\infty} \int_x ^t f(t,s) ds dt + \int_x^{\infty} \int_x ^s f(t,s) dt ds \\
+= & \int_x^{\infty} \int_x ^t  \rho \exp( - \rho t + (\rho - 2)s) ds dt + \int_x^{\infty} \int_x ^t   \exp(-t - s) dt ds \\
+= & \int_x^{\infty} \rho \big( \frac{\exp(-2t)}{\rho - 2} - \frac{\exp(\rho x - 2 x - \rho t)}{\rho - 2}\big) dt + \int_x^{\infty} \exp{-x-s} - \exp(-2s) ds \\
+= & \frac{\rho}{\rho - 2} \frac{\rho - 2}{2 \rho}\exp(-2x) +  \frac{\exp(-2x)}{2} \\
+= & \exp(-2x)
+\end{aligned}$$
+Therefore, 
+$$S_H(t) = S_x(t) = \exp(-2t), \lambda_H(t) = 2 \text{ ,(consistent to previous notation)})$$
+Then the $m()$ function is 
+$$m(t) = \frac{\lambda_F(t)}{\lambda_H(t)} = \frac{\frac{\frac{2 \rho - 2}{\rho - 2} \exp(-2t) - \frac{\rho}{\rho - 2} \exp(-\rho t)}{ \frac{ \rho - 1}{ \rho - 2} \exp(-2t) - \frac{1}{\rho - 2} \exp(-\rho t)}}{2} =  \frac{(2 \rho - 2)  \exp(-2t) - \rho \exp(-\rho t)}{2(\rho - 1)  \exp(-2t) - 2\exp(-\rho t)}$$
+And from the above formula, we can know that when $\rho = 1$, $m(t) = \frac{1}{2}$. 
+
+Let's an add parameter in the $m(t)$ function: 
+$$m_{\theta}(t) = \frac{\lambda_F(t)}{\lambda_H(t)} = \frac{(2 \theta - 2)  \exp(-2t) - \theta \exp(-\theta t)}{2(\theta - 1)  \exp(-2t) - 2\exp(-\theta t)}$$
+
+Then we could estimate the $\theta$ by calulating the MLE. Since it is hard to solve the $\hat \theta$, Newton Raphson method is applied. 
+
+```{R include = FALSE}
+library(survival)
+
+
+# rho = 1.1; # rho = 1.01; # rho = 0.01; # rho = 0.1; # rho = 10; # rho = 100
+RHO = 10  # function for data generation: 
+for(functionsanddatageneration in 1){
+  f1 = function(t){return(exp(-t))}
+  f2 = function(t){return(RHO * exp(-t * RHO))}
+  fc = function(s){return(-s)}
+  S1 = function(t){return(exp(-t))}
+  S2 = function(t){return(exp(-RHO*t))}
+  
+  f = function(t){
+    res = (2 * RHO - 2) / (RHO - 2) * exp(-2 * t) - RHO / (RHO - 2) * exp(- RHO * t)
+    return(res)
+  }
+  S = function(t){
+    res = 0.5 * (2 * RHO - 2) / (RHO - 2) * exp(-2 * t) - 1 / (RHO - 2) * exp(- RHO * t)
+    return(res)
+  }
+  
+  
+  lambda_truef = function(t){
+    return(f(t)/S(t))
+  }
+  
+  psi = function(t){
+    return(exp(-2 * t))
+  }
+  Psi = function(t){return(0.5 * (1 - exp(-2 * t)))}
+  Sx = function(t){
+    return(exp(-2 * t))
+  }
+  rou = function(t){
+    return((f(t)/psi(t) - 1)/(S(t)/Sx(t) - 1))
+  }
+  rho = function(t){
+    return((f(t)/psi(t) - 1)/(S(t)/Sx(t) - 1))
+  }
+  
+  # functions for likelihood estimation 
+  S0 = function(rho,t){
+    res = (rho - 1)/(rho - 2) * exp(-2 * t) - 1/(rho - 2) * exp(-rho * t)
+    return(res)
+  }
+  f0 = function(rho,t){
+    res = (2 * rho - 2)/(rho -2) * exp(-2 * t) - rho/(rho -2) * exp(-rho * t)
+    return(res)
+  }
+  
+  Sp0 = function(rho, t){
+    res = exp(-2 * t) * (-1 /(rho-2)^2) + exp(-rho * t) * (rho/(rho - 2) + 1/(rho -2)^2)
+    return(res)
+  }
+  fp0 = function(rho, t){
+    res = exp(-2 * t) * (-2 /(rho-2)^2) + exp(-rho * t) * (rho + 2 * rho/(rho - 2) + 2/(rho - 2)^2)
+    return(res)
+  }
+  
+  llh = function(rho, t, delta){
+    res = delta * fp0(rho,t)/f0(rho,t) + (1-delta) * Sp0(rho,t)/S0(rho,t)
+    return(res)
+  }
+  
+  # functions for estimation 
+  f_ts1 = function(t,s){
+    return(exp(-s-t))
+  }
+  # if t>s
+  f_ts2 = function(t,s){
+    return(RHO * exp((RHO - 2) * s - RHO * t))
+  }
+  
+  
+  
+  # when s >= t
+  # t ~ EXP(2)
+  # s|t ~ y = t - ln(1-x)
+  Fs_t = function(s){
+    return(1 - exp(-s + t))
+  }
+  # the PDF of s|t
+  fs_t = function(s,t){
+    return(exp(-s + t))
+  }
+  # the inverse density sampling 
+  st_generate = function(x,t){
+    return(t - log(1-x))
+  }
+  
+  # when s < t 
+  # s ~ EXP(2)
+  # t|s ~ y = s - 1/rho ln(1-x)
+  # the CDF of t|s
+  Ft_s = function(t, RHO){
+    return(1 - exp(-RHO * (t-s)))
+  }
+  # the PDF of t|s
+  ft_s = function(t,s, RHO){
+    return(RHO * exp(-RHO * (t -s)))
+  }
+  # the inverse density sampling 
+  ts_generate = function(x,s,RHO){
+    return(s - 1/RHO * log(1-x))
+  }
+  
+  f_s_marginal_1 = function(s){
+    return(2 * exp(-s) - 2 * exp(- 2 * s))
+  }
+  f_t_marginal_2 = function(t,RHO){
+    res = 2*RHO/(RHO - 2) * exp(-2 * t) -  2 *RHO/(RHO - 2) * exp(-RHO * t)
+    return(res)
+  }
+  
+  piecewise_data_generation = function(n,RHO){
+    
+    #### the sampling 
+    # when s >= t
+    # sample the t first
+    t = rexp(n,2)
+    
+    st_pair = c()
+    for(i in 1:length(t)){
+      temp_t = t[i]
+      x = runif(1,0,1)
+      yt = st_generate(x,temp_t)
+      st_pair = rbind(st_pair, c(temp_t, yt))
+    }
+    st_pair = as.data.frame(st_pair)
+    colnames(st_pair) = c('t','s')
+    
+    #### the sampling 
+    # when t>s
+    # sample the s first
+    
+    s = rexp(n,2)
+    ts_pair = c()
+    for(i in 1:length(s)){
+      temp_s = s[i]
+      x = runif(1,0,1)
+      yt = ts_generate(x,temp_s, RHO)
+      ts_pair = rbind(ts_pair, c(yt, temp_s))
+    }
+    ts_pair = as.data.frame(ts_pair)
+    colnames(ts_pair) = c('t','s')
+    
+    data = rbind(st_pair, ts_pair)
+    data$status = (data$t< data$s)
+    data$status = ifelse(data$status == TRUE, 1, 0)
+    data$time = ifelse(data$status == 1, data$t, data$s)
+    data = data[order(data$time),]; rownames(data) = NULL
+    return(list(data = data, st_pair = st_pair, ts_pair = ts_pair))
+  }
+  
+  check_marginal = function(st_pair, ts_pair, RHO){
+    par(mfrow = c(2,2))
+    # check whether we got the marignal correct, the marginals are correct. 
+    hist(st_pair$t, freq = FALSE, xlab = 'marignal of t', main = 'Margianl PDF of f(t), when s>=t')
+    lines(seq(0,3,0.1), 2 * exp(-2 * seq(0,3,0.1)), col =2)
+    
+    hist(st_pair$s, freq = FALSE, xlab = 'marignal of s', main = 'Margianl PDF of f(s), when s>=t')
+    lines(seq(0,7,0.1), f_s_marginal_1(seq(0,7,0.1)), col =2, type = 'l')
+    
+    # check whether we got the marignal correct, the marginals are correct. 
+    hist(ts_pair$s, freq = FALSE, xlab = 'marignal of s', main = 'Margianl PDF of f(s), when t>s')
+    lines(seq(0,3,0.1), 2 * exp(-2 * seq(0,3,0.1)), col =2)
+    
+    hist(ts_pair$t, freq = FALSE, xlab = 'marignal of t', main = 'Margianl PDF of f(t), when t>s')
+    lines(seq(0,20,0.1), f_t_marginal_2(seq(0,20,0.1),RHO), col =2, type = 'l')
+  }
+  
+  res = piecewise_data_generation(100, RHO)
+  data = res$data
+  length(unique(data$time))
+}
+
+## estimate use m(t)
+
+fit_km = survfit(Surv(time, status) ~ 1, data = data)
+
+lambda_trueh = function(t){
+  A1 = (2 * RHO -2) * exp(-2 * t) - RHO * exp(- RHO * t) 
+  A2 = ( RHO -1) * exp(-2 * t) - exp(- RHO * t)
+  res = A1/A2
+  return(res)
+}
+
+for(mfunction in 1){
+  m = function(x){
+    return(lambda_trueh(x)/2)
+  }
+  
+  lambda_H = function(t){
+    i = which(abs(data$time - t) == min(abs(data$time - t)))
+    if(data$time[i] > t & i > 1 ){i = i - 1}
+    h = (fit_km$n.event[i] + fit_km$n.censor[i])/ fit_km$n.risk[i]
+    return(h)
+  }
+  
+  lambda_F = function(t){
+    h = lambda_H(t) * m(t)
+    return(h)
+  }
+  
+  lambda_F_est = function(t){
+    h = lambda_H(t) * m_est(t,r)
+    return(h)
+  }
+  
+  lambda_H = function(t){
+    i = which(abs(data$time - t) == min(abs(data$time - t)))
+    if(data$time[i] > t & i > 1 ){i = i - 1}
+    h = (fit_km$n.event[i] + fit_km$n.censor[i])/ fit_km$n.risk[i]
+    return(h)
+  }
+  
+  Lambda_H = function(t){
+    i = which(abs(data$time - t) == min(abs(data$time - t)))[1]
+    if(data$time[i] > t & i > 1){i = i -1}
+    HH = c()
+    for(ii in 1:i){
+      HH = c(HH, (fit_km$n.event[ii]+fit_km$n.censor[ii])/fit_km$n.risk[ii])
+    }
+    return(sum(HH))
+  }
+  
+  Lambda_H2 = function(t){
+    i = which(abs(data$time - t) == min(abs(data$time - t)))[1]
+    if(data$time[i] > t & i > 1){i = i -1}
+    HH = c()
+    for(ii in 1:i){
+      HH = c(HH, lambda_H(data$time[ii]))
+    }
+    return(sum(HH))
+  }
+  
+  Lambda_F = function(t){
+    i = which(abs(data$time - t) == min(abs(data$time - t)))[1]
+    if(data$time[i] > t & i > 1){i = i -1}
+    HH = c()
+    for(ii in 1:i){
+      HH = c(HH, lambda_F(data$time[ii]))
+    }
+    return(sum(HH))
+  }
+  
+  Lambda_F_est = function(t){
+    i = which(abs(data$time - t) == min(abs(data$time - t)))[1]
+    if(data$time[i] > t & i > 1){i = i -1}
+    HH = c()
+    for(ii in 1:i){
+      HH = c(HH, lambda_F_est(data$time[ii]))
+    }
+    return(sum(HH))
+  }
+  
+  # Lambda_F = function(t){
+  #   i = which(abs(data$time - t) == min(abs(data$time - t)))[1]
+  #   if(data$time[i] > t & i > 1){i = i -1}
+  #   HH = c()
+  #   for(ii in 1:i){
+  #     HH = c(HH, (fit_km$n.event[ii]+fit_km$n.censor[ii])/fit_km$n.risk[ii])
+  #   }
+  #   return(sum(HH))
+  # }
+  
+  # Lambda_F = function(t){
+  #   return(m(t) * Lambda_H(t)) 
+  # }
+  
+  S_est = function(t){
+    return(exp(-Lambda_F(t)))
+  }
+  
+  S_est_est = function(t){
+    return(exp(-Lambda_F_est(t)))
+  }
+  
+  
+}
+
+```
+
+
+
+```{R include = FALSE}
+m_est = function(t, r){
+    A1 = (2 * r -2) * exp(-2 * t) - r * exp(- r * t) 
+    A2 = (r -1) * exp(-2 * t) - exp(- r * t)
+    res = A1/A2
+    res = res/2
+    return(res)
+}
+
+m_est(1,1)
+m_est(1,10)
+
+loglikes = function(r){
+  lksum = 0
+  if(r !=2){
+    for(i in 1:dim(data)[1]){
+      #temp = m_est(data$time[i],r)^(data$status[i]) * (1-m_est(data$time[i],r))^(1 - data$status[i])
+      temp = m_est(data$time[i],r)^(data$status[i]) * 
+        (1-m_est(data$time[i],r))^(1 - data$status[i]) * 
+        lambda_H(data$time[i]) * exp(-Lambda_H(data$time[i]))
+      temp = log(temp)
+      # print(temp)
+      lksum = lksum + temp
+    }
+    lksum = sum(lksum)
+  }
+ return(lksum)
+}
+
+r = 14.6
+
+sest = c()
+for(i in 1:length(data$time)){
+  sest = c(sest, S_est(fit_km$time[i]))
+}
+
+sest_est = c()
+for(i in 1:length(data$time)){
+  sest_est = c(sest_est, S_est_est(fit_km$time[i]))
+}
+
+```
+
+
+```{R echo = FALSE}
+plot(fit_km$time, S(fit_km$time), xlab = 'Time', ylab = 'S(t)', type = 'l') 
+lines(fit_km$time, fit_km$surv, col = 2)
+lines(fit_km$time, sest, col = 4)
+lines(fit_km$time, sest_est, col = 6)
+legend('topright', cex = 1.4, legend = c('True S(t)', 'KM', 'Use m(t)'), col = c(1,2,4), lty = 1)
+```
+
+
+
+```{R}
+mean(abs(fit_km$surv - S(fit_km$time)))
+mean(abs(sest - S(fit_km$time)))
+mean(abs(sest_est - S(fit_km$time)))
+```
+
+
+
+
+

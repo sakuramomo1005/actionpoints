@@ -1,0 +1,54 @@
+---
+title: "Calculate the Kendall's tau for Tsiatis Copula"
+date: 2019-09-010
+output: pdf_document
+header-includes:
+  - \usepackage{color}
+fontsize: 11pt
+geometry: tmargin=1.8cm,bmargin=1.8cm,lmargin=2.1cm,rmargin=2.1cm
+---
+
+
+A copula is the joint distribution of random variables $U_1, U_2,... , U_p,$ each of which is marginally uniformly distributed as $U(0,1)$. 
+$$C(u_1, ..., u_p) = P(U1 \leq u_1, ... ,U_p \leq u_p)$$
+Therefore, the copula for distribution $F(t,s)$ is 
+$$F(t,s) = C[F_t(t), F_s(s)]$$
+The pdf of copula distribution is:
+$$c(u_1, u_2, ... , u_p) = \frac{\partial^p}{\partial u_1 \partial u_2... \partial u_p} C(u_1, u_2, ..., u_p)$$
+That is, 
+$$c(F_1(x_1),.. F_p(x_p)) = \frac{f(x_1, x_2, ..., x_p)}{f_1(x_1) f_2(x_2) ... f_p(x_p)}$$
+
+Therefore, in the Tsiatis's example, the copula is 
+$$C(F_t(t), F_c(c)) = 1 + exp(-\lambda t - \mu c -\theta tc) - exp(-\lambda t) -  exp(-\mu c)$$
+$$\begin{aligned}
+C(u,v) =& 1 + (1-u) (1-v) exp \big(-\frac{\theta}{\lambda \mu} ln(1-u) ln(1-v) \big) - (1-u) - (1-v) \\
+=& u + v - 1 +  (1-u) (1-v) exp \big(-\frac{\theta}{\lambda \mu} ln(1-u) ln(1-v) \big) 
+\end{aligned}$$
+
+The pdf of copula is 
+$$\begin{aligned}
+c(F_t(t), F_c(c)) =& \frac{f(t,c)}{f_t(t) f_c(c)}  = \frac{(\lambda \mu - \theta + \lambda \theta t + \mu \theta c + \theta^2 t c) exp(-\lambda t - \mu c - \theta c t )}{\lambda exp(-\lambda t)\mu exp(-\mu c)} \\
+= & \frac{(\lambda \mu - \theta + \lambda \theta t + \mu \theta c + \theta^2 t c)}{\lambda \mu} exp(-\theta tc) \\
+ = & \frac{1}{\lambda \mu} \big(\lambda \mu -\theta - \theta ln(1-u) - \theta ln(1-u) + \theta^2 ln(1-u) ln(1-v) \big) exp \big(-\frac{\theta}{\lambda \mu} ln(1-u) ln(1-v) \big)
+\end{aligned}$$
+
+To calculate the Kendall's tau, we need $E(C(u,v))$
+
+$$\begin{aligned}
+E(C(u,v)) = \int C(u.v) dC(u,v) = \int_0^1 \int_0^1 C(u.v) c(u,v) du d v
+\end{aligned}$$
+In this case, replace $u,v$ with $t,c$ may be easier to calculate, that is 
+$$\begin{aligned}
+ & \int_0^{\infty} \int_0^{\infty} C(F_t(t).F_c(c)) c(F_t(t),F_c(c)) dF_t(t) d F_c(c) \\
+ & = F(t,c) \frac{f(t,s)}{f_t(t)f_c(c)} dF_t(t) d F_c(c)  \\
+ & = F(t,c) \frac{f(t,s)}{f_t(t)f_c(c)} f_t(t) f_c(c) dt dc \\
+\end{aligned}$$
+Here, to make it easy, let's set $\lambda = \mu = \theta = 1$, then
+$$\begin{aligned}
+E(C(u,v)) =& \int_0^{\infty} \int_0^{\infty} F(t,c) \frac{f(t,s)}{f_t(t)f_c(c)} f_t(t) f_c(c) dt dc \\ 
+= & \int_0^{\infty} \int_0^{\infty} \big[1 + exp(-t - c - tc) - exp(-t) -  exp(-c) \big]  \\
+ & ( t +  c +  t c) exp(-tc) exp(-t) exp(-c) dt dc \\
+ =& \int_0^{\infty} \frac{e^{-2c} ((4c^2 + 16c + 12)e^c - 2c^3 - 11 c^2 - 20 c - 12)}{4 c^3 + 20 c^2 + 32 c + 16} dc
+\end{aligned}$$
+
+However, still, no antiderivative could be found since the formula

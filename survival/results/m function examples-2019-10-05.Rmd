@@ -1,0 +1,262 @@
+---
+title: "Examples"
+date: 2019-10-05
+output: pdf_document
+fontsize: 12pt
+---
+
+# Introduction
+
+We denote $Y_i, i = 1, ..., N$ are the independent, identically, distributed (iid) lifetimes, whose corresponding cumulative distriubtion function (CDF) is $F$, probability distribution function (PDF) is $f$; the censoring time is defined as $C_i, i = 1,..., N$. $C_i$s are also iid, with CDF denoted as $G$ and PDF denoted as $g$. We set the censors happen on the right and the ovserved time is $Z_i = Y_i \wedge C_i$, whose CDF is $H$ and PDF is $h$. The $\delta_i = I_{[T_i \leq C_i]}$ is the status indicator, which shows whether subject $i$ is censored ($\delta_i = 0$) or not ($\delta_i = 0$). The corresponding hazard function of lifetime is $\lambda_F$ and cumulative hazard function is $\Lambda_F$. 
+
+Instead of the strong assumption of independent between $Y_i$ and $C_i$, we proposed that
+\begin{equation}
+P(C > t | T = t) = P(C > t| T > t)
+\end{equation}
+under which, the Gerhard Dikta's model is still hold. 
+
+Given (Eq 1), we could derive that 
+$$\begin{aligned}
+P(\delta = 1|X = t) = \frac{P(C > t, T = t)}{P(X = t)} = & \frac{P(T = t)}{P(X = t)} \frac{P(C > t, T > t)}{P(T > t)} 
+= \frac{f(t)S_x(t)}{h(t)S(t)} = \frac{\lambda_F(t)}{\lambda_H(t)}
+\end{aligned}$$
+where $\lambda_H(t)$ is the hazard function corresponding to $Z$, which is known as crude hazard rate as well. 
+
+We may define $m(t) =P(\delta = 1|X = t) = E(\delta|X = t)$. Then 
+\begin{equation}
+m(t) = \frac{\lambda_F(t)}{\lambda_H(t)}
+\end{equation}
+which is the same parameter defined in Dikta's papers. Therefore, the independence between $Y$ and $C$ is not the necessory condition for equation (2).
+
+We give several examples to support our conclusion. 
+
+# Example 1
+
+For a joint pdf function $f_{T1, T2}(t_1, t_2)$, if it equals to 
+$$f_{T1, T2}(x,y) = 16 (x - \frac{1}{2}) (y - \frac{1}{2}) (x - y) (x - y + 1) + 1$$
+Then we have survival function $S_{T_1, T_2} = P(T_1 >t_1, T_2> t_2)$ as:
+$$\begin{aligned}
+S_{T_1, T_2} = & P(T_1 >t_1, T_2> t_2) =\int_{t_2}^{1} \int_{t_1}^{1}  f_{T_1, T_2}(x,y) dx dy \\
+ = & \int_{t_2}^{1} \int_{t_1}^{1}  f_{T_1, T_2}(x,y) dx dy \\
+ = & \int_{t_2}^{1} \int_{t_1}^{1} \big[ 16 (x - \frac{1}{2}) (y - \frac{1}{2}) (x - y) (x - y + 1) + 1 \big] dx dy \\
+ = &  \int_{t_2}^{1} \big \{ 4 (y - \frac{1}{2}) \big[x^4 - 2x^3 + (-2 y^2 + 2y + 1) x^2 + (2y^2 - 2y )x \big] + x\big \} |_{t_1}^1 dy \\
+ = & \int_{t_2}^{1} \big \{ (2 -4y) t_1^4 + (8y - 4) t_1 ^3 + (8 y^3 - 12 y^2 + 2) t_1^2  +(-8y^3 + 12 y ^2 - 4y - 1) t_1 + 1 \big \}dy \\
+ = & (t_1 - 1) y (2 t_1 y^3 - 4 t_1 y^2 +(-2 t_1^3 + 2 t_1 ^2 + 2 t_1)y + 2 t_1 ^ 3 - 2 t_1 ^2 - 1)  |_{t_2}^1 \\
+ = & (1 - t_1) (1 - t_2) (1 - 2 t_1 t_2 (t_2 - t_1) (t _ 1 + t_2 - 1))
+\end{aligned}$$
+The marginal function for the survival time and censoring time are all uniform distributions: 
+$$\begin{aligned} 
+f_{t_1} (x) = & \int_0^1 f_{t_1,t_2} (x,y) dy \\
+= & \big \{ y - 4 (x - \frac{1}{2}) (y^4 - 2y^3 + (-2 x^2 + 2x + 1) y^2 + (2x^2 - 2x) y)\big \} |_{0}^1 \\
+= 1
+\end{aligned}$$
+$$\begin{aligned} 
+f_{t_2} (y) = & \int_0^1 f_{t_1,t_2} (x,y) dx \\
+= & \big \{ 4 (y - \frac{1}{2}) \big[x^4 - 2x^3 + (-2 y^2 + 2y + 1) x^2 + (2y^2 - 2y )x \big] + x\big \} |_{0}^1 \\
+= 1
+\end{aligned}$$
+That is,
+$$f_{T_1}(t_1) = I_{[0,1]}(t_1), \text{ } f_{T_2}(t_2) = I_{[0,1]}(t_2)$$
+$$P(T_1 > t_1) = 1 - t_1, \text{ } P(T_2 > t_2) = 1 - t_2$$
+
+Therefore, the hazard rate function $\lambda_F$ for the survival time is: 
+
+* $S_F(t) = 1 - t$, $\Lambda_F(t) = - log(1-t)$, $\lambda_F(t) = \frac{1}{1-t}$
+
+The hazard rate function $\lambda_H$ for the observed time is: 
+
+* $S_H(t) = P(Z > t) = (1-t)^2$, $\Lambda_H(t) = - 2log(1-t), \lambda_H(t) = \frac{2}{1-t}$
+
+Then $$m(t) = \frac{\lambda_F(t)}{\lambda_H(t)} = 0.5$$
+
+Let's make a simulation to show it works. 
+
+## Data generation
+
+$T_2$ is generated from the UNI(0,1). 
+
+Given $T_2$, $T_1$ is generated from $f_{T_1|T_2}(x|y) = \frac{f_{T_1, T_2}(x,y)}{f_{T_2}(y)} = f_{T_1, T_2}(x,y)$, since $f_{T_2}(y) = 1$. 
+
+Then $F_{T_1|T_2}(x|y) =  x((4y - 2)x^3 + (4 - 8y)x^2 +(-8y^3 + 12y^2 - 2)x + 8y^3 - 12y^2 + 4y + 1)$. Then sample $x$ by inverse probability sampling. 
+
+#### Results: 
+
+Censoring percentage: 52.5$\%$
+
+```{R include = FALSE}
+library(survival)
+
+# sample y 
+
+set.seed(123)
+
+Fx = function(x){return(x)}
+Sx = function(x){return(1-x)}
+
+Fx_y = function(x, y){
+  res = x * ((4*y-2) * x^3 + (4 - 8*y)*x^2 +(-8 * y^3 + 12*y^2 - 2) * x + 8 * y^3 - 12*y^2 + 4 * y + 1 )
+  return(res)
+}
+
+inverse_fxy = function(a,y){
+  res1 = c()
+  for(i in seq(0.00001, 1, 0.1)){
+    res1 = c(res1, Fx_y(i, y))
+  }
+  temp = seq(0.00001, 1, 0.1)[which(abs(res1 - a) == min(abs(res1 - a)))]
+ 
+  res2 = c()
+  for(i in seq((temp - 0.1), (temp+0.1), 0.01)){
+    res2 = c(res2, Fx_y(i, y))
+  }
+  temp = seq((temp - 0.1), (temp+0.1), 0.01)[which(abs(res2 - a) == min(abs(res2 - a)))]
+  
+  res3 = c()
+  for(i in seq((temp - 0.01), (temp+0.01), 0.001)){
+    res3 = c(res3, Fx_y(i, y))
+  }
+  temp = seq((temp - 0.01), (temp+0.01), 0.001)[which(abs(res3 - a) == min(abs(res3 - a)))]
+  
+  res4 = c()
+  for(i in seq((temp - 0.001), (temp+0.001), 0.0001)){
+    res4 = c(res4, Fx_y(i, y))
+  }
+  temp = seq((temp - 0.001), (temp+0.001), 0.0001)[which(abs(res4 - a) == min(abs(res4 - a)))]
+  return(temp)
+}
+
+# sample x
+y = runif(200, 0, 1)
+x = c()
+for(i in 1:length(y)){
+  xx = runif(1)
+  x = c(x, inverse_fxy(xx, y[i]))
+}
+
+status = ifelse(x <=y, 1, 0)
+z = ifelse(status == 1, x, y)
+
+data = data.frame(survival = x, censor = y, time = z, status = status)
+data = data[order(data$time),]
+
+```
+
+
+The KM estimator: 
+
+```{r fig2, fig.height = 4, fig.width = 4, fig.align = "center", echo = FALSE}
+
+fit_km = survfit(Surv(time, status) ~ 1, data = data)
+
+
+m = function(x){return(0.5)}
+
+lambda_H = function(t){
+  i = data$time - t == min(data$time - t)
+  h = (fit_km$n.event[i] + fit_km$n.censor[i])/fit_km$n.risk[i]
+  return(h)
+}
+
+Lambda_H = function(t){
+  i = which(abs(data$time - t) == min(abs(data$time - t)))
+  if(data$time[i] > t & i > 1){i = i -1}
+  HH = c()
+  for(ii in 1:i){
+    HH = c(HH, (fit_km$n.event[ii]+fit_km$n.censor[ii])/fit_km$n.risk[ii])
+  }
+  return(sum(HH))
+}
+
+Lambda_F = function(t){
+  return(m(t) * Lambda_H(t)) 
+}
+
+S_est = function(t){
+  return(exp(-Lambda_F(t)))
+}
+
+sest = c()
+for(i in 1:200){
+  sest = c(sest, S_est(data$time[i]))
+}
+
+
+plot(fit_km$time, fit_km$surv, col = 2, lty = 2, type = 'l', ylab = 'survival',
+     xlab = 'time', main='Comparison')
+lines(data$time, Sx(data$time), lwd = 2)
+lines(data$time, sest, col = 6, lty = 3, lwd = 2)
+legend('topright', legend = c('True S(t)', 'KM', 'm(t)'), lty = c(1,2,3), col = c(1,2,6), cex = 0.8)
+```
+
+
+Bias: 
+
+Kaplan Meier: 
+
+```{R}
+mean(abs(fit_km$surv - Sx(fit_km$time)))
+```
+
+Semi parametric model: $m(t) = \frac{\lambda_F(t)}{\lambda_H(t)}$ 
+```{R}
+mean(abs(sest - Sx(fit_km$time)))
+```
+
+If we do not know the $m(t)$ function, but know that it is a constant, i.e. $m(t; \theta) = \theta$,we many estimate the parameter by using the MLE: 
+$$L_n(\theta) = \prod_{i = 1}^n m (\theta)^{\delta_i} (1 - m(\theta))^{\delta_i}$$
+The estimated value is $m(t) = 0.525$. The bias is 
+
+```{R include = FALSE}
+
+m = function(x){return(0.525)}
+sest = c()
+for(i in 1:200){
+  sest = c(sest, S_est(data$time[i]))
+}
+```
+
+```{R echo = FALSE}
+mean(abs(sest - Sx(fit_km$time)))
+```
+
+# Example 2
+
+
+The other examples in paper are not usable. 
+
+A family of exponential example
+
+$$f(x,y) = a e^{-x} e^{-y} + be^{-x-y} + c (2I_{y > x}-1) e^{min(x,y) - max(x,y)}$$
+That is 
+$$
+f(x,y) = 
+\begin{cases}
+ a e^{-x} e^{-y} + be^{-x-y} + c exp(x-y) & y \geq x \\
+ a e^{-x} e^{-y} + be^{-x-y} - c exp(y-x) & y < x
+\end{cases}
+$$
+
+The marginal distribution is 
+$$\begin{aligned}
+f_x(x) = &  \int_0^{\infty} f(x,y) dy \\
+= & \int_0^x \big( a e^{-x} e^{-y} + be^{-x-y} - c exp(y-x) \big)  dy+ \\
+& \int_x^{\infty} a e^{-x} e^{-y} + be^{-x-y} + c exp(x-y) dy  \\
+= & (a+b+c) e^{-x} - (a+b) e^{-2x} - c + c + (a+b)e^{-2x} \\
+= & (a+b+c) e^{-x} 
+\end{aligned}$$
+$$\begin{aligned}
+f_y(y) = &  \int_0^{\infty} f(x,y) dx \\
+= & \int_y^{\infty} \big( a e^{-x} e^{-y} + be^{-x-y} - c exp(y-x) \big)  dx+ \\
+& \int_0^y a e^{-x} e^{-y} + be^{-x-y} + c exp(x-y) dx  \\
+= & (-c + (a+b) e^{-2y}) + (c + (a+b-c) e^{-y} - (a+b) e^{-2y}) \\
+= & (a+b-c) e^{-x} 
+\end{aligned}$$
+
+$f_{x,y}(t,t) = a e^{-2t}$ and $f_x(t) f_y(t) = (a+b-c)(a+b+c) e^{-2t}$
+
+$\rightarrow$ $a +b = (a+b-c)(a+b+c)$, that is 
+$$A = A^2 - C^2$$
+We may let $A = 2, C = \sqrt 2$ or other values
+
+
+

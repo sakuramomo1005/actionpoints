@@ -1,0 +1,1091 @@
+---
+title: "Semi-parameter model estimation, with quantiles"
+date: 2019-11-25
+output: pdf_document
+fontsize: 11pt
+---
+
+```{R include = FALSE}
+library(knitr)
+library(kableExtra)
+```
+
+
+# Changes
+
+* use inverse function in R package instead of using my own function
+
+* calculated the estimated $\hat S(t)$ at time quantiles (e.g. $t_{0.1}, t_{0.25}, t_{0.5}, t_{0.75}, t_{0.9}$),  instead of using order statistics of time. 
+
+
+# Results highlight
+
+* Four methods: KM: Kaplan Meier; Exp m(): estimate $\lambda_F$ with $\exp( m(t) \lambda_H)$; Dikta 1: use Dikta's first formula; Dikta 2: use Dikta's updated formula.
+
+* The 4 methods have similar mean absolute difference between $\hat S(t)$ and true $S(t)$
+
+* The standard deviation of KM is larger than the other three methods. 
+
+* The other three methods have similar standard deviation over 500 iterations. 
+
+* When using the logistic regression estimated $m(t)$, the standard deviation get larger, but still smaller than the Kaplan Meier's sd
+
+
+
+# Simulation 
+
+All the simulations below have generated data with size 500. And 500 times iterations. 
+
+
+# Example 3: exponential + extreme distribution
+
+The survival time is denoted as $T$ and censor time as $C$, the observed time is marked as $Z$
+
+And
+$$S_T(t) = P(T > t) = P(T > t, C > 0) = e^{- \theta t}  e^{-(e^{ \theta 0} - 1)\big( (t-0)^2 + 1\big)} = e^{- \theta t}$$
+$$f_T(t) = \frac{\partial}{\partial t} (1 - S_T(t)) = \frac{\partial}{\partial t} (1 - e^{-\theta t}) = \theta e^{- \theta t}$$
+$$S_Z(t) = P(T > t, C> t) = e^{-\theta t} e^{-(e^{ \theta t} - 1)} = e^{-e^{\theta t} - \theta t + 1}$$
+$$f_Z(t) = \frac{\partial}{\partial t} (1 - S_x(t)) = 1- e^{-e^{\theta t} - \theta t + 1} = \theta (1 + e^{\theta t})e^{-e^{\theta t} - \theta t + 1}$$
+$$\psi(t) = \int_t^{\infty} f(t,c) dc = \int_t^{\infty} \theta^2  e^{-e^{ \theta c} +\theta c - \theta t + 1} dc = \theta e^{-e^{\theta t} - \theta t + 1}$$
+Therefore, 
+the $m()$ function is: 
+$$m(t) = \frac{\lambda_F(t)}{\lambda_H(t)} = \frac{f_T(t)}{S_T(t)}/ \frac{f_Z(t)}{S_Z(t)} = \frac{\theta e^{- \theta t}}{e^{- \theta t}} / \frac{ \theta (1 + e^{\theta t})e^{-e^{\theta t} - \theta t + 1}}{e^{-e^{\theta t} - \theta t + 1}} = \frac{1}{1 + e^{\theta t}}$$
+And for the $\rho()$ function, 
+$$\begin{aligned}
+\rho = & \frac{f(t)/\psi(t) - 1}{S(t)/S_Z(t) - 1}  \\ 
+= & \frac{\theta e^{-\theta t}/(\theta e^{-e^ {\theta t} - \theta t + 1}) -1}{ e^{- \theta t}/ e^{-e^{\theta t} -\theta t + 1} -1}\\
+= & 1
+\end{aligned}$$
+
+
+
+<!-- ```{R include = FALSE} -->
+
+<!-- add_table_name = function(data){ -->
+<!--   data = data.frame(data) -->
+<!--   data = round(data,5) -->
+<!--   nn = dim(data)[1] -->
+<!--   nn = round(nn/5) -->
+<!--   data = cbind(rep(c('t0.1', 't0.25', 't0.5', 't0.75', 't0.9'), nn), data) -->
+<!--   colnames(data) = c('Quantile','KM','Exp m()','Dikta 1', 'Dikta 2') -->
+<!--   rownames(data) = NULL -->
+<!--   return(data) -->
+<!-- } -->
+
+<!-- M_diff_m = c(); M_diff_sd = c() -->
+<!-- The_est_the = c(); -->
+<!-- S_est_diff = c(); S_est_diff_lg = c() -->
+<!-- S_est_sd = c(); S_est_sd_lg = c() -->
+
+<!-- for(theta  in c(0.8, 1, 1.5, 2, 5)){ -->
+<!--   names = paste('theta_6_', theta, '.RData', sep = '') -->
+<!--   load(names) -->
+
+
+<!--   # estimate of m -->
+<!--   temp_m_diff = result$m_diff -->
+<!--   M_diff_m = c(M_diff_m, mean(temp_m_diff)) -->
+<!--   M_diff_sd = c(M_diff_sd, sd(temp_m_diff)) -->
+<!--   #hist(temp_m_diff, breaks = 100) -->
+
+<!--   # estimate of theta -->
+<!--   theta1 = -result$theta_est -->
+<!--   The_est_the = c(The_est_the, mean(theta1)) -->
+
+
+<!--   # est of true S and  -->
+<!--   true_quant = c(0.9, 0.75, 0.5, 0.25, 0.1) -->
+<!--   # km -->
+<!--   temp = cbind( -->
+<!--     apply(abs(result$s0 - matrix(true_quant,  -->
+<!--                                  dim(result$s0)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE),  -->
+<!--     # 1 -->
+<!--     apply(abs(result$s1 - matrix(true_quant,  -->
+<!--                                  dim(result$s1)[1], 5, byrow =  TRUE)),2, -->
+<!--           mean, na.rm=TRUE),  -->
+<!--     # 2  -->
+<!--     apply(abs(result$s2 - matrix(true_quant,  -->
+<!--                                  dim(result$s2)[1], 5, byrow =  TRUE)),2, -->
+<!--           mean, na.rm=TRUE), -->
+<!--     # 3 -->
+<!--     apply(abs(result$s3 - matrix(true_quant,  -->
+<!--                                  dim(result$s3)[1], 5, byrow =  TRUE)),2, -->
+<!--           mean, na.rm=TRUE)) -->
+
+<!--   S_est_diff = rbind(S_est_diff, temp) -->
+
+<!--   ## estimated -->
+<!--   # km  -->
+<!--   temp = cbind( -->
+<!--     apply(abs(result$s_lg0 - matrix(true_quant, dim(result$s_lg0)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE),  -->
+<!--     # 1 -->
+<!--     apply(abs(result$s_lg1 - matrix(true_quant, dim(result$s_lg1)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE),  -->
+<!--     # 2  -->
+<!--     apply(abs(result$s_lg2 - matrix(true_quant, dim(result$s_lg2)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE),  -->
+<!--     # 3 -->
+<!--     apply(abs(result$s_lg3 - matrix(true_quant, dim(result$s_lg3)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE) ) -->
+
+<!--   S_est_diff_lg = rbind( S_est_diff_lg, temp) -->
+<!--   ## variance  -->
+
+<!--   temp = cbind(apply(result$s0, 2, sd, na.rm=TRUE), -->
+<!--                apply(result$s1, 2, sd, na.rm=TRUE), -->
+<!--                apply(result$s2, 2, sd, na.rm=TRUE), -->
+<!--                apply(result$s3, 2, sd, na.rm=TRUE)) -->
+
+<!--   S_est_sd = rbind(S_est_sd, temp) -->
+
+<!--   ## variance  -->
+<!--   temp = cbind( apply(result$s_lg0, 2, sd, na.rm=TRUE), -->
+<!--                 apply(result$s_lg1, 2, sd, na.rm=TRUE), -->
+<!--                 apply(result$s_lg2, 2, sd, na.rm=TRUE), -->
+<!--                 apply(result$s_lg3, 2, sd, na.rm=TRUE)) -->
+
+<!--   S_est_sd_lg = rbind(S_est_sd_lg, temp) -->
+<!-- } -->
+
+<!-- ``` -->
+
+<!-- ```{R echo =FALSE} -->
+<!-- # S_est_diff = c(); S_est_diff_lg = c() -->
+<!-- # S_est_sd = c(); S_est_sd_lg = c() -->
+<!-- colnames(S_est_diff_lg) = c('KM','Exp m()','Dikta 1', 'Dikta 2') -->
+<!-- x = cbind(add_table_name(S_est_diff), round(S_est_diff_lg,5)) -->
+<!-- kable(x, "latex", longtable = T, align="c",  -->
+<!--       caption = 'Mean absolute difference between estimated  and true S()', -->
+<!--       booktabs=TRUE, escape = F)  %>%  -->
+<!--   group_rows("theta = 0.8", 1, 5) %>% -->
+<!--   group_rows("theta = 1.5", 6, 10) %>% -->
+<!--     group_rows("theta = 1", 11, 15) %>% -->
+<!--     group_rows("theta = 2", 16, 20) %>% -->
+<!--     group_rows("theta = 5", 21, 25) %>% -->
+<!--   add_header_above(header = c(" " = 1, -->
+<!--                               "With true m()" = 4, -->
+<!--                               "With estimated m()" = 4)) -->
+<!-- ``` -->
+
+<!-- ```{R echo =FALSE} -->
+<!-- # S_est_diff = c(); S_est_diff_lg = c() -->
+<!-- # S_est_sd = c(); S_est_sd_lg = c() -->
+<!-- colnames(S_est_sd_lg) = c('KM','Exp m()','Dikta 1', 'Dikta 2') -->
+<!-- x = cbind(add_table_name(S_est_sd), round(S_est_sd_lg,5)) -->
+<!-- kable(x, "latex", longtable = T, align="c",  -->
+<!--       caption = 'Standard deviations of the estimated S()', -->
+<!--       booktabs=TRUE, escape = F)  %>%  -->
+<!--   group_rows("theta = 0.8", 1, 5) %>% -->
+<!--   group_rows("theta = 1.5", 6, 10) %>% -->
+<!--     group_rows("theta = 1", 11, 15) %>% -->
+<!--     group_rows("theta = 2", 16, 20) %>% -->
+<!--     group_rows("theta = 5", 21, 25) %>% -->
+<!--   add_header_above(header = c(" " = 1, -->
+<!--                               "With true m()" = 4, -->
+<!--                               "With estimated m()" = 4)) -->
+<!-- ``` -->
+
+After changing the inverse function, the data is generated more appropriately. For example: 
+
+```{r include = FALSE}
+
+library(GoFKernel)
+library(survival)
+
+theta = 0.3
+for(functions in 1){
+  ##########################################
+  # when x > y, 
+  # x ~ exp(-x)
+  # cdf F(Y | X = x): 
+  
+  
+  myTryCatch <- function(expr) {
+    warn <- err <- NULL
+    value <- withCallingHandlers(
+      tryCatch(expr, error=function(e) {
+        err <<- e
+        NULL
+      }), warning=function(w) {
+        warn <<- w
+        invokeRestart("muffleWarning")
+      })
+    list(value=value, warning=warn, error=err)
+  }
+  
+  Fc_t = function(c,x){
+    c = theta*c
+    x = theta*x
+    res = 1 - ((2*exp(c + 1) - 2*exp(1))*(exp(c^2))*x + (-2*c*exp(c + 1) + 2*exp(1)*c + exp(1))* exp(c^2))* 
+      exp(-exp(c)*x^2 + x^2 + 2*c*exp(c)*x - 2*c*x - c^2*exp(c) - exp(c))
+    return(res)
+  } 
+  
+  Fc_t2 = function(y){
+    res = 1 - (2 * theta * (exp(theta*y) -1) * (x_input - y) + 1) * 
+      exp( - (theta^2 * (x_input - y)^2 + 1) * (exp(theta * y) - 1))
+    return(res)
+  }
+  
+  ##########################################
+  # inverse function of F(Y | X = x):
+  inverse_fct = function(a,y){
+    res1 = c()
+    for(i in seq(0.00001, 1, 0.1)){
+      res1 = c(res1, Fc_t(i, y))
+    }
+    temp = seq(0.00001, 1, 0.1)[which(abs(res1 - a) == min(abs(res1 - a)))[1]]
+    
+    res2 = c()
+    for(i in seq((temp - 0.1), (temp+0.1), 0.01)){
+      res2 = c(res2, Fc_t(i, y))
+    }
+    temp = seq((temp - 0.1), (temp+0.1), 0.01)[which(abs(res2 - a) == min(abs(res2 - a)))[1]]
+    
+    res3 = c()
+    for(i in seq((temp - 0.01), (temp+0.01), 0.001)){
+      res3 = c(res3, Fc_t(i, y))
+    }
+    temp = seq((temp - 0.01), (temp+0.01), 0.001)[which(abs(res3 - a) == min(abs(res3 - a)))[1]]
+    
+    res4 = c()
+    for(i in seq((temp - 0.001), (temp+0.001), 0.0001)){
+      res4 = c(res4, Fc_t(i, y))
+    }
+    temp = seq((temp - 0.001), (temp+0.001), 0.0001)[which(abs(res4 - a) == min(abs(res4 - a)))[1]]
+    return(temp)
+  }
+  
+  ##########################################
+  # Functions to calculate true m()
+  # m function = lambda_f/lambda_h
+  
+  m = function(x){
+    return(1/(1 + exp(theta * x)))
+  }
+  m0 = function(x){
+    return(1/(1 + exp(theta * x)))
+  }
+  
+  ## hazard function of observed time, calculated with tie
+  lambda_H = function(t){
+    i = which(abs(unique(data$time) - t) == min(abs(unique(data$time) - t)))
+    if(unique(data$time)[i] > t & i > 1 ){i = i - 1}
+    h = (fit_km$n.event[i] + fit_km$n.censor[i])/ fit_km$n.risk[i]
+    return(h)
+  }
+  
+  ## cumulative hazard function of observed time, calculated with tie
+  Lambda_H = function(t){
+    i = which(abs(unique(data$time) - t) == min(abs(unique(data$time) - t)))[1]
+    if(unique(data$time)[i] > t & i > 1){i = i -1}
+    HH = c()
+    for(ii in 1:i){
+      HH = c(HH, (fit_km$n.event[ii]+fit_km$n.censor[ii])/fit_km$n.risk[ii])
+    }
+    return(sum(HH))
+  }
+  
+  ## hazard 
+  lambda_F = function(t){
+    h = lambda_H(t) * m(t)
+    return(h)
+  }
+  
+  ## cumulative hazard
+  Lambda_F = function(t){
+    i = which(abs(unique(data$time) - t) == min(abs(unique(data$time) - t)))[1]
+    if(unique(data$time)[i] > t & i > 1){i = i -1}
+    HH = c()
+    for(ii in 1:i){
+      HH = c(HH, lambda_F(unique(data$time)[ii]))
+    }
+    return(sum(HH,na.rm = TRUE))
+  }
+  
+  ## estimate the S() with m function
+  S_est = function(t){
+    return(exp(-Lambda_F(t)))
+  }
+  
+  ##########################################
+  # m function (Gerhard method)
+  Ri = function(t){
+    return(sum(data$time <= t))
+  } 
+  m_est_old1 = function(t){
+    res = 1
+    for(i in 1:Ri(t)){
+      res = res * ((n - i)/(n - i + 1))^(m(data$time[i]))
+    }
+    return(res)
+  }
+  m_est_old2 = function(t){
+    res = 1
+    for(i in 1:Ri(t)){
+      res = res * ((n - i)/(n - i + m(data$time[i])))
+    }
+    return(res)
+  }
+  
+  
+}
+x_input = 1
+f.inv <- inverse(Fc_t2,lower=0,upper=Inf)
+
+for(datageneration in 1){
+  ##########################################
+  # simulate data
+  t1 = rexp(2000,theta)
+  c1 = c()
+  for(i in 1:length(t1)){
+    #bars = Fc_t(t1[i],t1[i])
+    #xx = runif(1,0,bars)
+    xx = runif(1,0,1)
+    x_input = t1[i]
+    # c1 = c(c1, inverse_fct(xx, t1[i]))
+    temp =  myTryCatch(f.inv(xx))
+    if(is.null(temp$error) == 0){
+      c1 = c(c1, NA)
+    }else{
+      c1 = c(c1, temp$value)
+    }
+  }
+  
+  data1 = data.frame(death = t1, censor = c1)
+  data1 = na.omit(data1)
+  data1$time = ifelse( (data1$death < data1$censor), data1$death, data1$censor)
+  data1$status = ifelse(data1$death < data1$censor, 1, 0)
+  data1 = data1[(data1$time >0 & data1$status == 0), ]
+  data1 = data1[sample(1:dim(data1)[1])[1:300],]
+  rownames(data1) = NULL
+  
+  # when x < y
+  t2 = rexp(2000, theta)
+  xx = runif(2000)
+  c2 = log(1 - log(1 - xx))/theta
+  data2 = data.frame(death = t2, censor = c2)
+  data2 = data2[(data2$death < data2$censor), ]
+  data2$time = ifelse((data2$death < data2$censor), data2$death, data2$censor)
+  data2$status = ifelse(data2$death < data2$censor, 1, 0)
+  range(data2$time)
+  rownames(data2) = NULL
+  data2 = data2[(sample(1:dim(data2)[1])[1:200]),]
+  rownames(data2) = NULL
+  dim(data2)
+  sum(data2$status)
+  
+  data = rbind(data1, data2)
+  range(data$time)
+  data = data[order(data$time),]
+  rownames(data) = NULL
+}
+```
+
+
+```{r fig.width=8, fig.height=3,echo=FALSE,  fig.align = "center"}
+par(mfrow=c(1,3),oma = c(0, 0, 2, 0))
+hist(data$death, freq = FALSE, breaks = 100, main = 'death time')
+xxx = seq(0, 25,0.1)
+lines(xxx, theta * exp(-theta * xxx), col =2, lwd = 3)
+# g
+hist(data$censor, freq = FALSE, breaks = 100, main = 'censor time')
+lines(xxx, theta * exp(-exp(theta * xxx) + xxx * theta + 1), col =2, lwd = 3)
+# x
+hist(data$time, freq = FALSE, breaks = 100, main = 'observed time')
+lines(xxx, (1 + exp(theta * xxx)) * theta * exp(-exp(theta * xxx) - xxx * theta + 1), col =2, lwd = 3)
+mtext(paste('Theta =', theta), outer = TRUE)
+```
+
+
+```{r include = FALSE}
+
+library(GoFKernel)
+library(survival)
+
+theta = 2
+for(functions in 1){
+  ##########################################
+  # when x > y, 
+  # x ~ exp(-x)
+  # cdf F(Y | X = x): 
+  
+  
+  myTryCatch <- function(expr) {
+    warn <- err <- NULL
+    value <- withCallingHandlers(
+      tryCatch(expr, error=function(e) {
+        err <<- e
+        NULL
+      }), warning=function(w) {
+        warn <<- w
+        invokeRestart("muffleWarning")
+      })
+    list(value=value, warning=warn, error=err)
+  }
+  
+  Fc_t = function(c,x){
+    c = theta*c
+    x = theta*x
+    res = 1 - ((2*exp(c + 1) - 2*exp(1))*(exp(c^2))*x + (-2*c*exp(c + 1) + 2*exp(1)*c + exp(1))* exp(c^2))* 
+      exp(-exp(c)*x^2 + x^2 + 2*c*exp(c)*x - 2*c*x - c^2*exp(c) - exp(c))
+    return(res)
+  } 
+  
+  Fc_t2 = function(y){
+    res = 1 - (2 * theta * (exp(theta*y) -1) * (x_input - y) + 1) * 
+      exp( - (theta^2 * (x_input - y)^2 + 1) * (exp(theta * y) - 1))
+    return(res)
+  }
+  
+  ##########################################
+  # inverse function of F(Y | X = x):
+  inverse_fct = function(a,y){
+    res1 = c()
+    for(i in seq(0.00001, 1, 0.1)){
+      res1 = c(res1, Fc_t(i, y))
+    }
+    temp = seq(0.00001, 1, 0.1)[which(abs(res1 - a) == min(abs(res1 - a)))[1]]
+    
+    res2 = c()
+    for(i in seq((temp - 0.1), (temp+0.1), 0.01)){
+      res2 = c(res2, Fc_t(i, y))
+    }
+    temp = seq((temp - 0.1), (temp+0.1), 0.01)[which(abs(res2 - a) == min(abs(res2 - a)))[1]]
+    
+    res3 = c()
+    for(i in seq((temp - 0.01), (temp+0.01), 0.001)){
+      res3 = c(res3, Fc_t(i, y))
+    }
+    temp = seq((temp - 0.01), (temp+0.01), 0.001)[which(abs(res3 - a) == min(abs(res3 - a)))[1]]
+    
+    res4 = c()
+    for(i in seq((temp - 0.001), (temp+0.001), 0.0001)){
+      res4 = c(res4, Fc_t(i, y))
+    }
+    temp = seq((temp - 0.001), (temp+0.001), 0.0001)[which(abs(res4 - a) == min(abs(res4 - a)))[1]]
+    return(temp)
+  }
+  
+  ##########################################
+  # Functions to calculate true m()
+  # m function = lambda_f/lambda_h
+  
+  m = function(x){
+    return(1/(1 + exp(theta * x)))
+  }
+  m0 = function(x){
+    return(1/(1 + exp(theta * x)))
+  }
+  
+  ## hazard function of observed time, calculated with tie
+  lambda_H = function(t){
+    i = which(abs(unique(data$time) - t) == min(abs(unique(data$time) - t)))
+    if(unique(data$time)[i] > t & i > 1 ){i = i - 1}
+    h = (fit_km$n.event[i] + fit_km$n.censor[i])/ fit_km$n.risk[i]
+    return(h)
+  }
+  
+  ## cumulative hazard function of observed time, calculated with tie
+  Lambda_H = function(t){
+    i = which(abs(unique(data$time) - t) == min(abs(unique(data$time) - t)))[1]
+    if(unique(data$time)[i] > t & i > 1){i = i -1}
+    HH = c()
+    for(ii in 1:i){
+      HH = c(HH, (fit_km$n.event[ii]+fit_km$n.censor[ii])/fit_km$n.risk[ii])
+    }
+    return(sum(HH))
+  }
+  
+  ## hazard 
+  lambda_F = function(t){
+    h = lambda_H(t) * m(t)
+    return(h)
+  }
+  
+  ## cumulative hazard
+  Lambda_F = function(t){
+    i = which(abs(unique(data$time) - t) == min(abs(unique(data$time) - t)))[1]
+    if(unique(data$time)[i] > t & i > 1){i = i -1}
+    HH = c()
+    for(ii in 1:i){
+      HH = c(HH, lambda_F(unique(data$time)[ii]))
+    }
+    return(sum(HH,na.rm = TRUE))
+  }
+  
+  ## estimate the S() with m function
+  S_est = function(t){
+    return(exp(-Lambda_F(t)))
+  }
+  
+  ##########################################
+  # m function (Gerhard method)
+  Ri = function(t){
+    return(sum(data$time <= t))
+  } 
+  m_est_old1 = function(t){
+    res = 1
+    for(i in 1:Ri(t)){
+      res = res * ((n - i)/(n - i + 1))^(m(data$time[i]))
+    }
+    return(res)
+  }
+  m_est_old2 = function(t){
+    res = 1
+    for(i in 1:Ri(t)){
+      res = res * ((n - i)/(n - i + m(data$time[i])))
+    }
+    return(res)
+  }
+  
+  
+}
+x_input = 1
+f.inv <- inverse(Fc_t2,lower=0,upper=Inf)
+
+for(datageneration in 1){
+  ##########################################
+  # simulate data
+  t1 = rexp(2000,theta)
+  c1 = c()
+  for(i in 1:length(t1)){
+    #bars = Fc_t(t1[i],t1[i])
+    #xx = runif(1,0,bars)
+    xx = runif(1,0,1)
+    x_input = t1[i]
+    # c1 = c(c1, inverse_fct(xx, t1[i]))
+    temp =  myTryCatch(f.inv(xx))
+    if(is.null(temp$error) == 0){
+      c1 = c(c1, NA)
+    }else{
+      c1 = c(c1, temp$value)
+    }
+  }
+  
+  data1 = data.frame(death = t1, censor = c1)
+  data1 = na.omit(data1)
+  data1$time = ifelse( (data1$death < data1$censor), data1$death, data1$censor)
+  data1$status = ifelse(data1$death < data1$censor, 1, 0)
+  data1 = data1[(data1$time >0 & data1$status == 0), ]
+  data1 = data1[sample(1:dim(data1)[1])[1:300],]
+  rownames(data1) = NULL
+  
+  # when x < y
+  t2 = rexp(2000, theta)
+  xx = runif(2000)
+  c2 = log(1 - log(1 - xx))/theta
+  data2 = data.frame(death = t2, censor = c2)
+  data2 = data2[(data2$death < data2$censor), ]
+  data2$time = ifelse((data2$death < data2$censor), data2$death, data2$censor)
+  data2$status = ifelse(data2$death < data2$censor, 1, 0)
+  range(data2$time)
+  rownames(data2) = NULL
+  data2 = data2[(sample(1:dim(data2)[1])[1:200]),]
+  rownames(data2) = NULL
+  dim(data2)
+  sum(data2$status)
+  
+  data = rbind(data1, data2)
+  range(data$time)
+  data = data[order(data$time),]
+  rownames(data) = NULL
+}
+```
+
+
+```{r fig.width=8, fig.height=3,echo=FALSE,  fig.align = "center"}
+par(mfrow=c(1,3),oma = c(0, 0, 2, 0))
+hist(data$death, freq = FALSE, breaks = 100, main = 'death time')
+xxx = seq(0, 25,0.1)
+lines(xxx, theta * exp(-theta * xxx), col =2, lwd = 3)
+# g
+hist(data$censor, freq = FALSE, breaks = 100, main = 'censor time')
+lines(xxx, theta * exp(-exp(theta * xxx) + xxx * theta + 1), col =2, lwd = 3)
+# x
+hist(data$time, freq = FALSE, breaks = 100, main = 'observed time')
+lines(xxx, (1 + exp(theta * xxx)) * theta * exp(-exp(theta * xxx) - xxx * theta + 1), col = 2, cex = 1.5, lwd = 3)
+mtext(paste('Theta =', theta), outer = TRUE)
+```
+
+
+```{R include = FALSE}
+
+setwd("/Users/yaolanqiu/Desktop/NYU/Research/Survival/M variance quantile 20191124/change inverse function 20191125")
+add_table_name = function(data){
+  data = data.frame(data)
+  data = round(data,5)
+  nn = dim(data)[1]
+  nn = round(nn/5)
+  data = cbind(rep(c('t0.1', 't0.25', 't0.5', 't0.75', 't0.9'), nn), data)
+  colnames(data) = c('Quantile','KM','Exp m()','Dikta 1', 'Dikta 2')
+  rownames(data) = NULL
+  return(data)
+}
+  
+M_diff_m = c(); M_diff_sd = c()
+The_est_the = c();
+S_est_diff = c(); S_est_diff_lg = c()
+S_est_sd = c(); S_est_sd_lg = c()
+mse1 = c(); mse_lg = c()
+
+for(theta  in c(0.3, 0.8, 1, 1.5, 2, 5)){
+  names = paste('theta_7_quant_inverse_', theta, '.RData', sep = '')
+  load(names)
+  
+  
+  # estimate of m
+  temp_m_diff = result$m_diff
+  M_diff_m = c(M_diff_m, mean(temp_m_diff))
+  M_diff_sd = c(M_diff_sd, sd(temp_m_diff))
+  #hist(temp_m_diff, breaks = 100)
+  
+  # estimate of theta
+  theta1 = -result$theta_est
+  The_est_the = c(The_est_the, mean(theta1))
+  
+  
+  # est of true S and 
+  true_quant = c(0.9, 0.75, 0.5, 0.25, 0.1)
+  # km
+  temp = cbind(
+    apply(abs(result$s0 - matrix(true_quant, 
+                                 dim(result$s0)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE), 
+    # 1
+    apply(abs(result$s1 - matrix(true_quant, 
+                                 dim(result$s1)[1], 5, byrow =  TRUE)),2,
+          mean, na.rm=TRUE), 
+    # 2 
+    apply(abs(result$s2 - matrix(true_quant, 
+                                 dim(result$s2)[1], 5, byrow =  TRUE)),2,
+          mean, na.rm=TRUE),
+    # 3
+    apply(abs(result$s3 - matrix(true_quant, 
+                                 dim(result$s3)[1], 5, byrow =  TRUE)),2,
+          mean, na.rm=TRUE))
+  
+  S_est_diff = rbind(S_est_diff, temp)
+  
+    temp = cbind(
+    apply(abs(result$s0 - matrix(true_quant, 
+                                 dim(result$s0)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE), 
+    # 1
+    apply(abs(result$s1 - matrix(true_quant, 
+                                 dim(result$s1)[1], 5, byrow =  TRUE))^2,2,
+          mean, na.rm=TRUE), 
+    # 2 
+    apply(abs(result$s2 - matrix(true_quant, 
+                                 dim(result$s2)[1], 5, byrow =  TRUE))^2,2,
+          mean, na.rm=TRUE),
+    # 3
+    apply(abs(result$s3 - matrix(true_quant, 
+                                 dim(result$s3)[1], 5, byrow =  TRUE))^2,2,
+          mean, na.rm=TRUE))
+  
+    mse1 = rbind(mse1, temp)
+
+    
+  ## estimated
+  # km 
+  temp = cbind(
+    apply(abs(result$s_lg0 - matrix(true_quant, dim(result$s_lg0)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE), 
+    # 1
+    apply(abs(result$s_lg1 - matrix(true_quant, dim(result$s_lg1)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE), 
+    # 2 
+    apply(abs(result$s_lg2 - matrix(true_quant, dim(result$s_lg2)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE), 
+    # 3
+    apply(abs(result$s_lg3 - matrix(true_quant, dim(result$s_lg3)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE) )
+  
+  S_est_diff_lg = rbind( S_est_diff_lg, temp)
+  
+    temp = cbind(
+    apply(abs(result$s_lg0 - matrix(true_quant, dim(result$s_lg0)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE), 
+    # 1
+    apply(abs(result$s_lg1 - matrix(true_quant, dim(result$s_lg1)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE), 
+    # 2 
+    apply(abs(result$s_lg2 - matrix(true_quant, dim(result$s_lg2)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE), 
+    # 3
+    apply(abs(result$s_lg3 - matrix(true_quant, dim(result$s_lg3)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE) )
+  
+  mse_lg = rbind(mse_lg, temp)
+
+  ## variance 
+  
+  temp = cbind(apply(result$s0, 2, sd, na.rm=TRUE),
+               apply(result$s1, 2, sd, na.rm=TRUE),
+               apply(result$s2, 2, sd, na.rm=TRUE),
+               apply(result$s3, 2, sd, na.rm=TRUE))
+  
+  S_est_sd = rbind(S_est_sd, temp)
+  
+  ## variance 
+  temp = cbind( apply(result$s_lg0, 2, sd, na.rm=TRUE),
+                apply(result$s_lg1, 2, sd, na.rm=TRUE),
+                apply(result$s_lg2, 2, sd, na.rm=TRUE),
+                apply(result$s_lg3, 2, sd, na.rm=TRUE))
+  
+  S_est_sd_lg = rbind(S_est_sd_lg, temp)
+}
+
+```
+
+## Results 
+
+```{R echo =FALSE}
+# S_est_diff = c(); S_est_diff_lg = c()
+# S_est_sd = c(); S_est_sd_lg = c()
+colnames(S_est_diff_lg) = c('KM','Exp m()','Dikta 1', 'Dikta 2')
+x = cbind(add_table_name(S_est_diff), round(S_est_diff_lg,5))
+kable(x, "latex", longtable = T, align="c", 
+      caption = 'Mean absolute difference between estimated  and true S()',
+      booktabs=TRUE, escape = F)  %>% 
+  group_rows("theta = 0.3", 1, 5) %>%
+  group_rows("theta = 0.8", 6, 10) %>%
+    group_rows("theta = 1", 11, 15) %>%
+    group_rows("theta = 1.5", 16, 20) %>%
+    group_rows("theta = 2", 21, 25) %>%
+    group_rows("theta = 5", 26, 30) %>%
+  add_header_above(header = c(" " = 1,
+                              "With true m()" = 4,
+                              "With estimated m()" = 4))
+```
+
+
+```{R echo =FALSE}
+# S_est_diff = c(); S_est_diff_lg = c()
+# S_est_sd = c(); S_est_sd_lg = c()
+colnames(mse_lg) = c('KM','Exp m()','Dikta 1', 'Dikta 2')
+x = cbind(add_table_name(mse1), round(mse_lg,5))
+kable(x, "latex", longtable = T, align="c", 
+      caption = 'MSE',
+      booktabs=TRUE, escape = F)  %>% 
+  group_rows("theta = 0.3", 1, 5) %>%
+  group_rows("theta = 0.8", 6, 10) %>%
+    group_rows("theta = 1", 11, 15) %>%
+    group_rows("theta = 1.5", 16, 20) %>%
+    group_rows("theta = 2", 21, 25) %>%
+    group_rows("theta = 5", 26, 30) %>%
+  add_header_above(header = c(" " = 1,
+                              "With true m()" = 4,
+                              "With estimated m()" = 4))
+```
+
+
+```{R echo =FALSE}
+# S_est_diff = c(); S_est_diff_lg = c()
+# S_est_sd = c(); S_est_sd_lg = c()
+colnames(S_est_sd_lg) = c('KM','Exp m()','Dikta 1', 'Dikta 2')
+x = cbind(add_table_name(S_est_sd), round(S_est_sd_lg,5))
+kable(x, "latex", longtable = T, align="c", 
+      caption = 'Standard deviations of the estimated S()',
+      booktabs=TRUE, escape = F)  %>% 
+  group_rows("theta = 0.3", 1, 5) %>%
+  group_rows("theta = 0.8", 6, 10) %>%
+    group_rows("theta = 1", 11, 15) %>%
+    group_rows("theta = 1.5", 16, 20) %>%
+    group_rows("theta = 2", 21, 25) %>%
+    group_rows("theta = 5", 26, 30) %>%
+  add_header_above(header = c(" " = 1,
+                              "With true m()" = 4,
+                              "With estimated m()" = 4))
+```
+
+##### The estimate of $m()$
+
+```{R echo = FALSE}
+M_diff_m = matrix(M_diff_m, 1, 6)
+rownames(M_diff_m) = NULL
+colnames(M_diff_m) = c(0.3, 0.8, 1,1.5,2,5)
+kable(M_diff_m, "latex", longtable = T, align="c", 
+      caption = 'mean absolute difference between hat m() and true m()',
+      booktabs=TRUE, escape = F) 
+```
+
+The row name shows the $\theta$ value 
+
+```{R echo = FALSE}
+M_diff_sd = matrix(M_diff_sd, 1, 6)
+rownames(M_diff_sd) = NULL
+colnames(M_diff_sd) = c(0.3, 0.8, 1,1.5,2,5)
+kable(M_diff_sd, "latex", longtable = T, align="c", 
+      caption = 'standard deviation of estimated m()',
+      booktabs=TRUE, escape = F) 
+```
+
+The row name shows the $\theta$ value 
+
+```{R echo = FALSE}
+
+The_est_the = matrix(The_est_the, 1, 6)
+rownames(The_est_the) = NULL
+colnames(The_est_the) = c(0.3, 0.8, 1,1.5,2,5)
+kable(The_est_the, "latex", longtable = T, align="c", 
+      caption = 'estimated theta from logitic regression',
+      booktabs=TRUE, escape = F) 
+
+```
+
+The row name shows the true $\theta$ value 
+
+# Example 4: exponential + weibull distribution
+
+
+
+$$
+P(T \geq x, C \geq y) = S(x,y) =
+\begin{cases}
+e^{-\theta x}  e^{- (\theta y)^k \big( ( \theta x-  \theta y)^2 + 1\big)} & x \geq y \\
+e^{- \theta x} e^{- (\theta y)^k} & x < y
+\end{cases}
+$$
+Then
+
+* $S_T(x) = P(T \geq x, C \geq 0) = S(x, 0) = e^{- \theta x}$, $f_T(x) = \frac{1 - S_T(x)}{x} =\theta e^{- \theta x}$
+
+* $S_C(x) = P(T \geq 0, C \geq x) = S(0, x) = e^{- \theta 0} e^{- (\theta x)^k} = e^{- (\theta x)^k}$,  $f_C(x) = \frac{1 - S_C(x)}{x} = k \theta (\theta y)^{k-1} e^{- (\theta x)^k}$
+
+The death time is from an exponential distribution with paramter $\theta$, the censor time is from a Weibull distribution with shape parameter $k$ and scale parameter $1/\theta$. 
+
+Beisdes,
+
+* $S_Z(x) = P(T > x, C > x) = e^{- \theta x - (\theta x)^k}$, $f_Z(x) = (\theta + k \theta (\theta x)^{k-1}) e^{- \theta x - (\theta x)^k}$
+
+Therefore the $m()$ function is
+$$m(x) = \frac{f_T(x)/S_T(x)}{f_Z(X)/S_Z(x)} = \frac{\theta e^{- \theta x}/ e^{- \theta x} }{ (\theta + k \theta (\theta x)^{k-1}) e^{- \theta x - (\theta x)^k}/e^{- \theta x - (\theta x)^k}} = \frac{1}{1 + k(\theta x)^{k-1}}$$
+We could also transform $m()$ function as: 
+$$m(x) = \frac{1}{1 + \exp(\log(k(\theta x)^{k-1}))} =\frac{1}{1 + \exp( \log(k) + (k-1) \log(\theta) + (k-1) \log(x))}$$
+We can then estimate the $k$ and $\theta$ by fitting logistic regression. 
+
+
+## Results 
+
+```{R include = FALSE}
+setwd('/Users/yaolanqiu/Desktop/NYU/Research/Survival/M variance quantile 20191124')
+
+M_diff_m = c(); M_diff_sd = c()
+The_est_k = c(); The_est_the1 = c(); The_est_the2 = c();
+S_est_diff = c(); S_est_diff_lg = c()
+S_est_sd = c(); S_est_sd_lg = c()
+mse1 = c(); mse_lg = c()
+
+
+for(theta  in c(1,2)){
+  names = paste('theta_5_', theta, '.RData', sep = '')
+  load(names)
+  
+  
+  # estimate of m
+  temp_m_diff = result$m_diff
+  M_diff_m = c(M_diff_m, mean(temp_m_diff))
+  M_diff_sd = c(M_diff_sd, sd(temp_m_diff))
+  #hist(temp_m_diff, breaks = 100)
+  
+  # estimate of theta
+  theta1 = result$theta_est1
+  theta2 = result$theta_est2
+  k_est = theta2 + 1
+  theta_est = exp((theta1 - log(k_est)) / (theta1))
+  theta_est2 = exp((theta1 - log(2)) / 1)
+  # mean(theta1)
+  # mean(theta2)
+  The_est_k = c(The_est_k, mean(k_est))
+  The_est_the1 = c(The_est_the1, mean(theta_est))
+  The_est_the2 = c(The_est_the2, mean(theta_est2))
+  
+  
+  # est of true S and 
+  true_quant = c(0.9, 0.75, 0.5, 0.25, 0.1)
+  # km
+  temp = cbind(
+                     apply(abs(result$s0 - matrix(true_quant, 
+                                                  dim(result$s0)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE), 
+                     # 1
+                     apply(abs(result$s1 - matrix(true_quant, 
+                                                  dim(result$s1)[1], 5, byrow =  TRUE)),2,
+                           mean, na.rm=TRUE), 
+                     # 2 
+                     apply(abs(result$s2 - matrix(true_quant, 
+                                                  dim(result$s2)[1], 5, byrow =  TRUE)),2,
+                           mean, na.rm=TRUE),
+                     # 3
+                     apply(abs(result$s3 - matrix(true_quant, 
+                                                  dim(result$s3)[1], 5, byrow =  TRUE)),2,
+                           mean, na.rm=TRUE))
+  
+  S_est_diff = rbind(S_est_diff, temp)
+  
+    temp = cbind(
+    apply(abs(result$s_lg0 - matrix(true_quant, dim(result$s_lg0)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE), 
+    # 1
+    apply(abs(result$s_lg1 - matrix(true_quant, dim(result$s_lg1)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE), 
+    # 2 
+    apply(abs(result$s_lg2 - matrix(true_quant, dim(result$s_lg2)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE), 
+    # 3
+    apply(abs(result$s_lg3 - matrix(true_quant, dim(result$s_lg3)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE) )
+  
+  mse_lg = rbind(mse_lg, temp)
+  
+  temp = cbind(
+    apply(abs(result$s0 - matrix(true_quant, 
+                                 dim(result$s0)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE), 
+    # 1
+    apply(abs(result$s1 - matrix(true_quant, 
+                                 dim(result$s1)[1], 5, byrow =  TRUE))^2,2,
+          mean, na.rm=TRUE), 
+    # 2 
+    apply(abs(result$s2 - matrix(true_quant, 
+                                 dim(result$s2)[1], 5, byrow =  TRUE))^2,2,
+          mean, na.rm=TRUE),
+    # 3
+    apply(abs(result$s3 - matrix(true_quant, 
+                                 dim(result$s3)[1], 5, byrow =  TRUE))^2,2,
+          mean, na.rm=TRUE))
+  
+    mse1 = rbind(mse1, temp)
+  ## estimated
+  # km 
+  temp = cbind(
+                        apply(abs(result$s_lg0 - matrix(true_quant, dim(result$s_lg0)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE), 
+                        # 1
+                        apply(abs(result$s_lg1 - matrix(true_quant, dim(result$s_lg1)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE), 
+                        # 2 
+                        apply(abs(result$s_lg2 - matrix(true_quant, dim(result$s_lg2)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE), 
+                        # 3
+                        apply(abs(result$s_lg3 - matrix(true_quant, dim(result$s_lg3)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE) )
+  
+  S_est_diff_lg = rbind( S_est_diff_lg, temp)
+  ## variance 
+  
+  temp = cbind(apply(result$s0, 2, sd, na.rm=TRUE),
+                   apply(result$s1, 2, sd, na.rm=TRUE),
+                   apply(result$s2, 2, sd, na.rm=TRUE),
+                   apply(result$s3, 2, sd, na.rm=TRUE))
+  
+  S_est_sd = rbind(S_est_sd, temp)
+  
+  ## variance 
+  temp = cbind( apply(result$s_lg0, 2, sd, na.rm=TRUE),
+                      apply(result$s_lg1, 2, sd, na.rm=TRUE),
+                      apply(result$s_lg2, 2, sd, na.rm=TRUE),
+                      apply(result$s_lg3, 2, sd, na.rm=TRUE))
+  
+  S_est_sd_lg = rbind(S_est_sd_lg, temp)
+}
+
+```
+
+
+```{R echo = FALSE}
+add_table_name = function(data){
+  data = data.frame(data)
+  data = round(data,5)
+  nn = dim(data)[1]
+  nn = round(nn/5)
+  data = cbind(rep(c('t0.1', 't0.25', 't0.5', 't0.75', 't0.9'), nn), data)
+  colnames(data) = c('Quantile','KM','Exp m()','Dikta 1', 'Dikta 2')
+  rownames(data) = NULL
+  return(data)
+}
+```
+
+```{R echo =FALSE}
+# S_est_diff = c(); S_est_diff_lg = c()
+# S_est_sd = c(); S_est_sd_lg = c()
+colnames(S_est_diff_lg) = c('KM','Exp m()','Dikta 1', 'Dikta 2')
+x = cbind(add_table_name(S_est_diff), round(S_est_diff_lg,5))
+kable(x, "latex", longtable = T, align="c", 
+      caption = 'Mean absolute difference between estimated  and true S()',
+      booktabs=TRUE, escape = F)  %>% 
+group_rows("theta = 1", 1, 5) %>%
+  group_rows("theta = 2", 6, 10) %>% 
+  add_header_above(header = c(" " = 1,
+                              "With true m()" = 4,
+                              "With estimated m()" = 4))
+```
+
+
+```{R echo =FALSE}
+# S_est_diff = c(); S_est_diff_lg = c()
+# S_est_sd = c(); S_est_sd_lg = c()
+colnames(mse_lg) = c('KM','Exp m()','Dikta 1', 'Dikta 2')
+x = cbind(add_table_name(mse1), round(mse_lg,5))
+kable(x, "latex", longtable = T, align="c", 
+      caption = 'MSE',
+      booktabs=TRUE, escape = F)  %>% 
+group_rows("theta = 1", 1, 5) %>%
+  group_rows("theta = 2", 6, 10) %>% 
+  add_header_above(header = c(" " = 1,
+                              "With true m()" = 4,
+                              "With estimated m()" = 4))
+```
+
+```{R echo =FALSE}
+# S_est_diff = c(); S_est_diff_lg = c()
+# S_est_sd = c(); S_est_sd_lg = c()
+colnames(S_est_sd_lg) = c('KM','Exp m()','Dikta 1', 'Dikta 2')
+x = cbind(add_table_name(S_est_sd), round(S_est_sd_lg,5))
+kable(x, "latex", longtable = T, align="c", 
+      caption = 'Standard deviations of the estimated S()',
+      booktabs=TRUE, escape = F)  %>% 
+group_rows("theta = 1", 1, 5) %>%
+  group_rows("theta = 2", 6, 10) %>% 
+  add_header_above(header = c(" " = 1,
+                              "With true m()" = 4,
+                              "With estimated m()" = 4))
+```
+
+
+##### The estimate of $m()$
+
+```{R echo = FALSE}
+M_diff_m = matrix(M_diff_m, 1, 2)
+rownames(M_diff_m) = NULL
+colnames(M_diff_m) = c(1,2)
+kable(M_diff_m, "latex", longtable = T, align="c", 
+      caption = 'mean absolute difference between hat m() and true m()',
+      booktabs=TRUE, escape = F) 
+```
+
+The colname shows the true $\theta$ value. 
+
+```{R echo = FALSE}
+M_diff_sd = matrix(M_diff_sd, 1, 2)
+rownames(M_diff_sd) = NULL
+colnames(M_diff_sd) = c(1,2)
+kable(M_diff_sd, "latex", longtable = T, align="c", 
+      caption = 'standard deviation of estimated m()',
+      booktabs=TRUE, escape = F) 
+```
+
+The colname shows the true $\theta$ value. 
+
+```{R echo = FALSE}
+
+The_est_k = matrix(The_est_k, 1, 2)
+rownames(The_est_k) = NULL
+colnames(The_est_k) = c(1,2)
+kable(The_est_k, "latex", longtable = T, align="c", 
+      caption = 'estimated k from logitic regression (true k = 2)',
+      booktabs=TRUE, escape = F) 
+```
+
+The colname shows the true $\theta$ value. 
+
+```{R echo = FALSE}
+The_est_the1  = matrix(The_est_the1 , 1, 2)
+rownames(The_est_the1 ) = NULL
+colnames(The_est_the1 ) = c(1,2)
+kable(The_est_the1 , "latex", longtable = T, align="c", 
+      caption = 'estimated theta from logitic regression',
+      booktabs=TRUE, escape = F) 
+```
+
+The colname shows the true $\theta$ value. 
+
+```{R echo = FALSE}
+The_est_the2  = matrix(The_est_the2 , 1, 2)
+rownames(The_est_the2 ) = NULL
+colnames(The_est_the2 ) = c(1,2)
+kable(The_est_the2 ,"latex", longtable = T, align="c", 
+      caption = 'estimated theta from logitic regression with true k',
+      booktabs=TRUE, escape = F) 
+```
+
+The colname shows the true $\theta$ value. 

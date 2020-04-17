@@ -1,0 +1,134 @@
+---
+title: "How rho will affect the value of $S_{km}, S_{p1}, S_{p2}$"
+date: 2019-07-31
+output: pdf_document
+---
+
+To generate examples with the $\rho_i$ value we want, we may use the piecewise example in Slud's paper, whose joint distribution is: 
+$$ f(t,s)=\left\{
+\begin{aligned}
+& f_1(t) f_C(s) & & \text{ } (t \leq s)\\
+& f_C(s) \frac{S_1(s)}{S_2(s)} f_2(t) &  & \text{ } (t > s)
+\end{aligned}
+\right.$$
+
+Let 
+
+* $f_1(t) = exp(-t)$, $S_1(s) = exp(-x)$
+
+* $f_C(s) = exp(-s)$, $S_C(s) = exp(-s)$
+
+* $f_2(t) = \rho exp(-\rho t)$ , $S_2(s) = exp(- \rho t)$
+
+* $\rho(t) = \frac{h_2(t)}{h_1(t)} = \rho$, which is a constant. 
+
+Then 
+$$ f(t,s)=\left\{
+\begin{aligned}
+& exp(-t - s) & & \text{ } (t \leq s)\\
+& \rho exp( - \rho t + (\rho - 2)s)&  & \text{ } (t > s)
+\end{aligned}
+\right.$$
+And 
+$$f(t) = \frac{2 \rho - 2}{\rho - 2} exp(-2t) - \frac{\rho}{\rho - 2} exp(-10t)$$
+$$S(t) = \frac{2 \rho - 2}{2 \rho - 4}exp(-2t) - \frac{1}{\rho - 2} exp(-\rho t)$$
+$$\psi(t) = exp(-2t), \text{ } S_x(t) = exp(-2t)$$
+
+## Set $\rho$ values
+
+Let's $\rho = 0, 0.1, 0.9, 1, 1.1, 1.01, 10, 100$ 
+
+Simulate 200 paired data points from the associated joint distribution $f(t,s)$.
+
+## The censor percentage
+
+```{R include = FALSE}
+library(survival)
+library(png)
+library(grid)
+library(knitr)
+
+setwd('/Users/yaolanqiu/Desktop/NYU/Research/Survival/rho and sp-2019-07-31')
+
+mis_per = c(); mis_per_100 = c()
+diff_km = c(); diff_km_100 = c()
+diff_sp1 = c(); diff_sp1_100 = c()
+diff_sp2 = c(); diff_sp2_100 = c()
+
+# censoring percentage
+rho_value = c(c(0, 0.1, 0.9, 1, 1.1, 1.01, 10, 100))
+for(i in 1:8){
+  
+  RHO = rho_value[i]
+  S = function(t){
+    res = 0.5 * (2 * RHO - 2) / (RHO - 2) * exp(-2 * t) - 1 / (RHO - 2) * exp(- RHO * t)
+    return(res)
+  }
+  
+  names = paste('result-',RHO,'.RData', sep = '')
+  load(names)
+  data = result$data
+  s1 = result$s1
+  s2 = result$s2
+  mis_per = c(mis_per, 1-sum(data$status)/dim(data)[1])
+  
+  # differences beween true 
+  ## qian 100 ge de difference 
+  fit_km = survfit(Surv(time, status) ~ 1, data=data)
+  s_est = fit_km$surv
+  t_est = fit_km$time
+  S_est = data.frame(S_est = s_est, time = fit_km$time)
+  diff_km = c(diff_km, mean(abs(s_est - S(t_est))))
+  diff_sp1 = c(diff_sp1, mean(abs(s1 - S(data$time))))
+  diff_sp2 = c(diff_sp2, mean(abs(s2 - S(data$time))))
+  
+  diff_km_100 = c(diff_km_100, mean(abs(s_est - S(t_est))[1:100]))
+  diff_sp1_100 = c(diff_sp1_100, mean(abs(s1 - S(data$time))[1:100]))
+  diff_sp2_100 = c(diff_sp2_100, mean(abs(s2 - S(data$time))[1:100]))
+  
+  # plots 
+ }
+```
+
+```{R echo =FALSE}
+aaa =  matrix(round(mis_per,3),1,8)
+colnames(aaa) = rho_value
+rownames(aaa) = c('Censor percent')
+kable(aaa)
+```
+
+When $\rho$ is close to 0, there is less censoring. Otherwise, the censor percentage is around 50 $\%$.
+
+## The differences between true values
+
+Differences between all times points: 
+```{R echo =FALSE}
+bbb = rbind(round(diff_km,4), 
+            round(diff_sp1,4), round(diff_sp2,4))
+colnames(bbb) = rho_value
+rownames(bbb) = c('KM','Sp1','Sp2')
+kable(bbb)
+```
+
+Differences between the first 100 subjects' times points:
+```{R echo =FALSE}
+ccc = rbind( round(diff_km_100,4), 
+            round(diff_sp1_100,4), round(diff_sp2_100,4))
+colnames(ccc) = rho_value
+rownames(ccc) = c('KM','Sp1','Sp2')
+kable(ccc)
+```
+
+## The Plot
+```{r fig.width=6, fig.height=6,echo=FALSE,  fig.align = "center"}
+img <- readPNG("/Users/yaolanqiu/Desktop/NYU/Research/Survival/rho and sp-2019-07-31/try1.png")
+ grid.raster(img)
+```
+
+```{r fig.width=6, fig.height=6,echo=FALSE,  fig.align = "center"}
+img <- readPNG("/Users/yaolanqiu/Desktop/NYU/Research/Survival/rho and sp-2019-07-31/try2.png")
+ grid.raster(img)
+```
+
+
+

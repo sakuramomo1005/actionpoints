@@ -1,0 +1,49 @@
+---
+title: "rho in the example 1"
+date: 2019-11-18
+output: pdf_document
+fontsize: 12pt
+---
+
+$$\begin{aligned}
+\rho (t) = &  \frac{f(t)/ \psi(t) -1}{S(t)/S_x(t) - 1} = \frac{1/\psi(t) - 1}{\frac{1-t}{(1-t)^2} - 1} \\
+= & \frac{1-t}{t} \frac{2 C_0 t^5 - 5 C_0 t^4 + 4 C_0 t^3 - C_0 t^2 + 8 t}{\big((1-t) \big(C_0(t -1) t^2 (2t - 1) + 8 \big)\big)} \\
+= & \frac{2 C_0 t^4 - 5 C_0 t^3 + 4 C_0 t^2 - C_0 t + 8}{C_0 t^2 (t -1) (2t - 1) + 8}
+\end{aligned}$$
+
+Let's look at how the value varies. 
+
+```{R}
+rho1 = function(c,t){
+  res1 = 2*c*t^4 - 5*c*t^3 + 4*c*t^2 -c*t + 8
+  res2 = c*t^2*(t-1)*(2*t-1) + 8
+  res = res1/res2
+  return(res)
+}
+```
+
+
+The range of the $\rho(t)$ value: 
+```{R echo = FALSE}
+ress = c()
+for(cs in seq(-4,4,0.1)){
+  for(ts in seq(0,1,0.01)){
+    ress = c(ress, rho1(cs,ts))
+  }
+}
+round(range(ress),4)
+```
+
+For example, when $C_0 = 4$, the curve looks like
+
+```{R echo = FALSE}
+cs = 4
+ress = c()
+for(ts in seq(0,1,0.01)){
+  ress = c(ress, rho1(cs,ts))
+}
+plot(seq(0,1,0.01), ress, type = 'l', ylab = 'rho', xlab = 't')
+```
+
+
+

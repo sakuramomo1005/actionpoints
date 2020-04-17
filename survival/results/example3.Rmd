@@ -1,0 +1,144 @@
+---
+title: "Example of Independence -2, 3"
+date: 2019-10-22
+output: pdf_document
+fontsize: 12pt
+---
+
+
+### The pairwise example in Slud's paper
+
+The joint distribution is: 
+$$ f(t,s)=\left\{
+\begin{aligned}
+& f_1(t) f_C(s) & & \text{ } (t \leq s)\\
+& f_C(s) \frac{S_1(s)}{S_2(s)} f_2(t) &  & \text{ } (t > s)
+\end{aligned}
+\right.$$
+
+Let 
+
+* $f_1(t) = \exp(-t)$, $S_1(s) = \exp(-x)$
+
+* $f_C(s) = \exp(-s)$, $S_C(s) = \exp(-s)$
+
+* $f_2(t) = \rho \exp(-\rho t)$ , $S_2(s) = ]exp(- \rho t)$
+
+* $\rho(t) = \frac{h_2(t)}{h_1(t)} = \rho$, which is a constant. 
+
+Then 
+$$ f(t,s)=\left\{
+\begin{aligned}
+&  \exp(-t - s) & & \text{ } (t \leq s)\\
+& \rho \exp( - \rho t + (\rho - 2)s)&  & \text{ } (t > s)
+\end{aligned}
+\right.$$
+And 
+$$f(t) = \frac{2 \rho - 2}{\rho - 2} \exp(-2t) - \frac{\rho}{\rho - 2} \exp(-\rho t)$$
+$$S(t) = \frac{ \rho - 1}{ \rho - 2}exp(-2t) - \frac{1}{\rho - 2} \exp(-\rho t)$$
+$$\psi(t) = \exp(-2t)$$
+$$S_x(x) = P(X = T \wedge C > x) = P(T > x, C > x) = P(T > C > x) + P(C > T > x)$$
+$$\begin{aligned}
+S_x(x) = & P(X = T \wedge C > x) = P(T > x, C > x) = P(T > C > x) + P(C > T > x) \\
+= & \int_x^{\infty} \int_x ^t f(t,s) ds dt + \int_x^{\infty} \int_x ^s f(t,s) dt ds \\
+= & \int_x^{\infty} \int_x ^t  \rho \exp( - \rho t + (\rho - 2)s) ds dt + \int_x^{\infty} \int_x ^t   \exp(-t - s) dt ds \\
+= & \int_x^{\infty} \rho \big( \frac{\exp(-2t)}{\rho - 2} - \frac{\exp(\rho x - 2 x - \rho t)}{\rho - 2}\big) dt + \int_x^{\infty} \exp{-x-s} - \exp(-2s) ds \\
+= & \frac{\rho}{\rho - 2} \frac{\rho - 2}{2 \rho}\exp(-2x) +  \frac{\exp(-2x)}{2} \\
+= & \exp(-2x)
+\end{aligned}$$
+Therefore, 
+$$S_H(t) = S_x(t) = \exp(-2t), \lambda_H(t) = 2 \text{ ,(consistent to previous notation)})$$
+Then the $m()$ function is 
+$$m(t) = \frac{\lambda_F(t)}{\lambda_H(t)} = \frac{\frac{\frac{2 \rho - 2}{\rho - 2} \exp(-2t) - \frac{\rho}{\rho - 2} \exp(-\rho t)}{ \frac{ \rho - 1}{ \rho - 2} \exp(-2t) - \frac{1}{\rho - 2} \exp(-\rho t)}}{2} = \frac{1}{2} \frac{(2 \rho - 2)  \exp(-2t) - \rho \exp(-\rho t)}{(\rho - 1)  \exp(-2t) - \exp(-\rho t)}$$
+And from the above formula, we can know that when $\rho = 1$, $m(t) = 1$. 
+
+
+### Simulation
+
+Let's take $\rho = 10$ as an example, then 
+
+$$ f(t,s)=\left\{
+\begin{aligned}
+&  \exp(-t - s) & & \text{ } (t \leq s)\\
+& 10 \exp( - 10 t + 8 s)&  & \text{ } (t > s)
+\end{aligned}
+\right.$$
+
+The censoring percentage is 50 $\%$. 
+
+The mean absolute difference between true $S(t)$ and Kaplan meier estimator is $0.146$
+
+The mean absolute difference between true $S(t)$ and use $\hat{\lambda}_F(t) = m(t) \hat{\lambda}_H$ is $0.021$ (the $m(t)$ is used as true value). 
+
+```{R include = FALSE}
+library(png)
+library(grid)
+```
+
+
+```{r fig.width=4, fig.height=4,echo=FALSE,  fig.align = "center"}
+setwd('/Users/yaolanqiu/Desktop/NYU/Research/Survival/M function')
+img <- readPNG("example3-1023.png")
+ grid.raster(img)
+```
+
+
+
+### The example in Dr. Ying's paper
+
+
+In Zhiliang Ying's paper, the Joint CDF is: 
+$$
+S(T \geq x, U \geq y) =
+\begin{cases}
+e^{-x}  e^{-(e^{y} - 1)\big( (x-y)^2 + 1\big)} & x \geq y \\
+e^{-x} e^{-(e^{y} - 1)} & x < y
+\end{cases}
+$$
+
+The corresponding marginal distributions: 
+
+* $P(T > x) = P(T > x, U > 0) = e^{-x}  e^{-(e^{0} - 1)\big( (x-0)^2 + 1\big)} = e^{-x}$
+
+* $F_T(x) = 1 - e^{-x}, f_T(x) = e^{-x}$
+
+* $P(U > x) = P(U > x, T > 0) = e^{-0} e^{-(e^{y} - 1)} =  e^{-(e^{y} - 1)}$
+
+* $F_U(x) = 1 - e^{-(e^{y} - 1)}, f_U(x) = e^{1 + y - e^y}$
+
+And the distribution of $X = T \wedge U$ is 
+$$P(X > x) = P(T > x, U > x) = e^{-x}e^{-(e^{x} - 1)}$$
+Therefore, 
+$$F_X(x) = 1 - e^{1-x-e^{x}}, f_X(x) = (1 + e^x)e^{1-x-e^{x}}$$
+The $m()$ function is: 
+$$m(t) = \frac{\lambda_F(t)}{\lambda_H(t)} = \frac{f_T(t)}{S_T(t)}/ \frac{f_X(t)}{S_X(t)} = \frac{e^{-t}}{e^{-t}} / \frac{(1 + e^t)e^{1-t-e^{t}}}{e^{1-t-e^{t}}} = \frac{1}{1 + e^t}$$
+
+
+<!-- $$P(T > x, U > x) = \exp(-x) \exp(-\exp(y) + 1)$$ -->
+
+**The censoring percentage**
+Since
+$$\begin{aligned}
+P(T < x < U) = & P(T < x, U > x) = P(U > x) - P(T > x, U > x) \\
+= & \exp({-(\exp({x}) - 1)}) - \exp(-x) \exp(-\exp(x) + 1) \\
+= & (1 - \exp(-x))\exp({-(\exp({x}) - 1)}) 
+\end{aligned}$$
+Then we can calculate $P(T < U)$ as: 
+$$\begin{aligned}
+P(T < U) = & \int_0^\infty P(T < x < U)  dx \\
+= & \int_0^\infty (1 - \exp(-x))\exp({-(\exp({x}) - 1)})  dx \\ 
+= & [-e(\Gamma(0,e^x)) - \Gamma(-1, e^x) ]|^{\infty}_0 \\
+\approx & 0.2
+\end{aligned}$$
+
+The censoring percentage is 1 - 0.2 = 0.8. 
+
+However, $S(T > x, U > y) \text{ , }(x < y)$ doesn't mean that $T < U$. I met some problem in calculating the joint pdf, and the result did not look good, may be because the data isn't generated in the correct way. 
+
+
+```{r fig.width=4, fig.height=4,echo=FALSE,  fig.align = "center"}
+setwd('/Users/yaolanqiu/Desktop/NYU/Research/Survival/M function')
+img <- readPNG("example2-1023.png")
+ grid.raster(img)
+```
+

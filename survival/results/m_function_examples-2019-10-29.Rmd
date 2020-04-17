@@ -1,0 +1,207 @@
+---
+title: "m() function's consistency"
+date: 2019-10-29
+fontsize: 12pt
+output: 
+  pdf_document:
+    toc: true # table of content true
+    toc_depth: 2
+header-includes:
+    - \usepackage[most]{tcolorbox}
+    - \definecolor{light-yellow}{rgb}{1, 0.95, 0.7}
+    - \newtcolorbox{myquote}{colback=light-yellow,grow to right by=-10mm,grow to left by=-10mm, boxrule=0pt,boxsep=0pt,breakable}
+    - \newcommand{\todo}[1]{\begin{myquote} \textbf{Theroem} \emph{#1} \end{myquote}}
+---
+
+
+ 
+
+
+<!-- #### Roadmap -->
+
+<!-- * 1. Derivation of the likelihood function -->
+
+<!-- * 2. Show that the true parameter is the one that maximize the likelihood function  -->
+
+<!-- * 3. The consistency of the $\theta$ -->
+
+<!-- * 4. The consistency of the $m()$ -->
+
+# 1. MLE function derivation
+
+**To make things easy, I just consider the one dimension scenario at this time.**
+
+We denote $Y_i, i = 1, ..., N$ are the independent, identically, distributed (iid) lifetimes, whose corresponding cumulative distriubtion function (CDF) is $F$, probability distribution function (PDF) is $f$; the censoring time is defined as $C_i, i = 1,..., N$. $C_i$s are also iid, with CDF denoted as $G$ and PDF denoted as $g$. We set the censors happen on the right and the ovserved time is $Z_i = Y_i \wedge C_i$, whose CDF is $H$ and PDF is $h$. The $\delta_i = I_{[T_i \leq C_i]}$ is the status indicator, which shows whether subject $i$ is censored ($\delta_i = 0$) or not ($\delta_i = 0$). The corresponding hazard function of lifetime is $\lambda_F$ and cumulative hazard function is $\Lambda_F$. 
+
+Instead of the strong assumption of independent between $Y_i$ and $C_i$, we proposed that $T \perp \!\!\! \perp C$ at a small neighborhood, where $T = C$. And define: 
+$$m_{\theta}(t) = P(\delta = 1| Z = z ) =\lambda_F(t) / \lambda_H(t)$$
+Giving observed $(\delta_1, Z_1),(\delta_2, Z_2), ..., (\delta_n, Z_n)$, the likelihood function can be written as: 
+$$L({\theta}) = \prod_{i = 1}^{n} m_{\theta} (z_i)^{\delta_i} (1 - m_{\theta}(z_i))^{1 - \delta_i}\lambda_H(z_i) S_H(z_i)$$
+where $f_{\theta}(\delta_i, z_i) = \big[ m_{\theta}(z_i)  \big]^{\delta_i }  \big[ (1 - m_{\theta}(z_i) )\big]^{1 - \delta_i } \lambda_H(z_i) S_H(z_i)$
+And 
+$$\begin{aligned}
+ \log(L({\theta})) = \sum_{i = 1}^{n} \big[ \delta_i \log \big(m_{\theta} (z_i) \lambda_H(z_i) S_H(z_i)\big) + (1 - \delta_i) \log((1 - m_{\theta}(z_i) )\lambda_H(z_i) S_H(z_i))  \\
+\end{aligned}$$
+<!-- $$\begin{aligned} -->
+<!-- l({\theta})= & \log(L({\theta})) = \sum_{i = 1}^{n} \big[ \delta_i \log \big(m_{\theta} (z_i) \big) + (1 - \delta_i) \log(1 - m_{\theta}(z_i)) + \log(\lambda_H(z_i) S_H(z_i))\big] \\ -->
+<!-- =& \sum_{i = 1}^{n} \delta_i \log \big(m_{\theta} (z_i)\big)  + \sum_{i = 1}^{n} (1 - \delta_i) \log(1 - m_{\theta}(z_i))+ \sum_{i = 1}^{n}\log(\lambda_H(z_i) S_H(z_i)) -->
+<!-- \end{aligned}$$ -->
+<!-- Since $\lambda_H(z_i) S_H(z_i)$ does not contain the parameter $\theta$. Therefore, to find the MLE, we can just look at the partial likelihood function. To make it easy, redefine $L({\theta})$ as:  -->
+<!-- $$L({\theta}) = \prod_{i = 1}^{n} m_{\theta} (z_i)^{\delta_i} (1 - m_{\theta}(z_i))^{1 - \delta_i}$$ -->
+
+# 2. $L({\theta}) \leq L({\theta_0})$
+
+
+Let $\theta_0$ be the $\theta$ that can maximize the likelihood function $L({\theta})$. Let $\hat \theta_n$ denote the maximum likelihood estimation, which maximize $L_n({\theta})$. 
+
+**Lemma 1:** We have that for any $\theta$, 
+$$L({\theta}) \leq L({\theta_0})$$
+*Proof:*
+
+Since 
+$$L({\theta}) \leq L({\theta_0})$$
+$$\log(L({\theta})) \leq log(L({\theta_0}))$$
+Then 
+<!-- $$\begin{aligned} -->
+<!-- l({\theta_0}) - l({\theta}) = & \sum_{i = 1}^{n} \delta_i \log \big(m_{\theta_0} (z_i)\big)  + \sum_{i = 1}^{n} (1 - \delta_i) \log(1 - m_{\theta_0}(z_i)) \\ -->
+<!-- & - \sum_{i = 1}^{n} \delta_i \log \big(m_{\theta} (z_i)\big)  - \sum_{i = 1}^{n} (1 - \delta_i) \log(1 - m_{\theta}(z_i)) \\ -->
+<!-- = & \sum_{i = 1}^{n} \delta_i \log \big(\frac{m_{\theta_0} (z_i)}{m_{\theta} (z_i)} \big) + \sum_{i = 1}^{n} (1 - \delta_i) \log \big(\frac{1 - m_{\theta_0} (z_i)}{1 - m_{\theta} (z_i)} \big)  -->
+<!-- \end{aligned}$$ -->
+$$\begin{aligned}
+l({\theta_0}) - l({\theta}) = & \sum_{i = 1}^{n}  \log \big(m_{\theta_0} (z_i)\big)^{\delta_i}  \log(1 - m_{\theta_0}(z_i))^{ (1 - \delta_i)} \lambda_H(z_i) S_H(z_i) \\
+& - \sum_{i = 1}^{n}  \log \big(m_{\theta} (z_i)\big)^{\delta_i}  \log(1 - m_{\theta}(z_i))^{ (1 - \delta_i)} \lambda_H(z_i) S_H(z_i) \\
+= & \sum_{i = 1}^{n} \log \frac{ \big(m_{\theta_0} (z_i)\big)^{\delta_i}  \log(1 - m_{\theta_0}(z_i))^{ (1 - \delta_i)} \lambda_H(z_i) S_H(z_i) }{ \big(m_{\theta} (z_i)\big)^{\delta_i}  \log(1 - m_{\theta}(z_i))^{ (1 - \delta_i)} \lambda_H(z_i) S_H(z_i)}
+\end{aligned}$$
+Based on Law of Large Number (LLN), 
+$$\begin{aligned}
+& \frac{1}{n} \sum_{i = 1}^{n} \log \frac{\big(m_{\theta_0} (z_i)\big)^{\delta_i}  \log(1 - m_{\theta_0}(z_i))^{ (1 - \delta_i)} \lambda_H(z_i) S_H(z_i) }{\big(m_{\theta} (z_i)\big)^{\delta_i}  \log(1 - m_{\theta}(z_i))^{ (1 - \delta_i)} \lambda_H(z_i) S_H(z_i)} \\ &  \xrightarrow{P} E(\log \frac{\big(m_{\theta_0} (z_i)\big)^{\delta_i}  \log(1 - m_{\theta_0}(z_i))^{ (1 - \delta_i)} \lambda_H(z_i) S_H(z_i) }{\big(m_{\theta} (z_i)\big)^{\delta_i}  \log(1 - m_{\theta}(z_i))^{ (1 - \delta_i)} \lambda_H(z_i) S_H(z_i)})
+\end{aligned}$$
+
+And 
+\begin{equation}
+E(\log \frac{\big(m_{\theta_0} (z_i)\big)^{\delta_i}  \log(1 - m_{\theta_0}(z_i))^{ (1 - \delta_i)} \lambda_H(z_i) S_H(z_i) }{\big(m_{\theta} (z_i)\big)^{\delta_i}  \log(1 - m_{\theta}(z_i))^{ (1 - \delta_i)} \lambda_H(z_i) S_H(z_i)}) =  \int_0^\infty \log(\frac{f_{\theta_0} (\delta, z)}{f_{\theta} (\delta, z)}) f_{\theta_0} (\delta, z)  dz
+\end{equation}
+Recall Kullback–Leibler divergence, 
+$$D_{KL} (F||G) = \int f \log(\frac{f}{g}) \geq 0$$
+Therefore, equation (1) $\geq 0$. Therefore, $L({\theta_0}) \geq L({\theta})$
+
+
+# 3. Asymptotic normality of $\hat{\theta}_n$
+
+<!-- Note: $f_{\theta}(z_i, \delta_i) = m_{\theta}(z_i)^{\delta_i} (1- m_{\theta}(z_i))^{1-\delta_i} \lambda_H(z_i) S_H(z_i)$ -->
+
+<!-- * $l_n(\theta) = \frac{1}{n} \sum_{i=1}^n \log(f_{\theta}(z_i, \delta_i))$  -->
+
+<!-- * $l_(\theta) = E_{\theta} \big[ \log(f_{\theta}(z_i, \delta_i))\big] = \int \log(f_{\theta}(z_i, \delta_i)) f_{\theta}(z_i, \delta_i) dz$ -->
+
+<!-- * By defination, $\hat{\theta_n}$ is the maximizer of $l_n(\theta)$ -->
+
+<!-- * $\theta_0$ is the maximizer of $l(\theta)$ -->
+
+<!-- * $l_n(\theta) \xrightarrow{p} l(\theta)$ by LLN -->
+
+Look back to the likelihood function, let
+$$l(\theta) = E_{\theta} \big[ \log(f_{\theta}(z_i, \delta_i))\big] = \int \log(f_{\theta}(z_i, \delta_i)) f_{\theta}(z_i, \delta_i) dz$$
+let
+ $$l_n(\theta) = \frac{1}{n} \sum_{i=1}^n \log(f_{\theta}(z_i, \delta_i))$$
+By LLN, $l_n(\theta) \xrightarrow{p} l(\theta)$. 
+ 
+The Taylor expension of $l_n(\theta)$ at $\theta_0$ is 
+$$l_n(\theta) = l_n(\theta_0) + \frac{l_n^{\prime}(\theta_0)}{1!} (\theta - \theta_0) + \frac{l_n^{\prime \prime}(\theta_0)}{2!} (\theta - \theta_0)^2 +  o \big((\theta - \theta_0)^2 \big)$$
+$$l_n(\theta) - l_n(\theta_0) = u_n(\theta_0) (\theta - \theta_0) + \frac{1}{2} u_n^{\prime}(\theta_0) (\theta - \theta_0)^2 + R_n$$
+where 
+$$R_n = o \big((\theta - \theta_0)^2 \big)$$
+$u_n(\theta_0)$ is the score function, which is the first derivative of the log likelihood function:
+$$u_n(\theta_0) = \frac{dl_n(\theta)}{d \theta}|_{\theta = \theta_0}$$
+<!-- $I_n(\theta)$ is the Fisher information, which is the negative second derivative of log likelihood function: -->
+<!-- $$I_n(\theta) = - \frac{d^2 l_n(\theta)}{d \theta^2}|_{\theta = \theta_0}$$ -->
+
+The Taylor expension of the score fucntion $u_n(\theta)$ at $\theta_0$ is: 
+$$u_n(\theta) = u_n(\theta_0) + u_n^{\prime} (\theta_0) (\theta - \theta_0) + r_n$$
+where, 
+$$r_n = o \big(\theta - \theta_0 \big)$$
+$$u_n^{\prime} (\theta_0) = \frac{d^2 l_n(\theta)}{d \theta^2}|_{\theta = \theta_0}$$ 
+<!-- = -I_n(\theta_0)$$ -->
+Besidse, we have the facts: 
+
+* By defination, $\hat{\theta_n}$ is the maximizer of $l_n(\theta)$ and $u_n(\hat{\theta_n}) = 0$
+
+* By defination, ${\theta_0}$ is the maximizer of $l(\theta)$ and $u(\theta_0) = 0$
+
+<!-- For the MLE $\hat{\theta}_n$, $u_n(\hat{\theta}_n) = 0$ -->
+Therefore, 
+$$\begin{aligned}
+(\hat{\theta}_n - \theta_0) = - \frac{u_n(\theta_0)}{u^{\prime}_n(\theta_0)} + r_{n2}
+\end{aligned}$$
+$$\sqrt{n}(\hat{\theta}_n - \theta_0) \approx \sqrt{n} \frac{u_n(\theta_0)}{u^{\prime}_n(\theta_0)}$$
+where $r_{n2} = - \frac{r_n}{u^{\prime}_n(\theta_0)} \rightarrow 0$. 
+
+Therefore, we need to look at the distributions of $u_n(\theta_0)$ and $u^{\prime}_n(\theta_0)$
+
+Recall the Centrol limit theroem
+$$\sqrt{n} (\frac{1}{n} \sum_{i = 1}^n X_i - E(X)) \xrightarrow{d} N(0, Var(X))$$
+And we have $u_n(\theta_0) = \frac{1}{n} \sum_{i = 1}^n \frac{\partial}{ \partial \theta} \log(f_{ \theta}(\delta_i, z_i)) |_{ \theta =  \theta_0}$
+<!-- Let $h(\delta, z; \theta ) = \log(f_{ \theta}(\delta_i, z_i))$. -->
+$$E(\frac{\partial }{\partial \theta} \log(f_{ \theta}(\delta, z)) |_{ \theta =  \theta_0 } ) =
+\int \frac{f^{\prime}_{ \theta}(\delta, z)}{f_{ \theta}(\delta , z)} | _{ \theta =  \theta_0} f_{\theta_0} (\delta, z) dz = \frac{\partial }{\partial \theta} \int f_{\theta_0} (\delta, z)  dz = 0$$
+Therefore, 
+$$\sqrt{n} u_n(\theta_0) \xrightarrow{d} N(0, \text{Var} (\frac{\partial }{\partial \theta} \log(f_{ \theta}(\delta, z)|_{\theta = \theta_0}))$$
+For $u^{\prime}_n(\theta_0)$, by LLN, 
+$$u^{\prime}_n(\theta_0) = \frac{1}{n} \sum_{i =1}^n \big[ \log f_{\theta}(Z_i, \delta_i)\big]^{\prime \prime }_{\theta = \theta_0} \rightarrow E_{\theta_0} \big[\log f_{\theta}(Z,  \delta)\big]^{\prime \prime }_{\theta = \theta_0} \big]$$
+where, 
+$$\begin{aligned} 
+E_{\theta_0} \big[\log f_{\theta}(Z,  \delta)\big]^{\prime \prime }_{\theta = \theta_0} \big] = & \int \frac{f^{\prime \prime}_{\theta_0} (\delta, z) f_{\theta_0} (\delta, z) - f^{\prime}_{\theta_0} (\delta, z) f^{\prime}_{\theta_0} (\delta, z) }{(f_{\theta_0} (\delta, z))^2} f_{\theta_0} (\delta, z) dz \\
+= & \int f^{\prime \prime}_{\theta_0} (\delta, z) dz - \int (\frac{f^{\prime}_{\theta_0} (\delta, z) }{f_{\theta_0} (\delta, z)})^2 f_{\theta_0} (\delta, z) dz \\
+= & 0 - E_{\theta_0} \big[ (\frac{\partial }{\partial \theta} \log(f_{\theta_0} (\delta, z)) |_{\theta = \theta_0})^2 \big ]
+\end{aligned}$$
+
+Recall the definiation of Fisher information: Fisher information is the variance of score function, which is 
+$$I(\theta_0) = E_{\theta_0} \big[ (\frac{\partial }{\partial \theta} \log(f_{\theta_0} (\delta, z)) |_{\theta = \theta_0})^2$$
+Therefore, 
+$$u^{\prime}_n(\theta_0) = \frac{1}{n} \sum_{i =1}^n \big[ \log f_{\theta}(Z_i, \delta_i)\big]^{\prime \prime }_{\theta = \theta_0} \rightarrow E_{\theta_0} \big[\log f_{\theta}(Z,  \delta)\big]^{\prime \prime }_{\theta = \theta_0} \big] = -I(\theta_0)$$
+Therefore, 
+
+* $\sqrt{n} u_n(\theta_0) \xrightarrow{d} N(0, \text{Var} (\frac{\partial }{\partial \theta} \log(f_{ \theta}(\delta, z)|_{\theta = \theta_0}))$
+
+* $u^{\prime}_n(\theta_0) = -I(\theta_0)$, which is a fixed value
+
+Then
+$$\sqrt{n}(\hat{\theta}_n - \theta_0) \approx \sqrt{n} \frac{u_n(\theta_0)}{u^{\prime}_n(\theta_0)} \xrightarrow{d}
+N(0, \frac{\text{Var} (\frac{\partial }{\partial \theta} \log(f_{ \theta}(\delta, z)|_{\theta = \theta_0})}{I^2(\theta_0)})$$
+
+And $\text{Var} (\frac{\partial }{\partial \theta} \log(f_{ \theta}(\delta, z)|_{\theta = \theta_0}) = E((\frac{\partial }{\partial \theta} \log(f_{ \theta}(\delta, z)|_{\theta = \theta_0})^2) - [E(\frac{\partial }{\partial \theta} \log(f_{ \theta}(\delta, z)|_{\theta = \theta_0})]^2 = E((\frac{\partial }{\partial \theta} \log(f_{ \theta}(\delta, z)|_{\theta = \theta_0})^2) - 0 = I(\theta_0)$
+
+Therefore, $$\sqrt{n}(\hat{\theta}_n - \theta_0) \approx \sqrt{n} \frac{u_n(\theta_0)}{u^{\prime}_n(\theta_0)} \xrightarrow{d}
+N(0,\frac{1}{I(\theta_0)})$$
+
+<!-- For $u_n(\theta_0)$, by centrol limit theorem,  -->
+<!-- $$\begin{aligned} -->
+<!-- \sqrt{n} u_n(\theta_0) =& \sqrt{n} (\frac{1}{n} \sum_{i = 1}^n l^{\prime}(\delta_i,Z_i; \theta_0  - 0) \\ -->
+<!-- =& \sqrt{n} (\frac{1}{n} \sum_{i = 1}^n l^{\prime}(\delta_i,Z_i; \theta_0  - E_{\theta_0} (l^{\prime}(\delta_i,Z_i; \theta_0)) \text{ since } \theta_0 \text{ maximize the function }L(theta) \\ -->
+<!-- \rightarrow & N(0, \text{Var}_{\theta_0} (l^{\prime}(\delta_i,Z_i; \theta_0))) -->
+<!-- \end{aligned}$$ -->
+
+<!-- For $I_n(\theta_0)$ -->
+<!-- By LLN,  -->
+<!-- $$\frac{1}{n} \sum l^{\prime \prime} (\delta_i, Z_i; \theta_0) \xrightarrow{p} E_{\theta_0} l^{\prime \prime}(\delta_i, Z_i; \theta_0)$$ -->
+<!-- And  -->
+<!-- $$l^{\prime}(\delta_i, Z_i; \theta_0) = \frac{f^{\prime}_{\theta_0} (\delta, z)}{f_{\theta_0} (\delta, z)}$$ -->
+<!-- $$l^{\prime \prime}(\delta_i, Z_i; \theta_0) = \frac{f^{\prime \prime}_{\theta_0} (\delta, z) f_{\theta_0} (\delta, z) - f^{\prime}_{\theta_0} (\delta, z) f^{\prime}_{\theta_0} (\delta, z) }{(f_{\theta_0} (\delta, z))^2}$$ -->
+<!-- Therefore,  -->
+<!-- $$\begin{aligned}  -->
+<!-- E_{\theta_0} l^{\prime \prime}(\delta_i, Z_i; \theta_0)  = & \int \frac{f^{\prime \prime}_{\theta_0} (\delta, z) f_{\theta_0} (\delta, z) - f^{\prime}_{\theta_0} (\delta, z) f^{\prime}_{\theta_0} (\delta, z) }{(f_{\theta_0} (\delta, z))^2} f_{\theta_0} (\delta, z) dz \\ -->
+<!-- = & \int f^{\prime \prime}_{\theta_0} (\delta, z) dz - \int (\frac{f^{\prime}_{\theta_0} (\delta, z) }{f_{\theta_0} (\delta, z)})^2 f_{\theta_0} (\delta, z) dz \\ -->
+<!-- = & 0 - E_{\theta_0} (\frac{\partial }{\partial \theta} \log(f_{\theta_0} (\delta, z)) |_{\theta = \theta_0}) \\ -->
+<!-- = & - I(\theta_0) -->
+<!-- \end{aligned}$$ -->
+
+<!-- Therefore, $I_n(\theta_0) \rightarrow I(\theta_0)$ -->
+
+<!-- Therefore, $$\sqrt{n} u_n(\theta_0) I^{-1}_n(\theta_0) \xrightarrow{d} N(0, \frac{\text{Var}_{\theta_0} (l^{\prime}(\delta_i,Z_i; \theta_0))}{I^2(\theta_0)})$$ -->
+
+
+# 4. The consistency of the $m()$
+
+Since $\hat\theta_n \xrightarrow{d} \theta_0$, according to Delta method, 
+$$m(\hat \theta_n ) \xrightarrow{d} m(\theta_0)$$
+$$\sqrt{n} (m(\hat \theta_n ) - m(\theta_0)) \xrightarrow{d} N(0,  \frac{m^{\prime} (\theta_0)) \text{Var} (\frac{\partial }{\partial \theta} \log(f_{ \theta}(\delta, z)|_{\theta = \theta_0})}{I^2(\theta_0)})$$

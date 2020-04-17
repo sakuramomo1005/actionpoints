@@ -1,0 +1,53 @@
+---
+title: "example 6 two weibull"
+date: 2020-01-15
+output: pdf_document
+---
+
+
+
+Two weibull distribution, mimic Dikta's example 
+
+The joint distribution 
+$$S_{T,C}(x,y) = \begin{cases}  
+\exp(- (\frac{\theta_1}{\lambda_1}x)^{k_1}) \exp \big( - (\frac{\theta_2}{\lambda_2}y)^{k_2} (x - y + 1) \big)  & x \geq y\\
+\exp(- (\frac{\theta_1}{\lambda_1}x)^{k_1}) \exp(-(\frac{\theta_2}{\lambda_2}y)^{k_2}) & x < y
+\end{cases}$$
+Then the joint pdf when $x < y$ is 
+$$f_{T,C}(x,y) = k_1 k_2 (\frac{\theta_1}{\lambda_1})^{k_1}(\frac{\theta_2}{\lambda_2})^{k_2} x^{k_1 -1}y^{k_2 -1} \exp(- (\frac{\theta_1}{\lambda_1}x)^{k_1}-(\frac{\theta_2}{\lambda_2}y)^{k_2})$$
+And then the survival function is 
+$$S_T(x) = P(T > x , C > 0) = \exp(- (\frac{\theta_1}{\lambda_1}x)^{k_1})$$
+which is a weibull distribution with shape parameter $k_1$ and scale parameter $\lambda_1$. The $\theta_1$ is the parameter associated with the covariates $X$. 
+
+The pdf of the survival function is $$f_T(x) = k_1 (\frac{\theta_1}{\lambda_1})^{k_1} x^{k_1 - 1} \exp(- (\frac{\theta_1}{\lambda_1}x)^{k_1})$$. 
+
+The CDF of the observed time is 
+$$S_H(x) = P(T > x, C > x) = \exp(- (\frac{\theta_1}{\lambda_1}x)^{k_1}) \exp(-(\frac{\theta_2}{\lambda_2}x)^{k_2})$$
+The pdf of the observed time is
+$$f_H(x) = \big(k_1 (\frac{\theta_1}{\lambda_1})^{k_1} x^{k_1 - 1} + k_2 (\frac{\theta_2}{\lambda_2})^{k_2} x^{k_2 - 1}  \big) \exp(- (\frac{\theta_1}{\lambda_1}x)^{k_1}-(\frac{\theta_2}{\lambda_2}x)^{k_2})$$
+
+The $\psi(x) = \int_{x}^{\infty} f_{T,C}(x,y) dy = k_1 (\frac{\theta_1}{\lambda_1})^{k_1} x^{k_1 - 1}\exp(- (\frac{\theta_1}{\lambda_1}x)^{k_1}) \exp(-(\frac{\theta_2}{\lambda_2}x)^{k_2})$
+
+Therefore, the $\rho(x)$ function equals to 1. 
+$$\rho(x) = \frac{f_T(x)/\psi(x) - 1}{S_T(x)/S_H(x) - 1} = \frac{\frac{k_1 (\frac{\theta_1}{\lambda_1})^{k_1} x^{k_1 - 1} \exp(- (\frac{\theta_1}{\lambda_1}x)^{k_1})}{k_1 (\frac{\theta_1}{\lambda_1})^{k_1} x^{k_1 - 1}\exp(- (\frac{\theta_1}{\lambda_1}x)^{k_1}) \exp(-(\frac{\theta_2}{\lambda_2}x)^{k_2})} - 1}{\frac{\exp(- (\frac{\theta_1}{\lambda_1}x)^{k_1})}{\exp(- (\frac{\theta_1}{\lambda_1}x)^{k_1}) \exp(-(\frac{\theta_2}{\lambda_2}x)^{k_2})} - 1} = 1$$
+The $m(x)$ function is 
+$$\begin{aligned}
+m(x) = & \frac{f_T(x)/S_T(x)}{f_H(x)/S_H(x)} = \frac{\frac{k_1 (\frac{\theta_1}{\lambda_1})^{k_1} x^{k_1 - 1} \exp(- (\frac{\theta_1}{\lambda_1}x)^{k_1})}{\exp(- (\frac{\theta_1}{\lambda_1}x)^{k_1})}}{\frac{\big(k_1 (\frac{\theta_1}{\lambda_1})^{k_1} x^{k_1 - 1} + k_2 (\frac{\theta_2}{\lambda_2})^{k_2} x^{k_2 - 1}  \big) \exp(- (\frac{\theta_1}{\lambda_1}x)^{k_1}-(\frac{\theta_2}{\lambda_2}x)^{k_2})}{\exp(- (\frac{\theta_1}{\lambda_1}x)^{k_1}) \exp(-(\frac{\theta_2}{\lambda_2}x)^{k_2})}} \\
+= & \frac{k_1 (\frac{\theta_1}{\lambda_1})^{k_1} x^{k_1 - 1} }{k_1 (\frac{\theta_1}{\lambda_1})^{k_1} x^{k_1 - 1} + k_2 (\frac{\theta_2}{\lambda_2})^{k_2} x^{k_2 - 1} } \\
+= & \frac{1}{1 + \frac{k_2}{k_1} (\frac{\theta_2}{\lambda_2})^{k_2} (\frac{\theta_1}{\lambda_1})^{k_1}x^{k_2 - k_1}}
+\end{aligned}$$
+The censoring percentage is 
+$$\begin{aligned}P(T < C) = &\int_{0}^{\infty} \int_{0}^y k_1 k_2 (\frac{\theta_1}{\lambda_1})^{k_1}(\frac{\theta_2}{\lambda_2})^{k_2} x^{k_1 -1}y^{k_2 -1} \exp(- (\frac{\theta_1}{\lambda_1}x)^{k_1}-(\frac{\theta_2}{\lambda_2}y)^{k_2}) dx dy \end{aligned}$$
+To make it sample, if $k_1 = k_2 = 1$, the missing precentage is 
+$$\frac{\frac{\theta_1}{\lambda_1}}{\frac{\theta_1}{\lambda_1} + \frac{\theta_2}{\lambda_2}}$$
+
+Let's then plug in numbers and make a simple example. 
+$$S_{T,C}(t,s | x) = \begin{cases}  
+\exp(- (\beta^T x) t) \exp \big( - ((\beta^T x) s) (t -s + 1) \big)  & x \geq y\\
+\exp(- (\beta^T x) t) \exp ( - (\beta^T x) s ) & x < y
+\end{cases}$$
+The censoring percentage is 0.5. 
+
+The m function is 
+$$m(t | x) = \frac{1}{1 +  (\beta^T x)^2 }$$
+

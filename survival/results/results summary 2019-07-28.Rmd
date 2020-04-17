@@ -1,0 +1,495 @@
+---
+title: "Look into $S_{p1}(t)$, $S_{p2}(t)$ and $S_{km}$"
+date: 2019-07-28
+fontsize: 12pt 
+geometry: tmargin=1.8cm,bmargin=1.8cm,lmargin=1.1cm,rmargin=2.1cm
+output: 
+  pdf_document:
+    toc: 3
+header-includes:
+  - \usepackage{color}
+---
+
+
+# 1. Ratio between $S_{p1}(t)$ and $S_{km}(t)$
+
+The Kaplan-Meier equation: 
+$$\hat{S}_{km}(t) = \prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i }$$
+The Slud's equation:
+$$\begin{aligned}
+\hat{S}_{p1}(t) = & \frac{1}{N}\big\{n(t) + \sum_{k=0}^{d(t) - 1} c_k \prod_{i = k+1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}\big\} \\
+= & \prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}+ \frac{1}{N} \sum_{k=1}^{d(t)} (\rho_k - 1)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}
+\end{aligned}$$
+where,
+
+* $N$ is the total subjects in the trial
+
+* $X_i$ is the time, $X_i = min(T_i, C_i)$, and $X_i$ is ordered from $1$ to $N$: $X_1 \leq X_2 \leq ... \leq X_N$
+
+* $d$ the total number of death
+
+* $X_{(i)}$ is the death time, and ordered as $X_{(1)} \leq X_{(2)} \leq ... \leq X_{(d)}$
+
+* $n(t)$ is the number of subjects who are still alive at time $t$ 
+
+* $d(t)$ is the number of total death people at time $t$
+
+* $n_i$ is the number of people who survived after the $i$th death time ($X_j \geq X_{(i)}$)
+
+* $c_i$ is the number of censer between the $i$th death time $X_{(i)}$ and the $(i+1)$th  death time $X_{(i+1)}$
+
+Let's look at the ration of $\hat{S}_{p1}(t)$ and $\hat{S}_{km}(t)$. 
+
+Let 
+
+* $\epsilon_{max} = max_{[i \in [1, d(t)]}(\delta_i)$,  $\epsilon_{min} = min_{[i \in [1, d(t)]}(\delta_i)$
+
+* $\epsilon_1 = min_{[i \in [1, d(t)]}(\frac{n_i}{\delta_i})$,
+
+* $\epsilon_2 = max_{[i \in [1, d(t)]}(\frac{n_i}{\delta_i})$
+
+* $\epsilon_3 = min_{[i \in [1, d(t)]}(|\frac{n_i}{\delta_i}|)$
+
+* $\epsilon_4 = max_{[i \in [1, d(t)]}(|\frac{n_i}{\delta_i}|)$
+
+
+For the ratio: 
+$$\begin{aligned}
+\frac{S_{p1}(t) }{S_{KM}(t)} =& \frac{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}+ \frac{1}{N} \sum_{k=1}^{d(t)} (\rho_k - 1)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}} \\
+=& \frac{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}} + \frac{\frac{1}{N} \sum_{k=1}^{d(t)} (\delta_i)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}}
+\end{aligned}$$
+
+Term 1 = $\frac{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}}$
+
+Term 2 = $\frac{\frac{1}{N} \sum_{k=1}^{d(t)} (\delta_i)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}}$ 
+
+## 1.1 $\rho_i = 1$
+
+If $\rho_i = 1$, clearly,  $S_{p1}(t)$ = $S_{km}(t)$
+
+## 1.2 $\rho_i = 0$
+
+
+When $\rho_i = 0$, which means that $f(t) = \psi(t) \rightarrow \int_0^{\infty} (t,s) ds = \int_t^{\infty} f(t,s) ds\rightarrow \int_0^t f(t,s) ds = 0$. That is, when $s < t$, $f(t,s) = 0$, there is no censoring. 
+
+$S_{p1}(t) = \prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}+ \frac{1}{N} \sum_{k=1}^{d(t)} (\rho_k - 1)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1} = 1 - \frac{d(t)}{N}$
+
+$S_{km}(t) = \prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}$. 
+
+And if there is no censor, $n_i = N - i$, $\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i} = \prod_{i = 1}^{d(t)} \frac{N - i - 1}{N-i} = \frac{N-1 - d(t)}{N-1} = 1 - \frac{d(t)}{N-1}$.
+
+Therefore, $S_{p1}(t)  \approx S_{km}(t)$. 
+
+<!-- If $\rho_i = 0$, term 1 =: -->
+<!-- $$\begin{aligned} -->
+<!-- \frac{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}} = & \frac{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i -1}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}} -->
+<!-- = \frac{1}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}} =  \prod_{i = 1}^{d(t)} \frac{n_i}{n_i - 1} -->
+<!-- \end{aligned}$$ -->
+<!-- Its limit: -->
+<!-- $$\begin{aligned} -->
+<!-- \lim \frac{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}} = & \lim \prod_{i = 1}^{d(t)} \frac{n_i}{n_i - 1}\\ -->
+<!-- =& \lim \prod_{i = 1}^{d(t)} \big( 1 + \frac{1}{n_i - 1}\big)^{(n_i - 1) \times (\frac{1}{n_i - 1})} \\ -->
+<!-- = & \lim \prod_{i = 1}^{d(t)} e^{\frac{1}{n_i - 1}} \\ -->
+<!-- = & \lim e^{\sum_{i = 1}^{d(t)} \frac{1}{n_i - 1}} < \lim e^{ \frac{d(t)}{n_{d(t)} - 1}} -->
+<!-- \end{aligned}$$ -->
+<!-- Since,  $\lim \frac{d(t)}{n_{d(t)} - 1} = 0$, $\lim e^{ \frac{d(t)}{n_{d(t)} - 1}} = 1$ -->
+
+<!-- The term 2 = : -->
+<!-- $$\begin{aligned} -->
+<!-- \frac{\frac{1}{N} \sum_{k=1}^{d(t)} (\delta_i)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}} = & \frac{\frac{1}{N} \sum_{k=1}^{d(t)} (-1)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i -1}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}} -->
+<!-- =  - \frac{\frac{d(t)}{N}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}} \\ -->
+<!-- = & - \frac{d(t)}{N} \prod_{i = 1}^{d(t)} \frac{n_i }{n_i - 1} -->
+<!-- \end{aligned}$$ -->
+<!-- Since $\lim \prod_{i = 1}^{d(t)} \frac{n_i }{n_i - 1} \rightarrow 1$, $\lim \text{ term2 } \rightarrow - \frac{d(t)}{N}$ -->
+
+<!-- Therefore, when $\rho_i = 0$, $\frac{S_{p1}(t)}{S_{KM}(t)} \rightarrow 1 -  \frac{d(t)}{N}$. It dependents on the order of $d(t)$. If d(t) is not o(N), the $S_{p1}(t)$ and $S_{KM}(t)$ are not equal. (?) -->
+
+
+
+## 1.3 $\rho_i = 1 + \delta_i$, $\delta_i \in [-M, +M]$, $M \leq \infty$ and $\frac{\delta_i}{n_i} \rightarrow 0$
+
+Previous, we set $|\delta_i| \rightarrow 0$. However, we do not need $\delta_i$ to have such a restrict condition. 
+
+Let's give $\delta_i$ a looser restriction and explore what condition we need. 
+
+
+<!-- If there are some $\delta_i \rightarrow \infty$ (infinity ones or finity), we need to make sure that the order of $n_i$ is larger than the order of $\delta_i$, that is $\frac{\delta_i}{n_i} \rightarrow 0$.  -->
+
+For term 1: 
+$$\begin{aligned}
+\frac{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}} =& \prod_{i = 1}^{d(t)}\frac{n_i}{n_i + \delta_i} = \prod_{i = 1}^{d(t)}(1 - \frac{1}{\frac{n_i}{\delta_i} + 1})\\
+\end{aligned}$$
+And 
+$$\prod_{i = 1}^{d(t)} (1 - \frac{1}{1+\epsilon_1}) \leq \prod_{i = 1}^{d(t)}(1 - \frac{1}{\frac{n_i}{\delta_i} + 1}) \leq \prod_{i = 1}^{d(t)} (1 - \frac{1}{1+\epsilon_2})$$
+$$(1 - \frac{1}{1+\epsilon_1})^{d(t)} \leq \prod_{i = 1}^{d(t)}(1 - \frac{1}{\frac{n_i}{\delta_i} + 1})  \leq  (1 - \frac{1}{1+\epsilon_2})^{d(t)}$$
+$$(1 - \frac{1}{1+\epsilon_1})^{ (1+\epsilon_1) \frac{d(t)}{1+\epsilon_1}} \leq \prod_{i = 1}^{d(t)}(1 - \frac{1}{\frac{n_i}{\delta_i} + 1})  \leq  (1 - \frac{1}{1+\epsilon_2})^{ (1+\epsilon_2) \frac{d(t)}{1+\epsilon_2}}$$
+where  $\epsilon_1 = min_{[i \in [1, d(t)]}(\frac{n_i}{\delta_i})$, $\epsilon_2 = max_{[i \in [1, d(t)]}(\frac{n_i}{\delta_i})$
+
+Since $\epsilon_1 = min_{i \in [1, d(t)]}(\frac{n_i}{\delta_i})$, $\epsilon_2 = max_{i \in [1, d(t)]}(\frac{n_i}{\delta_i})$, and $\frac{\delta_i}{n_i} \rightarrow 0$, $1 + \epsilon_1 \rightarrow \infty$ and  $1+  \epsilon_2 \rightarrow \infty$. (if all $\delta_i$ > 0, $1 + \epsilon_1 \rightarrow + \infty$,  $1+  \epsilon_2 \rightarrow + \infty$; if all $\delta_i$ < 0, $1 + \epsilon_1 \rightarrow - \infty$,  $1+  \epsilon_2 \rightarrow - \infty$; otherwise, $1 + \epsilon_1 \rightarrow - \infty$,  $1+  \epsilon_2 \rightarrow + \infty$. however, the sign of $\infty$ will not affect the result)
+
+
+Recall: 
+$$\lim_{n \rightarrow \infty}(1 + \frac{a}{n})^{bn} = e^{ab}$$
+Therefore, 
+$$\lim_{\epsilon_1 \rightarrow \infty} (1 - \frac{1}{1+\epsilon_1})^{ (1+\epsilon_1) \frac{d(t)}{1+\epsilon_1}} =\lim_{\epsilon_1 \rightarrow \infty} [\frac{1}{e}]^{\frac{d(t)}{1+\epsilon_1}}$$
+$$\lim_{\epsilon_2 \rightarrow \infty} (1 - \frac{1}{1+\epsilon_2})^{ (1+\epsilon_2) \frac{d(t)}{1+\epsilon_2}} =\lim_{\epsilon_2 \rightarrow \infty} [\frac{1}{e}]^{\frac{d(t)}{1+\epsilon_2}}$$
+Therefore, 
+$$\lim_{\epsilon_1 \rightarrow \infty} [\frac{1}{e}]^{\frac{d(t)}{1+\epsilon_1}} \leq \lim_{ \infty}\text{ term1 } \leq \lim_{\epsilon_2 \rightarrow \infty} [\frac{1}{e}]^{\frac{d(t)}{1+\epsilon_2}}$$
+
+
+<!-- based on the squeeze theorem, $\lim_{\frac{n_i}{\delta_i} \rightarrow \infty} \prod_{i = 1}^{d(t)}(1 - \frac{1}{\frac{n_i}{\delta_i} + 1}) = 1$. That is, $\lim_{\frac{n_i}{\delta_i} \rightarrow \infty} \frac{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}} = 1$ -->
+
+
+For the term 2: 
+$$\frac{1}{N} \sum_{k=1}^{d(t)} (D_{min})\prod_{i = k}^{d(t)} \frac{\frac{n_i - 1}{n_i + \delta_i}}{\frac{n_i - 1}{n_i}}\prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1} \leq \frac{\frac{1}{N} \sum_{k=1}^{d(t)} (\delta_i)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}}  \leq \frac{1}{N} \sum_{k=1}^{d(t)} (D_{max})\prod_{i = k}^{d(t)} \frac{\frac{n_i - 1}{n_i + \delta_i}}{\frac{n_i - 1}{n_i}}\prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1}$$
+where $D_{min}$ is the smallest $\delta_i$ and $D_{max}$ is the biggest $\delta_i$. 
+
+Here, since $D_{max}, D_{min}$ may goes to $+\infty, -\infty$, we may discuss different scenarios. 
+
+### Scenario 1
+
+$\rho_i = 1 + \delta_i$, $\delta_i \in [-M, +M]$ and $0< M < \infty$. 
+
+In this scenario, $D_{min} < D_{max} < \infty$. 
+
+Let's look at the right part first: 
+$$\begin{aligned}\frac{1}{N} \sum_{k=1}^{d(t)} (D_{max})\prod_{i = k}^{d(t)} \frac{\frac{n_i - 1}{n_i + \delta_i}}{\frac{n_i - 1}{n_i}}\prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1} 
+= & \frac{1}{N} \sum_{k=1}^{d(t)} (D_{max})\prod_{i = k}^{d(t)} \frac{1}{1 + \frac{\delta_i}{n_i}}\prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1} \\
+\leq & \frac{1}{N} \sum_{k=1}^{d(t)} (D_{max})\prod_{i = k}^{d(t)} \frac{1}{1 - 1/\epsilon_3}\prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1}, \text{ where } \epsilon_3 = min_{[i \in [1, d(t)]}(|\frac{n_i}{\delta_i}|) \\
+=&\frac{D_{max}}{N} \sum_{k=1}^{d(t)} \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t) -k + 1} \prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1} \\
+=& \frac{D_{max}}{N}  \big[\frac{1}{1 - 1/\epsilon_3}\big] ^{d(t)}\sum_{k=1}^{d(t)} \big[1 - 1/\epsilon_3\big]^{k-1} \prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1} \\
+\leq & \frac{D_{max}}{N}  \big[\frac{1}{1 - 1/\epsilon_3}\big] ^{d(t)}\sum_{k=1}^{d(t)} \big[1 - 1/\epsilon_3\big]^{k-1} \big[ \frac{n_{k-1}}{n_{k-1} - 1} \big] ^ {k-1} \\
+= &  \frac{D_{max}}{N}  \big[\frac{1}{1 - 1/\epsilon_3}\big] ^{d(t)} \frac{1 - A^{d(t)}}{1 -A}
+\end{aligned}$$
+where $A = \big[1 - 1/\epsilon_3\big]\big[ \frac{n_{k-1}}{n_{k-1} - 1} \big]$.
+
+And: 
+
+* $D_{max} < \infty$, $\frac{D_{max}}{N} \rightarrow 0$
+
+* $\lim_{\epsilon_3 \rightarrow \infty} \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t)} = 
+\lim_{\epsilon_3 \rightarrow \infty} (1 + \frac{1}{\epsilon_3 -1})^{d(t)} = e^{\frac{d(t)}{\epsilon_3 + 1}}$
+
+* Since $\epsilon_3 \rightarrow \infty$, $n_{k-1} \rightarrow \infty$, $A = \big[1 - 1/\epsilon_3\big]\big[ \frac{n_{k-1}}{n_{k-1} - 1} \big] = \frac{\frac{\epsilon_3 - 1}{n_{k-1} - 1}}{\frac{\epsilon_3}{n_{k-1}}} \rightarrow 1$, and $A < 1$. Therefore, $1 - A^{d(t)} \rightarrow 0$ and $1 -A \rightarrow 0$. According to L’Hôpital’s rule,
+$$\lim_{A \rightarrow 1}\frac{1 - A^{d(t)}}{1 -A} = \lim_{A \rightarrow 1} d(t) A^{d(t) -1} \approx \lim_{A \rightarrow 1} d(t) A^{d(t)}$$
+And
+$$\begin{aligned}
+A = & \big[1 - 1/\epsilon_3\big]\big[ \frac{n_{k-1}}{n_{k-1} - 1} \big] \\
+ = & 1  + \frac{1}{n_{k-1} + 1} - \frac{1}{\epsilon_3} - \frac{1}{\epsilon_3(n_{k-1} + 1)}\\
+=& [1 + \frac{1}{n_{k-1} + 1} - \frac{1}{\epsilon_3} - \frac{1}{\epsilon_3(n_{k-1} + 1)}] ^ {1/(\frac{1}{n_{k-1} + 1} - \frac{1}{\epsilon_3} - \frac{1}{\epsilon_3(n_{k-1} + 1)}) \times (\frac{1}{n_{k-1} - 1} - \frac{1}{\epsilon_3} - \frac{1}{\epsilon_3(n_{k-1} + 1)})}
+\end{aligned}$$
+And 
+$$\lim_{n_{k-1}, \epsilon_3 \rightarrow \infty} A = e^{(\frac{1}{n_{k-1} - 1} - \frac{1}{\epsilon_3} - \frac{1}{\epsilon_3(n_{k-1} - 1)})} = e^{\frac{\epsilon_3 - n_{k-1}}{\epsilon_3(n_{k-1} - 1)}}$$
+Therefore, limitation of  right part of term 2 inequation is: 
+$$\begin{aligned}
+& \frac{D_{max}}{N} \times e^{\frac{d(t)}{\epsilon_3 + 1}} \times d(t) [e^{\frac{\epsilon_3 - n_{k-1}}{\epsilon_3(n_{k-1} - 1)}}]^{d(t)}  \\
+& =\frac{d(t) D_{max}}{N} e^{d(t) \times (\frac{1}{\epsilon_3 + 1} + \frac{\epsilon_3 - n_{k-1}}{\epsilon_3(n_{k-1} - 1)})}
+\end{aligned}$$
+Therefore, 
+$$\begin{aligned}
+\lim \frac{S_{p1}(t) }{S_{KM}(t)} \leq \lim \big \{ [\frac{1}{e}]^{\frac{d(t)}{1+\epsilon_2}} + \frac{d(t) D_{max}}{N} e^{d(t) \times (\frac{1}{\epsilon_3 + 1} + \frac{\epsilon_3 - n_{k-1}}{\epsilon_3(n_{k-1} - 1)})} \big \}
+\end{aligned}$$
+The left part is similar. 
+
+Therefore, if $\frac{d(t)}{\epsilon_i} = \frac{d(t)}{\frac{n_i}{\delta_i}} = \frac{d(t)\delta_i}{n_i} \rightarrow 0,$
+
+* $[\frac{1}{e}]^{\frac{d(t)}{1+\epsilon_2}} \rightarrow 1$
+
+* $d(t) \times \frac{1}{\epsilon_3 + 1} \rightarrow  0$,  $d(t) \times ( \frac{\epsilon_3 - n_{k-1}}{\epsilon_3(n_{k-1} - 1)}) \rightarrow  0$,
+
+That is, $e^{d(t) \times (\frac{1}{\epsilon_3 + 1} + \frac{\epsilon_3 - n_{k-1}}{\epsilon_3(n_{k-1} - 1)})} \rightarrow  1$, or it is less than $\infty$, 
+
+Then we need $\frac{d(t) D_{max}}{N} \rightarrow 0$. If $d(t)$ and $N$ have same order, we need $D_{max} \rightarrow 0$, that is, $\rho_i \rightarrow 1$
+
+
+This means that, we need the majority of $\rho_i$ goes to 1. 
+
+
+### Scenario 2
+
+There are finity amound of $\delta_i$, whose absolute value is large.  
+
+Let's divide subjects into two sets: $E_1, E_2$. 
+
+* When $i \in E_1$, $\delta_i \in (-d_1,d_1)$, where $d_1 \rightarrow 0$
+
+* When $i \in E_2$, $\delta_i \in (-d_2, d_2)$, where $0 <d_2 < \infty$. The size of set $E_2$ is finite, say, $|E_2| = l$. 
+
+Then the $\frac{n_i}{\delta_i} \rightarrow \infty$ is still true, therefore, the derivative of term 1 will not change. 
+
+$$\lim_{\epsilon_1 \rightarrow \infty} [\frac{1}{e}]^{\frac{d(t)}{1+\epsilon_1}} \leq \lim_{ \infty}\text{ term1 } \leq \lim_{\epsilon_2 \rightarrow \infty} [\frac{1}{e}]^{\frac{d(t)}{1+\epsilon_2}}$$
+
+Regrad to term 2:
+$$\begin{aligned}
+& \frac{\frac{1}{N} \sum_{k=1}^{d(t)} (\delta_i)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}} = \\
+& \frac{\frac{1}{N} \sum_{k \in E_1} (\delta_i)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}} + \frac{\frac{1}{N} \sum_{k\in E_2} (\delta_i)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}}
+\end{aligned}$$
+
+* For the points in $E_1$, the previous derivation is still true 
+$$\begin{aligned}
+\frac{\frac{1}{N} \sum_{k \in E_1} (\delta_i)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}}  \leq &
+\frac{\frac{1}{N} \sum_{k \in E_1} (d_1)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}} \\
+= & \frac{d_1}{N} \sum_{k \in E_1} \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t) -k + 1} \prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1} \\
+\leq & \frac{d_1}{N} \sum_{k =1}^{d(t)} \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t) -k + 1} \prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1}
+\end{aligned}$$
+which throught the above derivation goes to 0 as $d_1$ goes to 0. 
+
+* For the points in $E_2$
+
+$$\begin{aligned}
+\frac{\frac{1}{N} \sum_{k \in E_2} (\delta_i)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}} \leq & 
+\frac{\frac{1}{N} \sum_{k \in E_2} (d_2)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}}  \\
+=& \frac{d_2}{N} \sum_{k \in E_2} \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t) -k + 1} \prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1}  \\
+= & \frac{d_2}{N}  \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t)} \sum_{k \in E_2} \big[{1 - 1/\epsilon_3}\big]^{ k - 1} \prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1} \\
+\leq & \frac{d_2}{N}  \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t)} \sum_{k \in E_2} \big[{1 - 1/\epsilon_3}\big]^{ k - 1} \big[ \frac{n_{k-1}}{n_{k-1} - 1}  \big]^{k-1} \\
+= & \frac{d_2}{N}  \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t)} \sum_{k \in E_2} A ^ {k-1} 
+\end{aligned}$$
+where $A = \big[1 - 1/\epsilon_3\big]\big[ \frac{n_{k-1}}{n_{k-1} - 1} \big]$.
+ 
+ Previously, we know that $A$ goes to 1 from the right. As $k$ is larger, $A^k$ is smaller. Therefore, 
+ $$\begin{aligned}
+\frac{d_2}{N}  \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t)} \sum_{k \in E_2} A ^ {k-1} \leq & \frac{d_2}{N}  \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t)} \big[ |E_2| A ^ {k_0-1} \big] , \text{ where } k_0 \text{ is the smallest value in } E_2 \\
+=& \frac{d_2}{N}  \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t)} \big[ l A ^ {k_0-1} \big] 
+\end{aligned}$$
+ within it,
+ 
+ * $A ^ {k_0-1}$ is a constant, since $0<A<1$, $k_0 < d_2 < \infty$.
+ 
+ * $\lim_{\epsilon_3 \rightarrow \infty} \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t)} = 
+\lim_{\epsilon_3 \rightarrow \infty} (1 + \frac{1}{\epsilon_3 -1})^{d(t)} = e^{\frac{d(t)}{\epsilon_3 + 1}}$, when $\frac{d(t)}{\epsilon_3} < \infty$, it is a constant. 
+ 
+ * $d_2 \times l < \infty$ is a constant. 
+ 
+ Therefore, $\frac{d_2}{N}\big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t)} \big[ l A^{k_0-1} \big]  = \frac{C}{N} \rightarrow 0$ 
+as $N \rightarrow \infty$, where $C = d_2 \times l \times A ^ {k_0-1} \times e^{\frac{d(t)}{\epsilon_3 + 1}}$. 
+
+Therefore, similarly, intotal, when $\frac{d(t)}{\epsilon_3} \rightarrow 0$, term1 goes to 1 and term 2 goes to 0. $S_{p1}$ is close to $S_{km}$
+ 
+ 
+### Scenario 3
+
+Let's divide subjects into three sets: $E_1, E_2, E_3$ 
+
+* When $i \in E_1$, $\delta_i \in (-d_1,d_1)$, where $d_1 \rightarrow 0$
+
+* When $i \in E_2$, $\delta_i \in (-d_2, d_2)$, where $0 <d_2 < \infty$. The size of set $E_2$ is finite, say, $|E_2| = l$. 
+
+* When $i \in E_3$, $\delta_i \rightarrow \infty$, where $0 <d_2 < \infty$, and the order is smaller than $n_i$, that is, $\frac{\delta_i}{n_i} \rightarrow 0$. The size of set $E_3$ is finite, say, $|E_3| = l_3$. 
+
+Then the $\frac{n_i}{\delta_i} \rightarrow \infty$ is still true, therefore, the derivative of term 1 will not change. 
+
+Regard to the term 2: 
+$$\begin{aligned}
+& \frac{\frac{1}{N} \sum_{k=1}^{d(t)} (\delta_i)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}} = \\
+& \frac{\frac{1}{N} \sum_{k \in E_1} (\delta_i)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}} + \frac{\frac{1}{N} \sum_{k\in E_2} (\delta_i)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}}+ \frac{\frac{1}{N} \sum_{k\in E_3} (\delta_i)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}}
+\end{aligned}$$
+* When $i \in E_1$, the derivation is similar as scenario 1, 
+$$\frac{\frac{1}{N} \sum_{k \in E_1} (\delta_i)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}} \rightarrow 0$$
+* When $i \in E_2$, the derivation is similar as scenario 2, 
+$$\frac{\frac{1}{N} \sum_{k \in E_2} (\delta_i)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}} \rightarrow 0$$
+* When $i \in E_3$, the derivation is similar as scenario 3, 
+
+$$\begin{aligned}
+\frac{\frac{1}{N} \sum_{k \in E_3} (\delta_i)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}} \leq & 
+\frac{\frac{1}{N} \sum_{k \in E_3} (d_3)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}}  \\
+=& \frac{d_3}{N} \sum_{k \in E_3} \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t) -k + 1} \prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1}  \\
+= & \frac{d_3}{N}  \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t)} \sum_{k \in E_3} \big[{1 - 1/\epsilon_3}\big]^{ k - 1} \prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1} \\
+\leq & \frac{d_3}{N}  \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t)} \sum_{k \in E_3} \big[{1 - 1/\epsilon_3}\big]^{ k - 1} \big[ \frac{n_{k-1}}{n_{k-1} - 1}  \big]^{k-1} \\
+= & \frac{d_2}{N}  \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t)} \sum_{k \in E_3} A ^ {k-1} 
+\end{aligned}$$
+where $A = \big[1 - 1/\epsilon_3\big]\big[ \frac{n_{k-1}}{n_{k-1} - 1} \big]$. $\delta_i$ is bounded by $d_3$ and $d_3$ goes to $\infty$.
+ 
+ Previously, we know that $A$ goes to 1 from the right. As $k$ is larger, $A^k$ is smaller. Therefore, 
+ $$\begin{aligned}
+\frac{d_3}{N}  \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t)} \sum_{k \in E_3} A ^ {k-1} \leq & \frac{d_3}{N}  \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t)} \big[ |E_3| A ^ {k_0-1} \big] , \text{ where } k_0 \text{ is the smallest value in } E_3 \\
+=& \frac{d_3}{N}  \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t)} \big[ l_3 A ^ {k_0-1} \big] 
+\end{aligned}$$
+ within it,
+ 
+ * $A ^ {k_0-1}$ is a constant, since $0<A<1$, $k_0 < d_3 < \infty$.
+ 
+ * $\lim_{\epsilon_3 \rightarrow \infty} \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t)} = 
+\lim_{\epsilon_3 \rightarrow \infty} (1 + \frac{1}{\epsilon_3 -1})^{d(t)} = e^{\frac{d(t)}{\epsilon_3 + 1}}$, when $\frac{d(t)}{\epsilon_3} < \infty$, it is a constant. 
+ 
+ * $d_2 \times l < \infty$ is a constant. 
+ 
+ Therefore, $\frac{d_3}{N}\big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t)} \big[ l_3 A^{k_0-1} \big]  = \frac{d_3}{N} C \rightarrow 0$ 
+as $N \rightarrow \infty$, where $C = l_3 \times A ^ {k_0-1} \times e^{\frac{d(t)}{\epsilon_3 + 1}}$. This is because $\frac{d_3}{N} \rightarrow 0$
+
+
+
+
+## Conclusion
+
+In a conclusion, when for 
+
+* any $i$, $\frac{\rho_i - 1}{n_i}\rightarrow 0$, 
+
+* all $\rho_i \rightarrow 1$, except finite number of $i$s, s.t. $|\rho_i| > 1$ ($|\rho_i|$ can be finite value or infinity)
+
+The $S_p(t)/S_{km} \rightarrow 1$
+
+
+<!-- And $A = \frac{\epsilon_3 - 1}{\epsilon_3} \times  \frac{n_{k-1}}{n_{k-1} - 1}$, if $0 < \epsilon_3 < n_{k-1}$, then $0 <A < 1$ (which means that there exists some $\delta_i > 1$) -->
+<!-- And if $0 <A < 1$, it is clear that $\lim \frac{\epsilon_{max}}{N}  \big[\frac{1}{1 - 1/\epsilon_3}\big] ^{d(t)} \frac{1 - A^n}{1 -A} \rightarrow 0$ -->
+
+<!-- If $A > 1$, ? $\epsilon_3$ be the $o()$?  -->
+
+<!-- If $A > 1$, which means that all $|\delta_i| < 1$, and also $A \rightarrow +1$, therefore, $\frac{1 - A ^ {d(t)}}{1-A} \rightarrow A^{d(t) - 1}$.  -->
+<!-- And  -->
+
+
+<!-- ## 1.4 $\rho_i = 1 + \delta_i$, and there is finity nubmber of  $\delta_i$ that $0 < \frac{\delta_i}{n_i} < M < \infty$ -->
+
+
+# 2. Difference between $S_{p1}(t)$ and $S_{km}(t)$
+
+Similar way as ratio, however, ratio is easier to show. 
+$$\begin{aligned}
+S_{p1}(t) - S_{km}(t) = S_{km}(t)\big[ \frac{S_{p1}(t)}{S_{km}(t)} - 1\big]
+\end{aligned}$$
+As $\frac{S_{p1}(t)}{S_{km}(t)} \rightarrow 1$, $S_{p1}(t) - S_{km}(t)  \rightarrow 0$.
+
+
+# 3. Difference between $S_{p1}(t)$ and $S_{p2}(t)$
+
+There was a wrong calculation in the difference between $S_{p1}(t)$ and $S_{p2}(t)$. 
+
+$~$
+
+We find that there are less differneces between $S_{p1}(t)$ and  $S_{p2}(t)$ from the simulations. Let's look at their distance. 
+$$\hat{S}_{p1}(t) = \frac{1}{N}\big\{n(t) + \sum_{k=0}^{d(t) - 1} c_k \prod_{i = k+1}^{d(t)} (1 - \frac{\rho_i}{n_i + \rho_i - 1})\big\}$$
+$$\hat{S}_{p2}(t) = \frac{1}{N}\big\{n(t) + c_{d(t)-1} + \sum_{k=0}^{d(t) - 2} c_k \prod_{i = k+1}^{d(t) - 1} (1-\frac{\rho(X_{i})}{n_i})  \big\}$$
+Within those two equations, the different parts are: 
+$$\begin{aligned} \hat{S}_{p2}(t) - \hat{S}_{p1}(t) =& \frac{1}{N} c_{d(t)-1} + \frac{1}{N} \sum_{k=0}^{d(t) - 2} c_k \prod_{i = k+1}^{d(t) - 1} (1-\frac{\rho_i}{n_i}) -  \frac{1}{N}\sum_{k=0}^{d(t) - 1} c_k \prod_{i = k+1}^{d(t)} (1 - \frac{\rho_i}{n_i + \rho_i - 1}) \\
+=&\frac{1}{N} c_{d(t)-1} + \frac{1}{N} \sum_{k=0}^{d(t) - 2} c_k\prod_{i = k+1}^{d(t) - 1} (1-\frac{\rho_i}{n_i}) - \frac{1}{N}\sum_{k=0}^{d(t) - 2} c_k\prod_{i = k+1}^{d(t) - 1} (1-\frac{\rho_i}{n_i})(\frac{1 - \frac{\rho_i}{n_i + \rho_i - 1}}{1-\frac{\rho_i}{n_i}}) \\
+&-\frac{1}{N}c_{d(t)-1} (1 - \frac{\rho_{d(t)-1}}{n_{d(t)-1} + \rho_{d(t)-1} - 1})\\
+=& \frac{1}{N} c_{d(t)-1} \frac{\rho_{d(t)-1}}{n_{d(t)-1} + \rho_{d(t)-1} - 1} + \frac{1}{N} \sum_{k=0}^{d(t) - 2} c_k\prod_{i = k+1}^{d(t) - 1} (1-\frac{\rho_i}{n_i}) (1 - \prod_{i = k+1}^{d(t) - 1}  \frac{1 - \frac{\rho_i}{n_i + \rho_i - 1}}{1-\frac{\rho_i}{n_i}}) \text{ equation (*)}
+\end{aligned}$$
+
+## 3.1 If all $\rho_i \leq 1$:
+
+Let $c_{max} = max(c_k), \text{ } k \in [0, d(t)-2]$.
+$$equation (*) \leq \frac{1}{N} c_{d(t)-1} \frac{\rho_{d(t)-1}}{n_{d(t)-1} + \rho_{d(t)-1} - 1} + \frac{c_{max}}{N}\sum_{k=0}^{d(t) - 2} \prod_{i = k+1}^{d(t) - 1} (1-\frac{\rho_i}{n_i}) \big(1 - \prod_{i = k+1}^{d(t) - 1}  \frac{1 - \frac{\rho_i}{n_i + \rho_i - 1}}{1-\frac{\rho_i}{n_i}}\big)$$
+And 
+$$\begin{aligned}
+\prod_{i = k+1}^{d(t) - 1} (1-\frac{\rho_i}{n_i}) \leq & (1-\frac{\rho_{m}}{n_{m}})^{d(t) - 1 -k}\\
+=& [e^{-\rho_m}]^{\frac{d(t) - 1 - k}{n_m}}, \text{ as } n_m \rightarrow \infty
+\end{aligned}$$
+where $m$ is the index that achieve the min $\frac{\rho_i}{n_i}, \text{ } i \in [1, d(t) - 1]$
+$$\begin{aligned}
+1 - \prod_{i = k+1}^{d(t) - 1}  \frac{1 - \frac{\rho_i}{n_i + \rho_i - 1}}{1-\frac{\rho_i}{n_i}} = & 1 - \prod_{i = k+1}^{d(t) - 1} \frac{(n_i - 1)n_i}{(n_i - 1)n_i + \rho_i - \rho_i^2} \\
+=& 1 - \prod_{i = k+1}^{d(t) - 1} (1 - \frac{ \rho_i - \rho_i^2}{(n_i - 1)n_i + \rho_i - \rho_i^2} ) \\
+\leq & 1 - (1 - \frac{ \rho_{d(t) - 1} - \rho_{d(t) - 1}^2}{(n_{d(t) - 1} - 1)n_{d(t) - 1} + \rho_{d(t) - 1} - \rho_{d(t) - 1}^2} )^{d(t) - 1 - k}
+\end{aligned}$$
+the inequality is because $\rho_i \in (0,1), 0< \rho_i - \rho_i^2 < 1$, and $\frac{(n_i - 1)n_i}{(n_i - 1)n_i + \rho_i - \rho_i^2}$ is an monotone increasing function w.r.t $n_i$ (the affect of $\rho_i$ is too small comparing to $\rho_i$, we can just treat it as a small fixed value.)
+$$\begin{aligned}
+& \lim_{n_i \rightarrow \infty} \big[ 1 - (1 - \frac{ \rho_{d(t) - 1} - \rho_{d(t) - 1}^2}{(n_{d(t) - 1} - 1)n_{d(t) - 1} + \rho_{d(t) - 1} - \rho_{d(t) - 1}^2} )^{d(t) - 1 - k} \big] \\
+& = \lim_{n_i \rightarrow \infty}  \big[ 1 - (1 - \frac{ \rho_{d(t) - 1} - \rho_{d(t) - 1}^2}{(n_{d(t) - 1} - 1)n_{d(t) - 1}}  )^{d(t) - 1 - k} \big] \\
+& = 1  - \big(\frac{1}{e}\big)^{\rho_{d(t) - 1} - \rho_{d(t) - 1}^2 \times \frac{d(t) - 1 - k}{(n_{d(t) - 1} - 1)n_{d(t) - 1}}}
+\end{aligned}$$
+Therefore,
+$$\begin{aligned}
+  \lim_{n_i \rightarrow \infty}  equation (*) \leq & \lim_{n_i \rightarrow \infty}  \frac{1}{N} c_{d(t)-1} \frac{\rho_{d(t)-1}}{n_{d(t)-1} + \rho_{d(t)-1} - 1}  \\
+  & + \lim_{n_i \rightarrow \infty}  \frac{c_{max}}{N}\sum_{k=0}^{d(t) - 2}  \big(\frac{1}{e}\big)^{\rho_m \times {\frac{d(t) - 1 - k}{n_m}}} \big\{ 1  - \big(\frac{1}{e}\big)^{\rho_{d(t) - 1} - \rho_{d(t) - 1}^2 \times \frac{d(t) - 1 - k}{(n_{d(t) - 1} - 1)n_{d(t) - 1}}} \big \} \\
+  = & \lim_{n_i \rightarrow \infty}  \frac{1}{N} c_{d(t)-1} \frac{\rho_{d(t)-1}}{n_{d(t)-1} + \rho_{d(t)-1} - 1} \\
+  & + \lim_{n_i \rightarrow \infty}  \frac{c_{max}}{N}\sum_{i=1}^{d(t) - 1}
+  [\big(\frac{1}{e}\big)^{\frac{\rho_m}{n_m}}]^i\big \{1 -[\big(\frac{1}{e}\big)^{\frac{\rho_{d(t) - 1} - \rho_{d(t) - 1}^2}{n_{d(t) - 1}^2 - n_{d(t) - 1}}}]^i \big\} \\
+  = &  \lim_{n_i \rightarrow \infty}  \frac{1}{N} c_{d(t)-1} \frac{\rho_{d(t)-1}}{n_{d(t)-1} + \rho_{d(t)-1} - 1} \\
+  & + \lim_{n_i \rightarrow \infty}  \frac{c_{max}}{N}\sum_{i=1}^{d(t) - 1} A^i \times (1-B^i) \\
+  = & \lim_{n_i \rightarrow \infty}  \frac{1}{N} c_{d(t)-1} \frac{\rho_{d(t)-1}}{n_{d(t)-1} + \rho_{d(t)-1} - 1} + \frac{c_{max}}{N} \big[ \frac{A}{1-A} - \frac{AB}{ 1- AB}\big]
+\end{aligned}$$
+where $A = \big(\frac{1}{e}\big)^{\frac{\rho_m}{n_m}}, B = \big(\frac{1}{e}\big)^{\frac{\rho_{d(t) - 1} - \rho_{d(t) - 1}^2}{n_{d(t) - 1}^2 - n_{d(t) - 1}}}$
+
+As $n \rightarrow \infty, \rho \in (0,1)$, $A \rightarrow 1, B \rightarrow 1$, and $A < 1, B < 1$
+
+$$\begin{aligned}
+\lim_{A \rightarrow 1, B \rightarrow 1} \frac{A}{1-A} - \frac{AB}{ 1- AB} =& \lim_{A \rightarrow 1, B \rightarrow 1} \frac{A - A B}{1 - A - AB + A^2B}\\
+=&\lim_{A \rightarrow 1, B \rightarrow 1} \frac{1-B}{-1-B + 2AB}, \text{ L'Hôpital's rule, derive r.t A} \\
+=& \lim_{A \rightarrow 1, B \rightarrow 1} \frac{1}{-1 + 2A}, \text{ L'Hôpital's rule, derive r.t B}\\
+=&  1
+\end{aligned}$$
+Therefore, 
+$$equation (*) \leq \frac{1}{N} c_{d(t)-1} \frac{\rho_{d(t)-1}}{n_{d(t)-1} + \rho_{d(t)-1} - 1} + \frac{c_{max}}{N}$$
+
+##  3.2 If  $\rho_i \rightarrow \infty$ and $\frac{n_i}{\rho_i} \rightarrow \infty$:
+
+Since, 
+$$\begin{aligned} \hat{S}_{p2}(t) - \hat{S}_{p1}(t) 
+=& \frac{1}{N} c_{d(t)-1} \frac{\rho_{d(t)-1}}{n_{d(t)-1} + \rho_{d(t)-1} - 1} + \frac{1}{N} \sum_{k=0}^{d(t) - 2} c_k\prod_{i = k+1}^{d(t) - 1} (1-\frac{\rho_i}{n_i}) (1 - \prod_{i = k+1}^{d(t) - 1}  \frac{1 - \frac{\rho_i}{n_i + \rho_i - 1}}{1-\frac{\rho_i}{n_i}}) 
+\end{aligned}$$
+And 
+$$1 - \prod_{i = k+1}^{d(t) - 1}  \frac{1 - \frac{\rho_i}{n_i + \rho_i - 1}}{1-\frac{\rho_i}{n_i}} \leq 0$$
+Therefore, let's look at the absolute value of $\hat{S}_{p2}(t) - \hat{S}_{p1}(t)$
+$$\begin{aligned} |\hat{S}_{p2}(t) - \hat{S}_{p1}(t)|
+=& \frac{1}{N} c_{d(t)-1} \frac{\rho_{d(t)-1}}{n_{d(t)-1} + \rho_{d(t)-1} - 1} + \frac{1}{N} \sum_{k=0}^{d(t) - 2} c_k\prod_{i = k+1}^{d(t) - 1} (1-\frac{\rho_i}{n_i}) (-1 + \prod_{i = k+1}^{d(t) - 1}  \frac{1 - \frac{\rho_i}{n_i + \rho_i - 1}}{1-\frac{\rho_i}{n_i}}) 
+\end{aligned}$$
+where,
+$$\begin{aligned}
+\lim_{N,n,\rho \rightarrow \infty}  \frac{1}{N} c_{d(t)-1} \frac{\rho_{d(t)-1}}{n_{d(t)-1} + \rho_{d(t)-1} - 1} =& \lim_{N,n,\rho \rightarrow \infty} \frac{1}{N} c_{d(t)-1}  \frac{1}{\frac{n_{d(t)-1}}{\rho_{d(t)-1}} + 1 - \frac{1}{\rho_{d(t)-1}}} \\
+=& 0
+\end{aligned}$$
+since $\frac{n_{d(t)-1}}{\rho_{d(t)-1}} \rightarrow \infty$.
+And in the second term within the equation: 
+$$\frac{1}{N} \sum_{k=0}^{d(t) - 2} c_k\prod_{i = k+1}^{d(t) - 1} (1-\frac{\rho_i}{n_i}) (-1 + \prod_{i = k+1}^{d(t) - 1}  \frac{1 - \frac{\rho_i}{n_i + \rho_i - 1}}{1-\frac{\rho_i}{n_i}})$$
+Similar with pervious result:
+$$\begin{aligned}
+\prod_{i = k+1}^{d(t) - 1} (1-\frac{\rho_i}{n_i}) \leq & (1-\frac{\rho_{m}}{n_{m}})^{d(t) - 1 -k}\\
+= & (1-\frac{1}{\frac{n_{m}}{\rho_{m}}})^{\frac{n_{m}}{\rho_{m}} \frac{\rho_{m}}{n_{m}} (d(t) - 1 -k)} \\
+=& [e^{-1}]^{\frac{\rho_{m}}{n_{m}} (d(t) - 1 -k)}, \text{ as } n_m \rightarrow \infty
+\end{aligned}$$
+where $m$ is the index that achieve the min $\frac{\rho_i}{n_i}, \text{ } i \in [1, d(t) - 1]$
+
+And 
+$$\begin{aligned}
+\prod_{i = k+1}^{d(t) - 1}  \frac{1 - \frac{\rho_i}{n_i + \rho_i - 1}}{1-\frac{\rho_i}{n_i}} -1= &  \prod_{i = k+1}^{d(t) - 1} \frac{(n_i - 1)n_i}{(n_i - 1)n_i + \rho_i - \rho_i^2} -1 \\
+=&  \prod_{i = k+1}^{d(t) - 1} (1 + \frac{ \rho_i^2 - \rho_i}{(n_i - 1)n_i + \rho_i - \rho_i^2} ) -1 \\
+\leq &  (1 + \frac{ \rho_{l}^2 - \rho_{l}}{(n_{l} - 1)n_{l} + \rho_{l} - \rho_{l}^2} )^{d(t) - 1 - k} -1
+\end{aligned}$$
+where $l$ is the index that achieve the max $\frac{(n_i - 1)n_i}{(n_i - 1)n_i + \rho_i - \rho_i^2}, \text{ } i \in [1, d(t) - 1]$, and the limit: 
+$$\begin{aligned}
+& \lim_{n, \rho \rightarrow \infty} (1 + \frac{ \rho_{l}^2 - \rho_{l}}{(n_{l} - 1)n_{l} + \rho_{l} - \rho_{l}^2} )^{d(t) - 1 - k} -1 \\
+ & = e^{\frac{ \rho_{l}^2 - \rho_{l}}{(n_{l} - 1)n_{l} + \rho_{l} - \rho_{l}^2} \times \big( d(t) - 1 - k \big)} -1
+\end{aligned}$$
+Therefore, the limit of the second term less than:
+$$\begin{aligned}
+\lim_{n, \rho \rightarrow \infty} \frac{c_{max}}{N}\sum_{i=1}^{d(t)-1} \big\{  [e^{-1}]^{\frac{\rho_{m}}{n_{m}} i} \times \big[ e^{\frac{\rho_{l}^2 - \rho_{l}}{(n_{l} - 1)n_{l} + \rho_{l} - \rho_{l}^2} \times i} -1\big] \big\}
+\end{aligned}$$
+Let $A =e^{-\frac{\rho_{m}}{n_{m}}}$, $B = e^{\frac{\rho_{l}^2 - \rho_{l}}{(n_{l} - 1)n_{l} + \rho_{l} - \rho_{l}^2}}$, then $A \rightarrow 1$ and $B \rightarrow 1$, $A < 1, B > 1$. 
+The limit equation becomes: 
+$$\begin{aligned}
+\lim_{n, \rho \rightarrow \infty} \frac{c_{max}}{N}\sum_{i=1}^{d(t)-1} A^i (B^i -1) = & \lim_{n, \rho \rightarrow \infty} \frac{c_{max}}{N}\sum_{i=1}^{d(t)-1} (AB)^i- \lim_{n, \rho \rightarrow \infty} \frac{c_{max}}{N}\sum_{i=1}^{d(t)-1} A^i\\ 
+=& \lim_{n, \rho \rightarrow \infty} \frac{c_{max}}{N} [\frac{AB}{1-AB} - \frac{A}{1-A}] \\
+= & \lim_{n, \rho \rightarrow \infty} \frac{c_{max}}{N}
+\end{aligned}$$
+Therefore, the results are similar as $|\rho| < 1$, $\lim |\hat S_{p1} - \hat S_{p2}| < \lim \frac{c_{max}}{N}$
+
+
+
+## 3.3 If all $\rho_i \rightarrow \infty$,  and $\frac{n_i}{\rho_i} \rightarrow H < \infty$:
+
+$$\begin{aligned}
+\lim \frac{1}{N} c_{d(t)-1} \frac{\rho_{d(t)-1}}{n_{d(t)-1} + \rho_{d(t)-1} - 1} = & \lim \frac{1}{N} c_{d(t)-1}  \frac{1}{\frac{n_{d(t)-1} }{\rho_{d(t)-1}} + 1 - \frac{1}{\rho_{d(t)-1}}} \\
+=& \lim \frac{1}{N} c_{d(t)-1} \frac{1}{H + 1} 
+\end{aligned}$$
+In the second part 
+$\lim \frac{c_{max}}{N}\sum_{k=0}^{d(t) - 2} \prod_{i = k+1}^{d(t) - 1} (1-\frac{\rho_i}{n_i}) \big(1 - \prod_{i = k+1}^{d(t) - 1}  \frac{1 - \frac{\rho_i}{n_i + \rho_i - 1}}{1-\frac{\rho_i}{n_i}}\big)$
+, $1-\frac{\rho_i}{n_i} < 1 - h$, where $h = min(\frac{\rho_i}{n_i})$. 
+$$\begin{aligned}
+\lim \prod_{i = k+1}^{d(t) - 1}  \frac{1 - \frac{\rho_i}{n_i + \rho_i - 1}}{1-\frac{\rho_i}{n_i}} = & \lim \prod_{i = k+1}^{d(t) - 1} \frac{(n_i - 1)n_i}{(n_i - 1)n_i + \rho_i - \rho_i^2} \\
+= & \lim \prod_{i = k+1}^{d(t) - 1} \frac{n_i^2}{n_i^2 - \rho_i^2} \\
+\leq &  \lim \prod_{i = k+1}^{d(t) - 1} \frac{1}{1 - (h^{\prime})^2}
+\end{aligned}$$
+where $h^{\prime} = max(\rho_i/n_i)$. 
+Therefore, 
+$$\begin{aligned}\lim  \frac{c_{max}}{N}\sum_{k=0}^{d(t) - 2} \prod_{i = k+1}^{d(t) - 1} (1-\frac{\rho_i}{n_i}) \big(1 - \prod_{i = k+1}^{d(t) - 1}  \frac{1 - \frac{\rho_i}{n_i + \rho_i - 1}}{1-\frac{\rho_i}{n_i}}\big) \leq & \lim \frac{c_{max}}{N}\sum_{k=0}^{d(t) - 2} \prod_{i = k+1}^{d(t) - 1} (1-h) \prod_{i = k+1}^{d(t) - 1} \frac{1}{1 - (h^{\prime})^2} \\
+ = & \lim \frac{c_{max}}{N}\sum_{i = 1}^{d(t) - 1} (1-h)^i \big[\frac{1}{1 - (h^{\prime})^2} \big] ^i \\
+ =&  \lim \frac{c_{max}}{N}\sum_{i =1}^{d(t) - 1} \big[\frac{1- h }{1 - (h^{\prime})^2} \big] ^ i\\
+ =& \lim \frac{c_{max}}{N} \frac{1 - h}{h - (h^{\prime})^2}
+\end{aligned}$$
+ where $h = min(\frac{\rho_i}{n_i})$, $h^{\prime} = max(\rho_i/n_i)$. 
+
+Therefore, in this scenario, the difference between $\hat S_{p1}$ and $\hat S_{p2}$ may be larger. 
+
+
+

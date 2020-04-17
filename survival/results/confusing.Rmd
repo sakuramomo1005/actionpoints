@@ -1,0 +1,169 @@
+---
+title: "new assumption and rho"
+date: 2020-01-20
+output: pdf_document
+---
+
+
+Calculate the $\rho(t)$ function when the following assumption is true. 
+$$\text{Condition A: }\lim_{dt \rightarrow 0} \big\{P(C > t, T \geq t + dt) - P(C > t) P(T \geq t + dt) \big\}= 0$$
+
+We know the $\rho(t)$ function is 
+$$\text{Condition B: }\rho(t) =  \lim_{dt \rightarrow 0} \frac{P(t<T < t + dt| T > t, C \leq t)}{P(t<T < t + dt| T > t, C > t)}$$
+However, this two conditions are not equivalent. 
+$$\text{Condition B } \subseteq \text{Condition A}$$ 
+Our new assumption is looser than $\rho =1$ in terms of independent relationship between death time and censor time. 
+
+#### Part 1
+
+New assumption is true $\not\to\mathcal \rho(t) = 1$.
+
+Counter example:  
+$$S_{T,C}(x,y) = (1-x)(1-y) (1 + \frac{C}{8} xy (x-y)(x + y -1))$$
+$$S_T(x) = 1- x, S_C(y) = 1-y$$
+where $(x,y) \in [0,1] \times [0,1], C \in[-4,4]$. 
+It satifies the condition A, since: 
+$$\begin{aligned}
+P(T > x + y, C > x) =& (1 - x- y)(1 - x) (1 + \frac{C}{8} xy(x + y) (2x + y - 1)) \\
+= & [(1 -x)^2 - (1 - x)y] [1 + \frac{C}{8} \big\{ (2x^3 - x^2) y + (3 x^2 - x) y^2 + xy^3 \big \}] \\
+= & (1 -x)^2 - (1 - x)y \\
++& \frac{C}{8} \big \{(1 -x)^2  (2x^3 - x^2) y + (1 -x)^2(3 x^2 - x) y^2 + x(1 -x)^2y^3\big\} \\
+- & \frac{C}{8} \big \{(1 -x) (2x^3 - x^2) y^2 + (1 -x)(3 x^2 - x) y^3 + x(1 -x)y^4\big\}  \\
+= & (1 -x)^2 + \frac{C}{8} \big[(1 -x)^2  (2x^3 - x^2)- (1 - x) \big] y  \\
++ & \frac{C}{8} \big[ (1 -x)^2(3 x^2 - x)  -(1 -x) (2x^3 - x^2) \big] y^2 \\
++ & \frac{C}{8} \big[  x(1 -x)^2 - (1 -x)(3 x^2 - x) \big] y^3 - \frac{C}{8} x(1 -x) y^4 \\
+= & (1 -x)^2+ A_1 y + A_2 y^2 + A_3 y^3 + A_4 y^4
+\end{aligned}$$
+where 
+
+* $A_1 = \frac{C}{8}[(1 -x)^2  (2x^3 - x^2)- (1 - x)]$
+* $A_2 = \frac{C}{8}[(1 -x)^2(3 x^2 - x)  -(1 -x) (2x^3 - x^2)]$
+* $A_3 = \frac{C}{8}[x(1 -x)^2 - (1 -x)(3 x^2 - x)]$
+* $A_4 = - \frac{C}{8}[x(1 -x)]$
+
+And when $y \rightarrow 0$,
+$$\lim_{y \rightarrow 0}P(T > x + y, C > x) = \lim_{y \rightarrow 0} \big\{(1 -x)^2+ A_1 y + A_2 y^2 + A_3 y^3 + A_4 y^4 \big\} = (1 -x)^2 = P(T > t) P(C > t)$$
+
+For $\rho(t)$ calculation,
+$$\begin{aligned}
+\rho(t) = & \lim_{dt \rightarrow 0} \frac{P(t<T < t + dt| T > t, C \leq t)}{P(t<T < t + dt| T > t, C > t)} \\
+= & \lim_{dt \rightarrow 0} \frac{\frac{P(t<T < t + dt, C \leq t)}{P( T > t, C \leq t)}}{\frac{P(t<T < t + dt, C  > t)}{P( T > t, C > t)}} = \lim_{dt \rightarrow 0} \frac{P(t<T < t + dt, C \leq t)}{P(t<T < t + dt, C  > t)} \frac{P( T > t, C > t)}{P( T > t, C \leq t)}
+\end{aligned}$$
+For $\frac{P( T > t, C > t)}{P( T > t, C \leq t)}$, under our assumption, 
+$$\begin{aligned}
+\frac{P( T > t, C > t)}{P( T > t, C \leq t)} = & \frac{P(T > t) P(C > t)}{P(T > t) -P( T > t, C > t) } = \frac{P(T > t) P(C > t)}{P(T > t)  - P(T > t) P(C > t)} = \frac{P(C > t)}{1-P(C > t)}
+\end{aligned}$$
+when $P(T > t) \neq 0$
+
+And we know that
+$$P (t <T < t + dt) = dt$$
+$$\begin{aligned}
+P(t<T < t + dt, C  > t) =&  P(T > t, C > t) - P(T > t+ dt, C > t) \\
+= & (1 -t)^2 - (1 -t)^2 - A_1 dt - A_2 (dt)^2 - A_3 (dt)^3 - A_4 (dt)^4  \\
+= & - A_1 dt - A_2 (dt)^2 - A_3 (dt)^3 - A_4 (dt)^4
+\end{aligned}$$
+Therefore,
+$$\begin{aligned}
+\frac{P(t<T < t + dt, C \leq t)}{P(t<T < t + dt, C  > t)} = & \frac{P(t<T < t + dt)- P(t<T < t + dt, C  > t)}{P(t<T < t + dt, C  > t)} \\
+=& \frac{dt + A_1 dt + A_2 (dt)^2 + A_3 (dt)^3 + A_4 (dt)^4}{- A_1 dt - A_2 (dt)^2 - A_3 (dt)^3 - A_4 (dt)^4}
+\end{aligned}$$
+$$\begin{aligned}
+\lim_{dt \rightarrow 0}\frac{P(t<T < t + dt, C \leq t)}{P(t<T < t + dt, C  > t)} = & \lim_{dt \rightarrow 0}\frac{P(t<T < t + dt)- P(t<T < t + dt, C  > t)}{P(t<T < t + dt, C  > t)} \\
+=& \lim_{dt \rightarrow 0} \frac{dt + A_1 dt + A_2 (dt)^2 + A_3 (dt)^3 + A_4 (dt)^4}{- A_1 dt - A_2 (dt)^2 - A_3 (dt)^3 - A_4 (dt)^4} \\
+= & \lim_{dt \rightarrow 0} \frac{1 + A_1  + 2A_2 (dt) + 3A_3 (dt)^2 + 4 A_4 (dt)^3}{- A_1  - 2A_2 (dt) - 3 A_3 (dt)^2 - 4A_4 (dt)^3} \\
+=& \frac{1 + A_1}{-A_1} = \frac{1 + \frac{C}{8}[(1 -x)^2  (2x^3 - x^2)- (1 - x)]}{-\frac{C}{8}[(1 -x)^2  (2x^3 - x^2)- (1 - x)]}
+\end{aligned}$$
+Therefore, 
+$$\rho(t) = \lim_{dt \rightarrow 0}\frac{P(t<T < t + dt, C \leq t)}{P(t<T < t + dt, C  > t)} \times \frac{P(C > t)}{1-P(C > t)} \neq 1$$
+
+#### Part 2
+
+When $\rho(t) = 1$, our condition is true. Since 
+$$\begin{aligned}
+\rho(t) = & \lim_{dt \rightarrow 0} \frac{P(t<T < t + dt| T > t, C \leq t)}{P(t<T < t + dt| T > t, C > t)} \\
+= & \lim_{dt \rightarrow 0} \frac{\frac{P(t<T < t + dt, C \leq t)}{P( T > t, C \leq t)}}{\frac{P(t<T < t + dt, C  > t)}{P( T > t, C > t)}} \\
+= & \lim_{dt \rightarrow 0} \frac{P(t<T < t + dt, C \leq t)}{P(t<T < t + dt, C  > t)} \frac{P( T > t, C > t)}{P( T > t, C \leq t)} = 1 \end{aligned}$$
+$\Longrightarrow$
+<!-- $$\lim_{dt \rightarrow 0} \frac{P(t<T < t + dt, C \leq t)}{P(t<T < t + dt, C  > t)} = \frac{P(T > t, C \leq t)}{P(T > t , C > t)}$$ -->
+$$\begin{aligned}
+\lim_{dt \rightarrow 0}  \frac{P(T > t) - P(T > t + dt) -P(T > t, C > t) + P(T > t + dt, C > t)}{P(T > t, C > t) - P(T > t + dt, C > t)} \times \frac{P(T > t, C > t)}{P(T > t) - P(T > t, C>t)} =1
+\end{aligned}$$
+To make it looks more clean, let' replace the probablities with some other labels, 
+
+* $A = P(T > t)$
+* $B = P(T > t + dt)$
+* $C = P(T > t, C > t)$
+* $D = P(T > t + dt, C > t)$
+
+And $\lim_{dt \rightarrow 0} [A -B] =0, \text{ } \lim_{dt \rightarrow 0} P[C- D] = 0$.
+
+Then the above function is 
+$$\begin{aligned}
+ 1 = & \lim_{dt \rightarrow 0} \frac{[A -B -(C-D)] C}{[C-D][A-C]}\\
+ = & \lim_{dt \rightarrow 0} \frac{AC -BC-C^2 + CD}{AC - AD - C^2 + CD}\\
+ = & \lim_{dt \rightarrow 0} \frac{(AC - C^2 + CD) - AD + AD - BC}{(AC - C^2 + CD) - AD} \\
+  =&  \lim_{dt \rightarrow 0}  \big \{1 + \frac{AD -BC}{AC + CD - C^2 - AD} \big\}
+\end{aligned}$$
+Therefore, 
+$$\begin{aligned}
+& \lim_{dt \rightarrow 0}   \frac{AD -BC}{AC + CD - C^2 - AD} =  0 \\
+= & \lim_{dt \rightarrow 0} \frac{AD -BC}{(C-D) (A-C)} \\
+= & \lim_{dt \rightarrow 0} \frac{AD -BC}{C-D} \text{ , since } A-C \neq 0
+\end{aligned}$$
+Therefore, $AD -BC = o(C-D)$.
+Since $\lim_{dt \rightarrow 0}  C- D = \lim_{dt \rightarrow 0} P(T > t, C > t) - P(T > t + dt, C > t) =0$, 
+$$\lim_{dt \rightarrow 0}AD -BC  =0$$
+$$\lim_{dt \rightarrow 0} \big\{ P(T > t)P(T > t + dt, C > t) -P(T > t + dt) P(T > t, C > t)\big\} =0$$
+$$\lim_{dt \rightarrow 0}  \big\{\frac{P(T > t + dt, C > t)}{P(T > t + dt)} - \frac{P(T > t, C > t)}{P(T > t)} \big \} =0$$
+$$\lim_{dt \rightarrow 0} \big\{P(C > t |T > t + dt)- P( C > t | T > t)\big \} =0$$
+$C$ and $T$ are independent at the diagnoal neighborhood. 
+
+<!-- P(T > t, C > t) - P(T > t + dt, C > t) -->
+
+
+<!-- For the term $\frac{P(t<T < t + dt, C \leq t)}{P(t<T < t + dt, C  > t)}$,  -->
+<!-- $$\begin{aligned} -->
+<!-- \frac{P(t<T < t + dt, C \leq t)}{P(t<T < t + dt, C  > t)} = & \frac{P(t<T < t + dt)- P(t<T < t + dt, C  > t)}{P(t<T < t + dt, C  > t)} \\ -->
+<!-- = & \frac{P(T > t) - P(T > t + dt) - P(T > t, C > t) + P(T > t + dt, C > t)}{P(T > t, C > t) - P(T > t + dt, C > t)} \\ -->
+<!-- = & \frac{P(T > t) - P(T > t + dt) - P(T > t)P(C > t) + P(T > t + dt)P(C > t)}{P(T > t)P(C > t) - P(T > t + dt)P(C > t)} \\ -->
+<!-- = & \frac{\big[ P(T > t) - P(T > t + dt) \big] \big[ 1 - P(C > t)\big]}{\big[ P(T > t) - P(T > t + dt) \big]  P(C > t)} -->
+<!-- \end{aligned}$$ -->
+<!-- Therefore,when the conditions are true,  -->
+<!-- $$\Rightarrow \rho(t) = \lim_{dt \rightarrow 0} \frac{P(t<T < t + dt| T > t, C \leq t)}{P(t<T < t + dt| T > t, C > t)} = \lim_{dt \rightarrow 0}\frac{\big[ P(T > t) - P(T > t + dt) \big] \big[ 1 - P(C > t)\big]}{\big[ P(T > t) - P(T > t + dt) \big]  P(C > t)}  \frac{P(C > t)}{1-P(C > t)} = 1$$ -->
+
+
+<!-- Whether the condition is true under the example 1?  -->
+
+<!-- $$S_{T,C}(x,y) = (1-x)(1-y) (1 + \frac{C}{8} xy (x-y)(x + y -1))$$ -->
+<!-- $$\begin{aligned} -->
+<!-- P(T > x + y, C > x) =& (1 - x- y)(1 - x) (1 + \frac{C}{8} xy(x + y) (2x + y - 1)) \\ -->
+<!-- = & [(1 -x)^2 - (1 - x)y] [1 + \frac{C}{8} \big\{ (2x^3 - x^2) y + (3 x^2 - x) y^2 + xy^3 \big \}] \\ -->
+<!-- = & (1 -x)^2 - (1 - x)y \\ -->
+<!-- +& \frac{C}{8} \big \{(1 -x)^2  (2x^3 - x^2) y + (1 -x)^2(3 x^2 - x) y^2 + x(1 -x)^2y^3\big\} \\ -->
+<!-- - & \frac{C}{8} \big \{(1 -x) (2x^3 - x^2) y^2 + (1 -x)(3 x^2 - x) y^3 + x(1 -x)y^4\big\}  \\ -->
+<!-- = & (1 -x)^2 + \frac{C}{8} \big[(1 -x)^2  (2x^3 - x^2)- (1 - x) \big] y  \\ -->
+<!-- + & \frac{C}{8} \big[ (1 -x)^2(3 x^2 - x)  -(1 -x) (2x^3 - x^2) \big] y^2 \\ -->
+<!-- + & \frac{C}{8} \big[  x(1 -x)^2 - (1 -x)(3 x^2 - x) \big] y^3 - \frac{C}{8} x(1 -x) y^4 \\ -->
+<!-- = & (1 -x)^2+ A_1 y + A_2 y^2 + A_3 y^3 + A_4 y^4 -->
+<!-- \end{aligned}$$ -->
+<!-- And when $y \rightarrow 0$, -->
+<!-- $$\lim_{y \rightarrow 0}P(T > x + y, C > x) = \lim_{y \rightarrow 0} \big\{(1 -x)^2+ A_1 y + A_2 y^2 + A_3 y^3 + A_4 y^4 \big\} = (1 -x)^2 = P(T > t) P(C > t)$$ -->
+
+<!-- $P (t <T < t + dt) = dt$ -->
+
+<!-- $$\begin{aligned} -->
+<!-- P(t<T < t + dt, C  > t) =&  P(T > t, C > t) - P(T > t+ dt, C > t) \\ -->
+<!-- = & (1 -t)^2 - (1 -t)^2 - A_1 dt - A_2 (dt)^2 - A_3 (dt)^3 - A_4 (dt)^4  \\ -->
+<!-- = & - A_1 dt - A_2 (dt)^2 - A_3 (dt)^3 - A_4 (dt)^4 -->
+<!-- \end{aligned}$$ -->
+<!-- Therefore, -->
+<!-- $$\begin{aligned} -->
+<!-- \frac{P(t<T < t + dt, C \leq t)}{P(t<T < t + dt, C  > t)} = & \frac{P(t<T < t + dt)- P(t<T < t + dt, C  > t)}{P(t<T < t + dt, C  > t)} \\ -->
+<!-- =& \frac{dt + A_1 dt + A_2 (dt)^2 + A_3 (dt)^3 + A_4 (dt)^4}{- A_1 dt - A_2 (dt)^2 - A_3 (dt)^3 - A_4 (dt)^4} -->
+<!-- \end{aligned}$$ -->
+<!-- $$\begin{aligned} -->
+<!-- \lim_{dt \rightarrow 0}\frac{P(t<T < t + dt, C \leq t)}{P(t<T < t + dt, C  > t)} = & \frac{P(t<T < t + dt)- P(t<T < t + dt, C  > t)}{P(t<T < t + dt, C  > t)} \\ -->
+<!-- =& \lim_{dt \rightarrow 0} \frac{dt + A_1 dt + A_2 (dt)^2 + A_3 (dt)^3 + A_4 (dt)^4}{- A_1 dt - A_2 (dt)^2 - A_3 (dt)^3 - A_4 (dt)^4} \\ -->
+<!-- = & \lim_{dt \rightarrow 0} \frac{1 + A_1  + 2A_2 (dt) + 3A_3 (dt)^2 + 4 A_4 (dt)^3}{- A_1  - 2A_2 (dt) - 3 A_3 (dt)^2 - 4A_4 (dt)^3} \\ -->
+<!-- =& \frac{1 + A_1}{-A_1} -->
+<!-- \end{aligned}$$ -->

@@ -1,0 +1,124 @@
+---
+title: "Prediction?" 
+date: 2020-02-02
+output: pdf_document
+---
+
+Mimic the simulation in Dikta's paper. 
+
+Assume the joint distribution
+$$S_{T,C}(t,s | x) = \begin{cases}  
+\exp\big(- (\exp(-\beta^T x)) t \big) \exp \big( - s (t -s + 1) \big)  & t \geq s\\
+\exp\big(- (\exp(-\beta^T x)) t\big) \exp \big( -s \big) & t < s
+\end{cases}$$
+The censoring percentage is
+When $t < s$, the pdf is 
+$$\frac{\partial}{\partial s \partial t }\exp\big(- (\exp(-\beta^T x)) t\big) \exp \big( -s \big) =  \exp(-\beta^T x) \times \exp\big(- (\exp(-\beta^T x)) t\big)\exp \big( -s \big)$$
+$$\begin{aligned}
+P(T < C) = & \int_0^{\infty} \int_0^s f_{T,C}(t,s) dt ds \\
+= & \int_0^{\infty} \int_0^s \exp(-\beta^T x) \times \exp\big(- (\exp(-\beta^T x)) t\big)\exp \big( -s \big) dt ds \\
+ = & \int_0^\infty  \big\{ - \exp\big(- (\exp(-\beta^T x)) t\big)\exp \big( -s \big) |_{0}^s \big\} ds\\
+ = & \frac{\exp(-\beta^T x)}{1 + \exp(-\beta^T x)}
+\end{aligned}$$
+
+The survival functions are: 
+$$S_T(t) = \exp\big(- \exp(-\beta^T x) t\big), S_C(t) = \exp \big( -s \big)$$
+The $m()$ function is 
+$$m(t, x) = \frac{1}{ 1 + \exp(-\beta^T x)}$$
+which can be estimated by fitting a logistic regression. 
+
+\newpage
+
+#### Simulation 
+
+Consider $n = 500$, $x = 0.1, \beta = 2$. Generate datasets.
+
+```{R include = FALSE}
+
+
+setwd('/Users/yaolanqiu/Desktop/NYU/Research/Survival/6. example6 two weibull 20200115')
+ true_quant = c(0.9, 0.75, 0.5, 0.25, 0.1)
+
+# result = list(m_diff = m_diff,
+#               theta_est1 = theta_est1,
+#               theta_est2 = theta_est2,
+#               s1 = s1, s2 = s2, s3 = s3, s0 = s0, 
+#               s_lg0 = s_lg0, s_lg1 = s_lg1, 
+#               s_lg2 = s_lg2, s_lg3 = s_lg3,
+#               t_lg_diff0 = t_lg_diff0,
+#               t_lg_diff1 = t_lg_diff1, 
+#               t_diff0 = t_diff0,
+#               t_diff1 = t_diff1,
+#               meandiff = meandiff,
+#               meandiff_lg = meandiff_lg, 
+#               b0_est = b0_est, b1_est = b1_est, b2_est = b2_est)
+
+load('twoexp_20200203.RData')
+# save(result, file ='twoexp_20200203.RData')
+
+S_est_diff = c()
+temp = cbind(
+  apply(abs(result$s0 - matrix(true_quant, 
+                               dim(result$s0)[1], 5, byrow =  TRUE)),2,mean, na.rm=TRUE), 
+  # 1
+  apply(abs(result$s1 - matrix(true_quant, 
+                               dim(result$s1)[1], 5, byrow =  TRUE)),2,
+        mean, na.rm=TRUE), 
+  # 2 
+  apply(abs(result$s2 - matrix(true_quant, 
+                               dim(result$s2)[1], 5, byrow =  TRUE)),2,
+        mean, na.rm=TRUE),
+  # 3
+  apply(abs(result$s3 - matrix(true_quant, 
+                               dim(result$s3)[1], 5, byrow =  TRUE)),2,
+        mean, na.rm=TRUE))
+S_est_diff = rbind(S_est_diff, temp)
+
+mse1 = c()
+temp = cbind(
+  apply(abs(result$s0 - matrix(true_quant, 
+                               dim(result$s0)[1], 5, byrow =  TRUE))^2,2,mean, na.rm=TRUE), 
+  # 1
+  apply(abs(result$s1 - matrix(true_quant, 
+                               dim(result$s1)[1], 5, byrow =  TRUE))^2,2,
+        mean, na.rm=TRUE), 
+  # 2 
+  apply(abs(result$s2 - matrix(true_quant, 
+                               dim(result$s2)[1], 5, byrow =  TRUE))^2,2,
+        mean, na.rm=TRUE),
+  # 3
+  apply(abs(result$s3 - matrix(true_quant, 
+                               dim(result$s3)[1], 5, byrow =  TRUE))^2,2,
+        mean, na.rm=TRUE))
+
+mse1 = rbind(mse1, temp)
+
+S_est_sd = c()
+temp = cbind(apply(result$s0, 2, sd, na.rm=TRUE),
+             apply(result$s1, 2, sd, na.rm=TRUE),
+             apply(result$s2, 2, sd, na.rm=TRUE),
+             apply(result$s3, 2, sd, na.rm=TRUE))
+
+S_est_sd = rbind(S_est_sd, temp)
+library(knitr)
+```
+
+```{R echo = FALSE}
+colnames(S_est_diff) = c('KM','Exp m()','Dikta 1', 'Dikta 2')
+rownames(S_est_diff) = c('q0.1', 'q0.25', 'q0.5', 'q0.75','q0.9')
+kable(round(S_est_diff, 3), caption = 'Mean absolute difference between estimated  and true S()')
+```
+
+
+```{R echo = FALSE}
+colnames(S_est_sd) = c('KM','Exp m()','Dikta 1', 'Dikta 2')
+rownames(S_est_sd) = c('q0.1', 'q0.25', 'q0.5', 'q0.75','q0.9')
+kable(round(S_est_sd, 3), caption = 'Standard deviations of the estimated S()')
+```
+
+
+```{R echo = FALSE}
+colnames(mse1) = c('KM','Exp m()','Dikta 1', 'Dikta 2')
+rownames(mse1) = c('q0.1', 'q0.25', 'q0.5', 'q0.75','q0.9')
+kable(round(mse1, 3), caption = 'MSE')
+```

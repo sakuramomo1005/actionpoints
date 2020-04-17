@@ -1,0 +1,201 @@
+---
+title: "Examples after update the sampling method"
+date: 2019-08-28
+output: pdf_document
+---
+
+
+# Example 1 
+
+
+Suppose we simulate the data from the following joint distribution: 
+$$f(s,t) = \frac{1}{1000} (s + t)$$
+where $s \in (0,10)$ and $t \in (0,10)$.
+
+Simulate data. 
+
+#### The marginal plots is: 
+
+```{R include = FALSE}
+setwd('/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/example1000')
+library(png)
+library(knitr)
+library(grid)
+```
+
+```{r fig.width=3, fig.height=3,echo=FALSE,  fig.align = "center"}
+img <- readPNG("/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/example1000/1.png")
+grid.raster(img)
+```
+
+
+#### The estimation plot:
+
+```{r fig.width=3, fig.height=3,echo=FALSE,  fig.align = "center"}
+img <- readPNG("/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/example1000/2.png")
+grid.raster(img)
+```
+
+#### The mean abs difference 
+
+```{R include = FALSE}
+load('/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/example1000/example1000.RData')
+load('/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/example1000/s_est.RData')
+sture = result$sture
+s_est = s_est
+spt1 = result$spt1
+spt2 = result$spt2
+sr = result$sr
+se = result$se
+
+tables = c(mean(abs(sture - s_est)), # 0.02429018
+mean(abs(sture - spt1)), # 0.0250697
+mean(abs(sture - spt2)), # 0.02520928 
+mean(abs(sture - sr)), # 0.0002958531
+mean(abs(sture - se))) # 0.02294636
+
+tables = round(tables, 3)
+tables = matrix(tables, 1, 5)
+colnames(tables) = c('KM','Slud1','Slud2','Riemann','Integral') 
+```
+
+```{R echo = FALSE}
+kable(tables)
+```
+
+#### The distribution of true $\rho(t)$
+
+```{R fig.width=3, fig.height=3,echo=FALSE,  fig.align = "center"}
+hist(result$rho_value, main = 'Histogram of rho', xlab = 'rho')
+```
+
+# Example 2 Tsiatis
+
+#### The functions 
+
+|   Function |   Description | Expression|
+|-------------:|------------------:|------------------------------------------------:|
+|$P(T < t, C < c)$ |Joint CDF | $1 + exp(-\lambda t - \mu c -\theta tc) - exp(-\lambda t) -  exp(-\mu c)$| 
+|$f(t, c)$ | Joint PDF|$(\lambda \mu - \theta + \lambda \theta t + \mu \theta c + \theta^2 t c) exp(-\lambda t - \mu c - \theta c t )$|
+|$f_t(t)$  |Marginal PDF of T|$\lambda exp(-\lambda t)$|
+|$S_t(t)$  |Survival function of T|$exp(-\lambda t)$ |
+|$f_c(c)$  | Marginal PDF of C| $\mu exp(-\mu c)$ | 
+|$S_c(c)$  | $P_c(C > c)$|$exp(-\mu c)$ | 
+|$S_x(t)$  | $P(T > t, C > t)$|$exp(-\lambda t - \mu t -\theta t^2)$|
+|$\psi(t)$ | $\int_{t}^{\infty} f(t,c) dc$ | $(\lambda + \theta t) exp(-\lambda t - \mu t - \theta t^2 )$|
+
+**Parameter settings (consistent to Tsiatis's example):** 
+
+* scenario 1:  $\lambda = 0.1, \mu = 0.2$,$\theta = 0.02$
+
+* scenario 2:  $\lambda = 1, \mu = 1$, $\theta = 1$
+
+P.S. the problem here is tha the inverse function cannot be calculated. Just estimated. 
+
+
+#### The marginal plots is ($\lambda = 0.1, \mu = 0.2$,$\theta = 0.02$): 
+
+
+```{r fig.width=3, fig.height=3,echo=FALSE,  fig.align = "center"}
+setwd('/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/tsiatis')
+img <- readPNG("1.png")
+grid.raster(img)
+```
+
+
+#### The estimation plot:
+
+```{r fig.width=3, fig.height=3,echo=FALSE,  fig.align = "center"}
+setwd('/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/tsiatis')
+img <- readPNG("2.png")
+grid.raster(img)
+```
+
+#### The mean abs difference 
+
+```{R include = FALSE}
+setwd('/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/tsiatis')
+load('result.RData')
+load('s_est1.RData')
+sture = result$sture
+s_est = s_est
+spt1 = result$spt1
+spt2 = result$spt2
+sr = result$sr
+se = result$se
+
+tables = c(mean(abs(sture - s_est)), # 0.02429018
+mean(abs(sture - spt1)), # 0.0250697
+mean(abs(sture - spt2)), # 0.02520928 
+mean(abs(sture - sr)), # 0.0002958531
+mean(abs(sture - se))) # 0.02294636
+
+tables = round(tables, 3)
+tables = matrix(tables, 1, 5)
+colnames(tables) = c('KM','Slud1','Slud2','Riemann','Integral') 
+```
+
+```{R echo = FALSE}
+kable(tables)
+```
+
+#### The distribution of true $\rho(t)$
+
+```{R fig.width=3, fig.height=3,echo=FALSE,  fig.align = "center"}
+hist(result$rho_value, main = 'Histogram of rho', xlab = 'rho')
+```
+
+
+
+#### The marginal plots is ($\lambda = 1, \mu = 1$, $\theta = 1$): 
+
+
+```{r fig.width=3, fig.height=3,echo=FALSE,  fig.align = "center"}
+setwd('/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/tsiatis')
+img <- readPNG("3.png")
+grid.raster(img)
+```
+
+
+#### The estimation plot:
+
+```{r fig.width=3, fig.height=3,echo=FALSE,  fig.align = "center"}
+setwd('/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/tsiatis')
+img <- readPNG("4.png")
+grid.raster(img)
+```
+
+#### The mean abs difference 
+
+```{R include = FALSE}
+setwd('/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/tsiatis')
+load('result2.RData')
+load('s_est2.RData')
+sture = result$sture
+s_est = s_est
+spt1 = result$spt1
+spt2 = result$spt2
+sr = result$sr
+se = result$se
+
+tables = c(mean(abs(sture - s_est)), # 0.02429018
+mean(abs(sture - spt1)), # 0.0250697
+mean(abs(sture - spt2)), # 0.02520928 
+mean(abs(sture - sr)), # 0.0002958531
+mean(abs(sture - se))) # 0.02294636
+
+tables = round(tables, 3)
+tables = matrix(tables, 1, 5)
+colnames(tables) = c('KM','Slud1','Slud2','Riemann','Integral') 
+```
+
+```{R echo = FALSE}
+kable(tables)
+```
+
+
+#### The distribution of true $\rho(t)$
+
+```{R fig.width=3, fig.height=3,echo=FALSE,  fig.align = "center"}
+hist(result$rho_value, main = 'Histogram of rho', xlab = 'rho')
+```

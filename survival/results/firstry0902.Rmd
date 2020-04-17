@@ -1,0 +1,30 @@
+---
+title: "Tsiatis's copula"
+date: 2019-09-02
+output: pdf_document
+fontsize: 12pt
+---
+
+The copula can be written as:  
+$$H(t,s) = C(H_1(t), H_2(s))H_1(t)H_2(s)$$
+where
+
+* $H_{t,s}(t,s)$ is the CDF of the joint distribution, H(t,s) = P(T > t, C>s)
+
+* $H_1(t)$ is the CDF of the survival time $H_1(t) = P(T > t), H_2(t)$ is the CDF of the censor time, $H_2(t) = P(C>t)$
+
+* $C(H_1(t), H_2(s))$ is the copula
+
+In Tsiatis's example,
+
+$H_{t,s}(t,s) = exp(-\lambda t  - \mu s - \theta ts), H_1(t) = exp(-\lambda t), H_2(t) = exp(-\mu t)$
+
+Therefore,
+
+$$\begin{aligned}
+C(H_1(t), H_2(s)) =& \frac{exp(-\lambda t  - \mu s - \theta ts)}{exp(-\lambda t)exp(-\mu t)} = exp(-\theta ts) \\
+=& exp(-\theta \frac{log U}{\lambda}\frac{log V}{\mu})
+\end{aligned}$$
+where $U = exp(-\lambda t), V = exp(-\mu s)$.
+
+Therefore, the copula is $$C(U,V) = exp(-\theta \frac{log U}{\lambda}\frac{log V}{\mu}),$$ where $U,V \sim U(0,1)$

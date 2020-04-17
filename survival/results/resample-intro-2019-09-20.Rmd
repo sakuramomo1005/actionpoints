@@ -1,0 +1,278 @@
+---
+title: "Checking the sampling method of Tsiatis's example" 
+date: 2019-09-20
+output: pdf_document
+---
+
+```{R include = FALSE}
+setwd("/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/tsiatis")
+library(survival)
+library(knitr)
+library(png)
+library(grid)
+```
+
+
+In the Tsiatis's paper, the related functions are: 
+
+|   Function |   Description | Expression|
+|:---------------|:---------------------|------------------------------------------------:|
+|$P(T < t, C < c)$ |Joint CDF | $1 + exp(-\lambda t - \mu c -\theta tc) - exp(-\lambda t) -  exp(-\mu c)$| 
+|$f(t, c)$ | Joint PDF|$(\lambda \mu - \theta + \lambda \theta t + \mu \theta c + \theta^2 t c) exp(-\lambda t - \mu c - \theta c t )$|
+|$f_t(t)$  |Marginal PDF of T|$\lambda exp(-\lambda t)$|
+|$S_t(t)$  |Survival function of T|$exp(-\lambda t)$ |
+|$f_c(c)$  | Marginal PDF of C| $\mu exp(-\mu c)$ | 
+|$S_c(c)$  | $P_c(C > c)$|$exp(-\mu c)$ | 
+|$S_x(t)$  | $P(T > t, C > t)$|$exp(-\lambda t - \mu t -\theta t^2)$|
+|$\psi(t)$ | $\int_{t}^{\infty} f(t,c) dc$ | $(\lambda + \theta t) exp(-\lambda t - \mu t - \theta t^2 )$|
+
+
+The sampling process: 
+
+* We may sample $t \sim Exp(\lambda)$ first (e.g. sample 100 subjects from an exponential distribution with parameter $\lambda$)
+
+* For each of the sampled $t$ (one of the 100), we can sample $c$ from the $F(c|t)$ distribution, based on inverse transform sampling idea. Where: 
+
+$$f(c|t) = f(t,c)/f(t) = \frac{(\lambda \mu - \theta + \lambda \theta t + \mu \theta c + \theta^2 t c)}{\lambda}exp( - \mu c - \theta c t )$$
+$$F(c|t) = \int_0 ^ c f(u|t) du = 1 - \frac{\lambda + \theta c}{\lambda} exp(-\mu c-\theta ct)$$
+
+Then the pairs of $(t,c)$ are sampled from the $f(t,c)$ distribution. 
+
+However, since the the close form of the inverse function of $F(c|t)$ cannot be calculated, we can estimate the inverse value approximately:
+
+* Given a value $x \sim U(0,1)$, we can find the $F(c_1|t)$ that is most close to the value $x$, where $c_1 \in \mathbb{N}$
+
+* Given $c_1$, we can find the $c_2$, where $c_2 \in [c_1-1, c_1 + 1]$ by 0.1, that has $F(c_2|t)$ value most close to the $x$
+
+* Given $c_2$, we can find the $c_3$...
+
+* The three digits of the true $c_0$ value that makes $F(c_0|t) = x$ is estimated by this method. 
+
+
+# Examples: 
+
+Try more scenarios to illustrate how the estimations work. For seeds were randomly selected. And the first table in each scenario is the table to show the mean absolute difference between true survival time and the estimated survival time by applying Kaplan-Meier method, Slud mehtod and the corrected Slud method. The second table in each scenario is to the mean absolute difference between true survival time and the estimated survival time within first 50 percents subjects, to avoid the unstable estimation in the tail. 
+
+
+## Scenario 1: $\lambda = 1, \theta = 1, \mu = 1$
+
+### Sample size = 50 
+
+```{R include = FALSE}
+lambda = 1; theta = 1; mu = 1
+```
+
+```{R echo = FALSE}
+setwd("/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/tsiatis")
+nns = 50
+seeds = 1
+names = paste(lambda,'-',mu,'-',theta,'.RData',sep='')
+load(names)
+kable(res$re_tables1[[1]], caption = paste('lambda = ', lambda, 
+                 ', mu = ', mu, ', theta = ', theta, sep= ''))
+kable(res$re_tables2[[1]], caption = paste('50% of data: ','lambda = ', lambda, ', mu = ', mu, ', theta = ', theta, sep= ''))
+```
+
+```{r fig.width=5, fig.height=5,echo=FALSE,  fig.align = "center"}
+setwd("/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/tsiatis")
+names = paste(nns,'-',seeds,'-',lambda,'-',mu,'-',theta,'.png',sep='')
+img = readPNG(names)
+grid.raster(img)
+```
+
+
+### Sample size = 100 
+
+```{R echo = FALSE}
+setwd("/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/tsiatis")
+nns = 100
+seeds = 1
+names = paste(lambda,'-',mu,'-',theta,'.RData',sep='')
+load(names)
+kable(res$re_tables1[[2]], caption = paste('lambda = ', lambda, 
+                 ', mu = ', mu, ', theta = ', theta, sep= ''))
+kable(res$re_tables2[[2]], caption = paste('50% of data: ','lambda = ', lambda, ', mu = ', mu, ', theta = ', theta, sep= ''))
+```
+
+```{r fig.width=5, fig.height=5,echo=FALSE,  fig.align = "center"}
+setwd("/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/tsiatis")
+names = paste(nns,'-',seeds,'-',lambda,'-',mu,'-',theta,'.png',sep='')
+img = readPNG(names)
+grid.raster(img)
+```
+
+
+### Sample size = 200
+
+
+```{R echo = FALSE}
+setwd("/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/tsiatis")
+nns = 200
+seeds = 1
+names = paste(lambda,'-',mu,'-',theta,'.RData',sep='')
+load(names)
+kable(res$re_tables1[[3]], caption = paste('lambda = ', lambda, 
+                 ', mu = ', mu, ', theta = ', theta, sep= ''))
+kable(res$re_tables2[[3]], caption = paste('50% of data: ','lambda = ', lambda, ', mu = ', mu, ', theta = ', theta, sep= ''))
+```
+
+```{r fig.width=5, fig.height=5,echo=FALSE,  fig.align = "center"}
+setwd("/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/tsiatis")
+names = paste(nns,'-',seeds,'-',lambda,'-',mu,'-',theta,'.png',sep='')
+img = readPNG(names)
+grid.raster(img)
+```
+
+
+## Scenario 2: $\lambda = 0.1, \mu = 0.2, \theta = 0.02$
+
+### Sample size = 50 
+
+```{R include = FALSE}
+lambda = 0.1; theta = 0.02; mu = 0.2
+```
+
+```{R echo = FALSE}
+setwd("/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/tsiatis")
+nns = 50
+seeds = 1
+names = paste(lambda,'-',mu,'-',theta,'.RData',sep='')
+load(names)
+kable(res$re_tables1[[1]], caption = paste('lambda = ', lambda, 
+                 ', mu = ', mu, ', theta = ', theta, sep= ''))
+kable(res$re_tables2[[1]], caption = paste('50% of data: ','lambda = ', lambda, ', mu = ', mu, ', theta = ', theta, sep= ''))
+```
+
+```{r fig.width=5, fig.height=5,echo=FALSE,  fig.align = "center"}
+setwd("/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/tsiatis")
+names = paste(nns,'-',seeds,'-',lambda,'-',mu,'-',theta,'.png',sep='')
+img = readPNG(names)
+grid.raster(img)
+```
+
+
+### Sample size = 100 
+
+```{R echo = FALSE}
+setwd("/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/tsiatis")
+nns = 100
+seeds = 1
+names = paste(lambda,'-',mu,'-',theta,'.RData',sep='')
+load(names)
+kable(res$re_tables1[[2]], caption = paste('lambda = ', lambda, 
+                 ', mu = ', mu, ', theta = ', theta, sep= ''))
+kable(res$re_tables2[[2]], caption = paste('50% of data: ','lambda = ', lambda, ', mu = ', mu, ', theta = ', theta, sep= ''))
+```
+
+```{r fig.width=5, fig.height=5,echo=FALSE,  fig.align = "center"}
+setwd("/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/tsiatis")
+names = paste(nns,'-',seeds,'-',lambda,'-',mu,'-',theta,'.png',sep='')
+img = readPNG(names)
+grid.raster(img)
+```
+
+
+### Sample size = 200
+
+
+```{R echo = FALSE}
+setwd("/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/tsiatis")
+nns = 200
+seeds = 1
+names = paste(lambda,'-',mu,'-',theta,'.RData',sep='')
+load(names)
+kable(res$re_tables1[[3]], caption = paste('lambda = ', lambda, 
+                 ', mu = ', mu, ', theta = ', theta, sep= ''))
+kable(res$re_tables2[[3]], caption = paste('50% of data: ','lambda = ', lambda, ', mu = ', mu, ', theta = ', theta, sep= ''))
+```
+
+```{r fig.width=5, fig.height=5,echo=FALSE,  fig.align = "center"}
+setwd("/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/tsiatis")
+names = paste(nns,'-',seeds,'-',lambda,'-',mu,'-',theta,'.png',sep='')
+img = readPNG(names)
+grid.raster(img)
+```
+
+
+## Scenario 3: $\lambda = 0.1, \mu = 0.2, \theta = 0.018$
+
+
+### Sample size = 50 
+
+```{R include = FALSE}
+lambda = 0.1; theta = 0.018; mu = 0.2
+```
+
+```{R echo = FALSE}
+setwd("/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/tsiatis")
+nns = 50
+seeds = 1
+names = paste(lambda,'-',mu,'-',theta,'.RData',sep='')
+load(names)
+kable(res$re_tables1[[1]], caption = paste('lambda = ', lambda, 
+                 ', mu = ', mu, ', theta = ', theta, sep= ''))
+kable(res$re_tables2[[1]], caption = paste('50% of data: ','lambda = ', lambda, ', mu = ', mu, ', theta = ', theta, sep= ''))
+```
+
+```{r fig.width=5, fig.height=5,echo=FALSE,  fig.align = "center"}
+setwd("/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/tsiatis")
+names = paste(nns,'-',seeds,'-',lambda,'-',mu,'-',theta,'.png',sep='')
+img = readPNG(names)
+grid.raster(img)
+```
+
+
+### Sample size = 100 
+
+```{R echo = FALSE}
+setwd("/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/tsiatis")
+nns = 100
+seeds = 1
+names = paste(lambda,'-',mu,'-',theta,'.RData',sep='')
+load(names)
+kable(res$re_tables1[[2]], caption = paste('lambda = ', lambda, 
+                 ', mu = ', mu, ', theta = ', theta, sep= ''))
+kable(res$re_tables2[[2]], caption = paste('50% of data: ','lambda = ', lambda, ', mu = ', mu, ', theta = ', theta, sep= ''))
+```
+
+```{r fig.width=5, fig.height=5,echo=FALSE,  fig.align = "center"}
+setwd("/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/tsiatis")
+names = paste(nns,'-',seeds,'-',lambda,'-',mu,'-',theta,'.png',sep='')
+img = readPNG(names)
+grid.raster(img)
+```
+
+
+### Sample size = 200
+
+
+```{R echo = FALSE}
+setwd("/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/tsiatis")
+nns = 200
+seeds = 1
+names = paste(lambda,'-',mu,'-',theta,'.RData',sep='')
+load(names)
+kable(res$re_tables1[[3]], caption = paste('lambda = ', lambda, 
+                 ', mu = ', mu, ', theta = ', theta, sep= ''))
+kable(res$re_tables2[[3]], caption = paste('50% of data: ','lambda = ', lambda, ', mu = ', mu, ', theta = ', theta, sep= ''))
+```
+
+```{r fig.width=5, fig.height=5,echo=FALSE,  fig.align = "center"}
+setwd("/Users/yaolanqiu/Desktop/NYU/Research/Survival/update-2019-08-27/tsiatis")
+names = paste(nns,'-',seeds,'-',lambda,'-',mu,'-',theta,'.png',sep='')
+img = readPNG(names)
+grid.raster(img)
+```
+
+
+
+
+
+
+
+
+
+<!-- $F(c|t) = 1 - exp(-(\mu + \theta t)c)\frac{(\mu + \theta ^2 t) (\mu + \theta t) c + (\lambda \mu - \theta + \lambda \theta t)(\mu + \theta t)/\lambda + (\mu \theta + \theta^2 t)/\lambda }{(\mu + \theta t)^2}$ -->
+
+
+

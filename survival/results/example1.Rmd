@@ -1,0 +1,221 @@
+---
+title: "Example of Independence-1"
+date: 2019-10-20
+fontsize: 12pt
+output: pdf_document
+---
+
+### Distribution description
+
+We have a joint pdf function $f_{T1, T2}(t_1, t_2)$, which 
+\begin{equation}
+f_{T1, T2}(x,y) = 1 + h(t_1, t_2) (t_1 - t_2), \text{ } (t_1, t_2) \in [0,1] \times [0,1]
+\end{equation}
+where 
+\begin{equation}
+h(t_1, t_2) = C_0 (t_1 -\frac{1}{2})(t_2 -\frac{1}{2})(t_1 + t_2 - 1)
+\end{equation}
+Then we could calculate $P(T_1 > t_1, T_2 > t_2)$ and its associated marginal distributions and the $m()$ function. That is: 
+\begin{equation}
+\begin{aligned}
+S_{T_1, T_2} = & P(T_1 >t_1, T_2> t_2) =\int_{t_2}^{1} \int_{t_1}^{1}  f_{T_1, T_2}(x,y) dx dy \\
+ = & (1 - t_1) (1 - t_2) (1 + \frac{C_0}{8} t_1 t_2 (t_1 - t_2) (t _ 1 + t_2 - 1))
+\end{aligned}
+\end{equation}
+
+### CDF/PDF validation
+
+To make equation (1) a valid PDF function and equation (3) a valid CDF fucnction,  we need: 
+
+\begin{itemize}
+\item 1. $f_{T_1, T_2}(t_1, t_2) \geq 0$
+\item 2. $S(0,0) = 1$
+\item 3. $S(1,1) = 0$
+\item 4. $S(t_1, t_2) > 0$, which is equivalent to show that $f_{t_1,t_2} > 0$
+\item 5. $S(t_1, t_2)$ is non-increasing. 
+\end{itemize}
+
+It is easy to show that $$S(0,0) = (1-0)(1-0)(1 + \frac{C_0}{8} \times 0 \times 0 \times(0 + 0 -1)) = 1$$
+$$S(1,1) = (1 - 1)(1 - 1)(1 + \frac{C_0}{8} \times 1 \times 1 \times(1 + 1 - 1)) = 0$$
+Therefore, (2) and (3) are satisfied.
+
+Show that $f_{T_1, T_2}(t_1, t_2) \geq 0$.  To make it easier, we may change $t_1, t_2$ to $x,y$, where $x = t_1 - \frac{1}{2}$ and $y = t_2 - \frac{1}{2}$, then, 
+$$\begin{aligned}
+f(x,y) = & 1 + C_0 x y (x + y), \text{ } x,y \in [-\frac{1}{2}, \frac{1}{2}] \times  [-\frac{1}{2}, \frac{1}{2}]
+\end{aligned}$$
+
+We may find the min and max value of $f(x,y)$.
+$$\begin{aligned}
+\frac{\partial f(x,y)}{ \partial x} = C_0 (2xy + y^2), \text{ } \frac{\partial^2 f(x,y)}{ \partial^2 x} = 2C_0 y \rightarrow \begin{cases} 
+C_0 >0, y > 0 & \text{convex function, } x = - \frac{y}{2} \text{ is the min}\\
+C_0 <0, y < 0 &  \text{convex function, } x = - \frac{y}{2} \text{ is the min} \\
+C_0 > 0, y > 0 & \text{concave function, } x = - \frac{y}{2} \text{ is the max} \\
+C_0 < 0, y > 0 & \text{concave function, } x = - \frac{y}{2} \text{ is the max} \\
+\end{cases}
+\end{aligned}$$
+And 
+\begin{equation} f(-\frac{y}{2}, y) = 1 - C_0\frac{y^3}{4},\end{equation} 
+\begin{equation} f(\frac{1}{2}, y) =1 + C_0(\frac{y^2}{2} + \frac{y}{4})\end{equation} 
+\begin{equation} f(-\frac{1}{2}, y) =1 + C_0( - \frac{y^2}{2} + \frac{y}{4})\end{equation} 
+
+The extreme value for function (4) is $$1 - C_0 \times \frac{1}{4}(\frac{1}{2})^3 = 1 - \frac{C_0}{32}, \text{ or}$$
+$$1 - C_0 \times \frac{1}{4}(- \frac{1}{2})^3 = 1 + \frac{C_0}{32}$$
+The extreme value for function (5) is  
+$$1 + C_0((\frac{1}{2})^2 \times \frac{1}{2} + \frac{1}{2} \times \frac{1}{4}) = 1 + \frac{C_0}{4}, \text{ or}$$
+$$1 + C_0((-\frac{1}{2})^2 \times \frac{1}{2} - \frac{1}{2} \times \frac{1}{4}) = 1$$
+The extreme value for function (5) is  $$1 + C_0 (- (\frac{1}{2})^2 \times \frac{1}{2} + \frac{1}{2} \times \frac{1}{4}) = 1 , \text{, or}$$
+$$1 + C_0 (- (-\frac{1}{2})^2 \times \frac{1}{2} - \frac{1}{2} \times \frac{1}{4}) = 1 - \frac{C_0}{4}$$
+Therefore, we need 
+$$1 - \frac{C_0}{32} \geq 0, 1 + \frac{C_0}{32} \geq 0, 1 - \frac{C_0}{4} \geq 0, 1 + \frac{C_0}{4}\geq 0 \rightarrow C_0 \in [-4, 4]$$
+That is, to satisfy condition (1) and condition (4), we need $C_0 \in [-4, 4]$
+
+The marginal function for the survival time and censoring time are all uniform distributions: 
+$$\begin{aligned} 
+f_{t_1} (x) = & \int_0^1 f_{t_1,t_2} (x,y) dy \\
+= & \big \{ y - \frac{C_0}{4} (x - \frac{1}{2}) (y^4 - 2y^3 + (-2 x^2 + 2x + 1) y^2 + (2x^2 - 2x) y)\big \} |_{0}^1 \\
+= 1
+\end{aligned}$$
+$$\begin{aligned} 
+f_{t_2} (y) = & \int_0^1 f_{t_1,t_2} (x,y) dx \\
+= & \big \{ \frac{C_0}{4}  (y - \frac{1}{2}) \big[x^4 - 2x^3 + (-2 y^2 + 2y + 1) x^2 + (2y^2 - 2y )x \big] + x\big \} |_{0}^1 \\
+= 1
+\end{aligned}$$
+That is,
+$$f_{T_1}(t_1) = I_{[0,1]}(t_1), \text{ } f_{T_2}(t_2) = I_{[0,1]}(t_2)$$
+$$P(T_1 > t_1) = 1 - t_1, \text{ } P(T_2 > t_2) = 1 - t_2$$
+Therefore, the condition (5) is satisfied. 
+
+And hazard rate function $\lambda_F$ for the survival time is: 
+
+* $S_F(t) = 1 - t$, $\Lambda_F(t) = - \log(1-t)$, $\lambda_F(t) = \frac{1}{1-t}$
+
+The hazard rate function $\lambda_H$ for the observed time is: 
+
+* $S_H(t) = P(Z > t) = (1-t)^2$, $\Lambda_H(t) = - 2\log(1-t), \lambda_H(t) = \frac{2}{1-t}$
+
+Then $$m(t) = \frac{\lambda_F(t)}{\lambda_H(t)} = 0.5$$
+
+And the associated $\rho(t)$ is 
+
+$$\begin{aligned}\psi(t) = & \int_t^1 f(t,s) ds = 1 + C_0 (t_1 -\frac{1}{2})(t_2 -\frac{1}{2})(t_1 + t_2 - 1) (t_1 - t_2) \\
+= & \frac{1}{8} \big((1-t) \big(C_0(t -1) t^2 (2t - 1) + 8 \big)\big)
+\end{aligned}$$
+
+$$\begin{aligned}
+\rho (t) = &  \frac{f(t)/ \psi(t) -1}{S(t)/S_x(t) - 1} = \frac{1/\psi(t) - 1}{\frac{1-t}{(1-t)^2} - 1} \\
+= & \frac{1-t}{t} \frac{2 C_0 t^5 - 5 C_0 t^4 + 4 C_0 t^3 - C_0 t^2 + 8 t}{\big((1-t) \big(C_0(t -1) t^2 (2t - 1) + 8 \big)\big)} \\
+= & \frac{2 C_0 t^4 - 5 C_0 t^3 + 4 C_0 t^2 - C_0 t + 8}{C_0 t^2 (t -1) (2t - 1) + 8}
+\end{aligned}$$
+
+However, 
+
+When $C_0 = 0$, $\rho(t) = 1$, and $T$ and $U$ are independent. However, $m(t) \neq 1$ since $m(t) = 0.5$ is always true. 
+
+Is that means that when $T$ and $U$ are independent, $m(t) = 1$ is not alwauys true? 
+
+
+```{R include = FALSE}
+library(survival)
+
+# sample y 
+
+set.seed(123)
+
+Fx = function(x){return(x)}
+Sx = function(x){return(1-x)}
+
+Fx_y = function(x, y){
+  res = x * ((4*y-2) * x^3 + (4 - 8*y)*x^2 +(-8 * y^3 + 12*y^2 - 2) * x + 8 * y^3 - 12*y^2 + 4 * y + 1 )
+  return(res)
+}
+
+inverse_fxy = function(a,y){
+  res1 = c()
+  for(i in seq(0.00001, 1, 0.1)){
+    res1 = c(res1, Fx_y(i, y))
+  }
+  temp = seq(0.00001, 1, 0.1)[which(abs(res1 - a) == min(abs(res1 - a)))]
+ 
+  res2 = c()
+  for(i in seq((temp - 0.1), (temp+0.1), 0.01)){
+    res2 = c(res2, Fx_y(i, y))
+  }
+  temp = seq((temp - 0.1), (temp+0.1), 0.01)[which(abs(res2 - a) == min(abs(res2 - a)))]
+  
+  res3 = c()
+  for(i in seq((temp - 0.01), (temp+0.01), 0.001)){
+    res3 = c(res3, Fx_y(i, y))
+  }
+  temp = seq((temp - 0.01), (temp+0.01), 0.001)[which(abs(res3 - a) == min(abs(res3 - a)))]
+  
+  res4 = c()
+  for(i in seq((temp - 0.001), (temp+0.001), 0.0001)){
+    res4 = c(res4, Fx_y(i, y))
+  }
+  temp = seq((temp - 0.001), (temp+0.001), 0.0001)[which(abs(res4 - a) == min(abs(res4 - a)))]
+  return(temp)
+}
+
+# sample x
+y = runif(200, 0, 1)
+x = c()
+for(i in 1:length(y)){
+  xx = runif(1)
+  x = c(x, inverse_fxy(xx, y[i]))
+}
+
+status = ifelse(x <=y, 1, 0)
+z = ifelse(status == 1, x, y)
+
+data = data.frame(survival = x, censor = y, time = z, status = status)
+data = data[order(data$time),]
+
+```
+
+
+The results comparison
+
+```{r fig2, fig.height = 4, fig.width = 4, fig.align = "center", echo = FALSE}
+
+fit_km = survfit(Surv(time, status) ~ 1, data = data)
+
+
+m = function(x){return(0.5)}
+
+lambda_H = function(t){
+  i = data$time - t == min(data$time - t)
+  h = (fit_km$n.event[i] + fit_km$n.censor[i])/fit_km$n.risk[i]
+  return(h)
+}
+
+Lambda_H = function(t){
+  i = which(abs(data$time - t) == min(abs(data$time - t)))
+  if(data$time[i] > t & i > 1){i = i -1}
+  HH = c()
+  for(ii in 1:i){
+    HH = c(HH, (fit_km$n.event[ii]+fit_km$n.censor[ii])/fit_km$n.risk[ii])
+  }
+  return(sum(HH))
+}
+
+Lambda_F = function(t){
+  return(m(t) * Lambda_H(t)) 
+}
+
+S_est = function(t){
+  return(exp(-Lambda_F(t)))
+}
+
+sest = c()
+for(i in 1:200){
+  sest = c(sest, S_est(data$time[i]))
+}
+
+
+plot(fit_km$time, fit_km$surv, col = 2, lty = 2, type = 'l', ylab = 'survival',
+     xlab = 'time', main='Comparison')
+lines(data$time, Sx(data$time), lwd = 2)
+lines(data$time, sest, col = 6, lty = 3, lwd = 2)
+legend('topright', legend = c('True S(t)', 'KM', 'm(t)'), lty = c(1,2,3), col = c(1,2,6), cex = 0.8)
+```
+

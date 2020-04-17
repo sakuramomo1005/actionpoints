@@ -1,0 +1,585 @@
+---
+title: "results"
+date: 2020-02-19
+output: 
+  pdf_document:
+    toc: true # table of content true
+    toc_depth: 2
+---
+
+
+# Setting 1
+
+
+
+```{R include = FALSE}
+
+library(survival)
+library(knitr)
+library(kableExtra)
+
+
+setwd('/Users/yaolanqiu/Desktop/NYU/Research/Survival/8. cox mt')
+load('result_sex01_20200218.RData') 
+Survlist = result$Survlist
+niters = 100
+
+
+Qtable2 = list(); Qtable3 = list()
+MSE =  list()
+for(theta in 1:4){
+  qtable2 = c()
+  qtable3 = c()
+  mse = c()
+  for(iters in c(1,1:niters)){
+    if(iters !=76){
+      qtable2 = rbind(qtable2, c(Survlist[[iters]][[theta]]$surv
+                               - c(matrix(rep(c(0.9,0.75, 0.5, 0.25,0.1),4),5,4))))
+    qtable3 = rbind(qtable3, c(Survlist[[iters]][[theta]]$surv))
+    mse = rbind(mse, c(c(Survlist[[iters]][[theta]]$surv) -
+                         c(matrix(rep(c(0.9,0.75, 0.5, 0.25,0.1),4),5,4)))^2)
+    }
+  }
+  
+  Qtable2[[theta]] = qtable2
+  Qtable3[[theta]] = qtable3
+  MSE[[theta]] = mse
+}
+
+
+metrix = matrix(c(0.9,0.75, 0.5, 0.25,0.1), 100, 20, byrow = TRUE)
+
+X1 = c(); X2 = c(); X3 = c(); X4 = c()
+for(i in 1:4){
+  qtable2 = Qtable2[[i]]
+  x1 = apply(qtable2, 2, mean, na.rm = TRUE)
+  x2 = apply(qtable2, 2, sd, na.rm = TRUE)
+  x3 = apply(mse, 2, mean, na.rm = TRUE)
+  X1 = rbind(X1, matrix(x1, 5,4))
+  X2 = rbind(X2, matrix(x2, 5,4))
+  X3 = rbind(X3, matrix(x3, 5,4))
+  qtable3 = Qtable3[[i]]
+  cl1 = ((qtable3 -
+            1.96 * matrix(apply(qtable2, 2, sd, na.rm = TRUE), 100,20, byrow = TRUE)) < metrix)
+  cl2 = ((qtable3 +
+            1.96 * matrix(apply(qtable2, 2, sd, na.rm = TRUE), 100,20, byrow = TRUE)) > metrix)
+  
+  X4 = rbind(X4, matrix(apply(cl1*cl2, 2, mean, na.rm =TRUE), 5,4))
+  
+}
+```
+
+
+```{R include = FALSE}
+X1 = as.data.frame(X1)
+X1 = cbind(X1, X1[,2:4]/X1[,1])
+#rownames(x1) = c('90%', '75%', '50%','25%','10%')
+colnames(X1) = c('coxph','Dikta1','Dikta2','Exp m', 'Dikta1','Dikta2','Exp m')
+X1 = round(X1,4)
+X1 = cbind( rep(c('0.90', '0.75', '0.50','0.25','0.10'),4), X1)
+colnames(X1)[1] = 'Quantile'
+
+X2 = as.data.frame(X2)
+X2 = cbind(X2, X2[,2:4]/X2[,1])
+#rownames(x1) = c('90%', '75%', '50%','25%','10%')
+colnames(X2) = c('coxph','Dikta1','Dikta2','Exp m', 
+                 'Dikta1','Dikta2','Exp m')
+X2 = round(X2,4)
+X2 = cbind( rep(c('0.90', '0.75', '0.50','0.25','0.10'),4), X2)
+colnames(X2)[1] = 'Quantile'
+
+X3 = as.data.frame(X3)
+X3 = cbind(X3, X3[,2:4]/X3[,1])
+#rownames(x1) = c('90%', '75%', '50%','25%','10%')
+colnames(X3) = c('coxph','Dikta1','Dikta2','Exp m', 
+                 'Dikta1','Dikta2','Exp m')
+X3 = round(X3,4)
+X3 = cbind( rep(c('0.90', '0.75', '0.50','0.25','0.10'),4), X3)
+colnames(X3)[1] = 'Quantile'
+
+
+X4 = as.data.frame(X4)
+colnames(X4) = c('coxph','Dikta1','Dikta2','Exp m')
+X4 = round(X4,4)
+X4 = cbind( rep(c('0.90', '0.75', '0.50','0.25','0.10'),4), X4)
+colnames(X4)[1] = 'Quantile'
+
+```
+
+
+```{R echo = FALSE}
+
+kable(X1, "latex", longtable = T, align="c", 
+      caption = 'Mean absolute difference between estimated  and true S()',
+      booktabs=TRUE, escape = F) %>%
+  add_header_above(header = c(" " = 1,
+                              " " = 1,
+                              "True m()" = 3,
+                              'ratio' = 3)) %>%
+  group_rows("x = 1", 1, 5) %>%
+  group_rows("x = 2", 6, 10) %>%
+  group_rows("x = 3", 11,15) %>%
+  group_rows("x = 4", 16,20) 
+
+kable(X2, "latex", longtable = T, align="c", 
+      caption = 'Standard deviation of estimated S()',
+      booktabs=TRUE, escape = F) %>%
+  add_header_above(header = c(" " = 1,
+                              " " = 1,
+                              "True m()" = 3,
+                              'ratio' = 3))%>%
+  group_rows("x = 1", 1, 5) %>%
+  group_rows("x = 2", 6, 10) %>%
+  group_rows("x = 3", 11,15) %>%
+  group_rows("x = 4", 16,20) 
+
+kable(X3, "latex", longtable = T, align="c", 
+      caption = 'MSE of estimated S()',
+      booktabs=TRUE, escape = F) %>%
+  add_header_above(header = c(" " = 1,
+                              " " = 1,
+                              "True m()" = 3,
+                              'ratio' = 3))%>%
+  group_rows("x = 1", 1, 5) %>%
+  group_rows("x = 2", 6, 10) %>%
+  group_rows("x = 3", 11,15) %>%
+  group_rows("x = 4", 16,20) 
+
+kable(X4, "latex", longtable = T, align="c", 
+      caption = 'Coverage of the true quantile',
+      booktabs=TRUE, escape = F) %>%
+  group_rows("x = 1", 1, 5) %>%
+  group_rows("x = 2", 6, 10) %>%
+  group_rows("x = 3", 11,15) %>%
+  group_rows("x = 4", 16,20) 
+
+```
+
+
+
+
+
+# Setting 2 
+
+
+```{R include = FALSE}
+
+setwd('/Users/yaolanqiu/Desktop/NYU/Research/Survival/8. cox mt')
+load('result_sex12_20200218.RData') 
+Survlist = result$Survlist
+niters = 100
+
+
+Qtable2 = list(); Qtable3 = list()
+MSE =  list()
+for(theta in 1:4){
+  qtable2 = c()
+  qtable3 = c()
+  mse = c()
+  for(iters in 1:niters){
+    qtable2 = rbind(qtable2, c(Survlist[[iters]][[theta]]$surv
+                               - c(matrix(rep(c(0.9,0.75, 0.5, 0.25,0.1),4),5,4))))
+    qtable3 = rbind(qtable3, c(Survlist[[iters]][[theta]]$surv))
+    mse = rbind(mse, c(c(Survlist[[iters]][[theta]]$surv) -
+                         c(matrix(rep(c(0.9,0.75, 0.5, 0.25,0.1),4),5,4)))^2)
+  }
+  Qtable2[[theta]] = qtable2
+  Qtable3[[theta]] = qtable3
+  MSE[[theta]] = mse
+}
+
+
+metrix = matrix(c(0.9,0.75, 0.5, 0.25,0.1), 100, 20, byrow = TRUE)
+
+X1 = c(); X2 = c(); X3 = c(); X4 = c()
+for(i in 1:4){
+  qtable2 = Qtable2[[i]]
+  x1 = apply(qtable2, 2, mean, na.rm = TRUE)
+  x2 = apply(qtable2, 2, sd, na.rm = TRUE)
+  x3 = apply(mse, 2, mean, na.rm = TRUE)
+  X1 = rbind(X1, matrix(x1, 5,4))
+  X2 = rbind(X2, matrix(x2, 5,4))
+  X3 = rbind(X3, matrix(x3, 5,4))
+  qtable3 = Qtable3[[i]]
+  cl1 = ((qtable3 -
+            1.96 * matrix(apply(qtable2, 2, sd, na.rm = TRUE), 100,20, byrow = TRUE)) < metrix)
+  cl2 = ((qtable3 +
+            1.96 * matrix(apply(qtable2, 2, sd, na.rm = TRUE), 100,20, byrow = TRUE)) > metrix)
+  
+  X4 = rbind(X4, matrix(apply(cl1*cl2, 2, mean, na.rm =TRUE), 5,4))
+  
+}
+```
+
+
+```{R include = FALSE}
+X1 = as.data.frame(X1)
+X1 = cbind(X1, X1[,2:4]/X1[,1])
+#rownames(x1) = c('90%', '75%', '50%','25%','10%')
+colnames(X1) = c('coxph','Dikta1','Dikta2','Exp m', 'Dikta1','Dikta2','Exp m')
+X1 = round(X1,4)
+X1 = cbind( rep(c('0.90', '0.75', '0.50','0.25','0.10'),4), X1)
+colnames(X1)[1] = 'Quantile'
+
+X2 = as.data.frame(X2)
+X2 = cbind(X2, X2[,2:4]/X2[,1])
+#rownames(x1) = c('90%', '75%', '50%','25%','10%')
+colnames(X2) = c('coxph','Dikta1','Dikta2','Exp m', 
+                 'Dikta1','Dikta2','Exp m')
+X2 = round(X2,4)
+X2 = cbind( rep(c('0.90', '0.75', '0.50','0.25','0.10'),4), X2)
+colnames(X2)[1] = 'Quantile'
+
+X3 = as.data.frame(X3)
+X3 = cbind(X3, X3[,2:4]/X3[,1])
+#rownames(x1) = c('90%', '75%', '50%','25%','10%')
+colnames(X3) = c('coxph','Dikta1','Dikta2','Exp m', 
+                 'Dikta1','Dikta2','Exp m')
+X3 = round(X3,4)
+X3 = cbind( rep(c('0.90', '0.75', '0.50','0.25','0.10'),4), X3)
+colnames(X3)[1] = 'Quantile'
+
+
+X4 = as.data.frame(X4)
+colnames(X4) = c('coxph','Dikta1','Dikta2','Exp m')
+X4 = round(X4,4)
+X4 = cbind( rep(c('0.90', '0.75', '0.50','0.25','0.10'),4), X4)
+colnames(X4)[1] = 'Quantile'
+
+```
+
+
+```{R echo = FALSE}
+
+kable(X1, "latex", longtable = T, align="c", 
+      caption = 'Mean absolute difference between estimated  and true S()',
+      booktabs=TRUE, escape = F) %>%
+  add_header_above(header = c(" " = 1,
+                              " " = 1,
+                              "True m()" = 3,
+                              'ratio' = 3)) %>%
+  group_rows("x = 1", 1, 5) %>%
+  group_rows("x = 2", 6, 10) %>%
+  group_rows("x = 3", 11,15) %>%
+  group_rows("x = 4", 16,20) 
+
+kable(X2, "latex", longtable = T, align="c", 
+      caption = 'Standard deviation of estimated S()',
+      booktabs=TRUE, escape = F) %>%
+  add_header_above(header = c(" " = 1,
+                              " " = 1,
+                              "True m()" = 3,
+                              'ratio' = 3))%>%
+  group_rows("x = 1", 1, 5) %>%
+  group_rows("x = 2", 6, 10) %>%
+  group_rows("x = 3", 11,15) %>%
+  group_rows("x = 4", 16,20) 
+
+kable(X3, "latex", longtable = T, align="c", 
+      caption = 'MSE of estimated S()',
+      booktabs=TRUE, escape = F) %>%
+  add_header_above(header = c(" " = 1,
+                              " " = 1,
+                              "True m()" = 3,
+                              'ratio' = 3))%>%
+  group_rows("x = 1", 1, 5) %>%
+  group_rows("x = 2", 6, 10) %>%
+  group_rows("x = 3", 11,15) %>%
+  group_rows("x = 4", 16,20) 
+
+kable(X4, "latex", longtable = T, align="c", 
+      caption = 'Coverage of the true quantile',
+      booktabs=TRUE, escape = F) %>%
+  group_rows("x = 1", 1, 5) %>%
+  group_rows("x = 2", 6, 10) %>%
+  group_rows("x = 3", 11,15) %>%
+  group_rows("x = 4", 16,20) 
+
+```
+
+
+
+
+
+# Setting 3 
+
+
+
+```{R include = FALSE}
+
+setwd('/Users/yaolanqiu/Desktop/NYU/Research/Survival/8. cox mt')
+load('result_expsex01_20200218.RData') 
+Survlist = result$Survlist
+niters = 100
+
+
+Qtable2 = list(); Qtable3 = list()
+MSE =  list()
+for(theta in 1:4){
+  qtable2 = c()
+  qtable3 = c()
+  mse = c()
+  for(iters in 1:niters){
+    qtable2 = rbind(qtable2, c(Survlist[[iters]][[theta]]$surv
+                               - c(matrix(rep(c(0.9,0.75, 0.5, 0.25,0.1),4),5,4))))
+    qtable3 = rbind(qtable3, c(Survlist[[iters]][[theta]]$surv))
+    mse = rbind(mse, c(c(Survlist[[iters]][[theta]]$surv) -
+                         c(matrix(rep(c(0.9,0.75, 0.5, 0.25,0.1),4),5,4)))^2)
+  }
+  Qtable2[[theta]] = qtable2
+  Qtable3[[theta]] = qtable3
+  MSE[[theta]] = mse
+}
+
+
+metrix = matrix(c(0.9,0.75, 0.5, 0.25,0.1), 100, 20, byrow = TRUE)
+
+X1 = c(); X2 = c(); X3 = c(); X4 = c()
+for(i in 1:4){
+  qtable2 = Qtable2[[i]]
+  x1 = apply(qtable2, 2, mean, na.rm = TRUE)
+  x2 = apply(qtable2, 2, sd, na.rm = TRUE)
+  x3 = apply(mse, 2, mean, na.rm = TRUE)
+  X1 = rbind(X1, matrix(x1, 5,4))
+  X2 = rbind(X2, matrix(x2, 5,4))
+  X3 = rbind(X3, matrix(x3, 5,4))
+  qtable3 = Qtable3[[i]]
+  cl1 = ((qtable3 -
+            1.96 * matrix(apply(qtable2, 2, sd, na.rm = TRUE), 100,20, byrow = TRUE)) < metrix)
+  cl2 = ((qtable3 +
+            1.96 * matrix(apply(qtable2, 2, sd, na.rm = TRUE), 100,20, byrow = TRUE)) > metrix)
+  
+  X4 = rbind(X4, matrix(apply(cl1*cl2, 2, mean, na.rm =TRUE), 5,4))
+  
+}
+```
+
+
+```{R include = FALSE}
+X1 = as.data.frame(X1)
+X1 = cbind(X1, X1[,2:4]/X1[,1])
+#rownames(x1) = c('90%', '75%', '50%','25%','10%')
+colnames(X1) = c('coxph','Dikta1','Dikta2','Exp m', 'Dikta1','Dikta2','Exp m')
+X1 = round(X1,4)
+X1 = cbind( rep(c('0.90', '0.75', '0.50','0.25','0.10'),4), X1)
+colnames(X1)[1] = 'Quantile'
+
+X2 = as.data.frame(X2)
+X2 = cbind(X2, X2[,2:4]/X2[,1])
+#rownames(x1) = c('90%', '75%', '50%','25%','10%')
+colnames(X2) = c('coxph','Dikta1','Dikta2','Exp m', 
+                 'Dikta1','Dikta2','Exp m')
+X2 = round(X2,4)
+X2 = cbind( rep(c('0.90', '0.75', '0.50','0.25','0.10'),4), X2)
+colnames(X2)[1] = 'Quantile'
+
+X3 = as.data.frame(X3)
+X3 = cbind(X3, X3[,2:4]/X3[,1])
+#rownames(x1) = c('90%', '75%', '50%','25%','10%')
+colnames(X3) = c('coxph','Dikta1','Dikta2','Exp m', 
+                 'Dikta1','Dikta2','Exp m')
+X3 = round(X3,4)
+X3 = cbind( rep(c('0.90', '0.75', '0.50','0.25','0.10'),4), X3)
+colnames(X3)[1] = 'Quantile'
+
+
+X4 = as.data.frame(X4)
+colnames(X4) = c('coxph','Dikta1','Dikta2','Exp m')
+X4 = round(X4,4)
+X4 = cbind( rep(c('0.90', '0.75', '0.50','0.25','0.10'),4), X4)
+colnames(X4)[1] = 'Quantile'
+
+```
+
+
+```{R echo = FALSE}
+
+kable(X1, "latex", longtable = T, align="c", 
+      caption = 'Mean absolute difference between estimated  and true S()',
+      booktabs=TRUE, escape = F) %>%
+  add_header_above(header = c(" " = 1,
+                              " " = 1,
+                              "True m()" = 3,
+                              'ratio' = 3)) %>%
+  group_rows("x = 1", 1, 5) %>%
+  group_rows("x = 2", 6, 10) %>%
+  group_rows("x = 3", 11,15) %>%
+  group_rows("x = 4", 16,20) 
+
+kable(X2, "latex", longtable = T, align="c", 
+      caption = 'Standard deviation of estimated S()',
+      booktabs=TRUE, escape = F) %>%
+  add_header_above(header = c(" " = 1,
+                              " " = 1,
+                              "True m()" = 3,
+                              'ratio' = 3))%>%
+  group_rows("x = 1", 1, 5) %>%
+  group_rows("x = 2", 6, 10) %>%
+  group_rows("x = 3", 11,15) %>%
+  group_rows("x = 4", 16,20) 
+
+kable(X3, "latex", longtable = T, align="c", 
+      caption = 'MSE of estimated S()',
+      booktabs=TRUE, escape = F) %>%
+  add_header_above(header = c(" " = 1,
+                              " " = 1,
+                              "True m()" = 3,
+                              'ratio' = 3))%>%
+  group_rows("x = 1", 1, 5) %>%
+  group_rows("x = 2", 6, 10) %>%
+  group_rows("x = 3", 11,15) %>%
+  group_rows("x = 4", 16,20) 
+
+kable(X4, "latex", longtable = T, align="c", 
+      caption = 'Coverage of the true quantile',
+      booktabs=TRUE, escape = F) %>%
+  group_rows("x = 1", 1, 5) %>%
+  group_rows("x = 2", 6, 10) %>%
+  group_rows("x = 3", 11,15) %>%
+  group_rows("x = 4", 16,20) 
+
+```
+
+
+
+
+
+# Setting 4 
+
+
+
+```{R include = FALSE}
+
+setwd('/Users/yaolanqiu/Desktop/NYU/Research/Survival/8. cox mt')
+load('result_expsex12_20200218.RData') 
+Survlist = result$Survlist
+niters = 100
+
+
+Qtable2 = list(); Qtable3 = list()
+MSE =  list()
+for(theta in 1:4){
+  qtable2 = c()
+  qtable3 = c()
+  mse = c()
+  for(iters in 1:niters){
+    qtable2 = rbind(qtable2, c(Survlist[[iters]][[theta]]$surv
+                               - c(matrix(rep(c(0.9,0.75, 0.5, 0.25,0.1),4),5,4))))
+    qtable3 = rbind(qtable3, c(Survlist[[iters]][[theta]]$surv))
+    mse = rbind(mse, c(c(Survlist[[iters]][[theta]]$surv) -
+                         c(matrix(rep(c(0.9,0.75, 0.5, 0.25,0.1),4),5,4)))^2)
+  }
+  Qtable2[[theta]] = qtable2
+  Qtable3[[theta]] = qtable3
+  MSE[[theta]] = mse
+}
+
+
+metrix = matrix(c(0.9,0.75, 0.5, 0.25,0.1), 100, 20, byrow = TRUE)
+
+X1 = c(); X2 = c(); X3 = c(); X4 = c()
+for(i in 1:4){
+  qtable2 = Qtable2[[i]]
+  x1 = apply(qtable2, 2, mean, na.rm = TRUE)
+  x2 = apply(qtable2, 2, sd, na.rm = TRUE)
+  x3 = apply(mse, 2, mean, na.rm = TRUE)
+  X1 = rbind(X1, matrix(x1, 5,4))
+  X2 = rbind(X2, matrix(x2, 5,4))
+  X3 = rbind(X3, matrix(x3, 5,4))
+  qtable3 = Qtable3[[i]]
+  cl1 = ((qtable3 -
+            1.96 * matrix(apply(qtable2, 2, sd, na.rm = TRUE), 100,20, byrow = TRUE)) < metrix)
+  cl2 = ((qtable3 +
+            1.96 * matrix(apply(qtable2, 2, sd, na.rm = TRUE), 100,20, byrow = TRUE)) > metrix)
+  
+  X4 = rbind(X4, matrix(apply(cl1*cl2, 2, mean, na.rm =TRUE), 5,4))
+  
+}
+```
+
+
+```{R include = FALSE}
+X1 = as.data.frame(X1)
+X1 = cbind(X1, X1[,2:4]/X1[,1])
+#rownames(x1) = c('90%', '75%', '50%','25%','10%')
+colnames(X1) = c('coxph','Dikta1','Dikta2','Exp m', 'Dikta1','Dikta2','Exp m')
+X1 = round(X1,4)
+X1 = cbind( rep(c('0.90', '0.75', '0.50','0.25','0.10'),4), X1)
+colnames(X1)[1] = 'Quantile'
+
+X2 = as.data.frame(X2)
+X2 = cbind(X2, X2[,2:4]/X2[,1])
+#rownames(x1) = c('90%', '75%', '50%','25%','10%')
+colnames(X2) = c('coxph','Dikta1','Dikta2','Exp m', 
+                 'Dikta1','Dikta2','Exp m')
+X2 = round(X2,4)
+X2 = cbind( rep(c('0.90', '0.75', '0.50','0.25','0.10'),4), X2)
+colnames(X2)[1] = 'Quantile'
+
+X3 = as.data.frame(X3)
+X3 = cbind(X3, X3[,2:4]/X3[,1])
+#rownames(x1) = c('90%', '75%', '50%','25%','10%')
+colnames(X3) = c('coxph','Dikta1','Dikta2','Exp m', 
+                 'Dikta1','Dikta2','Exp m')
+X3 = round(X3,4)
+X3 = cbind( rep(c('0.90', '0.75', '0.50','0.25','0.10'),4), X3)
+colnames(X3)[1] = 'Quantile'
+
+
+X4 = as.data.frame(X4)
+colnames(X4) = c('coxph','Dikta1','Dikta2','Exp m')
+X4 = round(X4,4)
+X4 = cbind( rep(c('0.90', '0.75', '0.50','0.25','0.10'),4), X4)
+colnames(X4)[1] = 'Quantile'
+
+```
+
+
+```{R echo = FALSE}
+
+kable(X1, "latex", longtable = T, align="c", 
+      caption = 'Mean absolute difference between estimated  and true S()',
+      booktabs=TRUE, escape = F) %>%
+  add_header_above(header = c(" " = 1,
+                              " " = 1,
+                              "True m()" = 3,
+                              'ratio' = 3)) %>%
+  group_rows("x = 1", 1, 5) %>%
+  group_rows("x = 2", 6, 10) %>%
+  group_rows("x = 3", 11,15) %>%
+  group_rows("x = 4", 16,20) 
+
+kable(X2, "latex", longtable = T, align="c", 
+      caption = 'Standard deviation of estimated S()',
+      booktabs=TRUE, escape = F) %>%
+  add_header_above(header = c(" " = 1,
+                              " " = 1,
+                              "True m()" = 3,
+                              'ratio' = 3))%>%
+  group_rows("x = 1", 1, 5) %>%
+  group_rows("x = 2", 6, 10) %>%
+  group_rows("x = 3", 11,15) %>%
+  group_rows("x = 4", 16,20) 
+
+kable(X3, "latex", longtable = T, align="c", 
+      caption = 'MSE of estimated S()',
+      booktabs=TRUE, escape = F) %>%
+  add_header_above(header = c(" " = 1,
+                              " " = 1,
+                              "True m()" = 3,
+                              'ratio' = 3))%>%
+  group_rows("x = 1", 1, 5) %>%
+  group_rows("x = 2", 6, 10) %>%
+  group_rows("x = 3", 11,15) %>%
+  group_rows("x = 4", 16,20) 
+
+kable(X4, "latex", longtable = T, align="c", 
+      caption = 'Coverage of the true quantile',
+      booktabs=TRUE, escape = F) %>%
+  group_rows("x = 1", 1, 5) %>%
+  group_rows("x = 2", 6, 10) %>%
+  group_rows("x = 3", 11,15) %>%
+  group_rows("x = 4", 16,20) 
+
+```
+

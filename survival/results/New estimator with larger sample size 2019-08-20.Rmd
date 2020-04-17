@@ -1,0 +1,275 @@
+---
+title: "New estimator with larger sample size"
+date: 2019-08-20
+output: pdf_document
+header-includes:
+  - \usepackage{color}
+---
+
+```{r setup, include=FALSE}
+setwd('/Users/yaolanqiu/Desktop/NYU/Research/Survival/new S(t) - expectation estimate')
+load('result2wrap20190819.Rdata')
+library(knitr)
+library(survival)
+for(functions in 1){
+  
+  # rho = 1.1; # rho = 1.01; # rho = 0.01; # rho = 0.1; # rho = 10; # rho = 100
+  RHO = 0.1
+  f1 = function(t){return(exp(-t))}
+  f2 = function(t){return(RHO * exp(-t * RHO))}
+  fc = function(s){return(-s)}
+  S1 = function(t){return(exp(-t))}
+  S2 = function(t){return(exp(-RHO*t))}
+  
+  f = function(t){
+    res = (2 * RHO - 2) / (RHO - 2) * exp(-2 * t) - RHO / (RHO - 2) * exp(- RHO * t)
+    return(res)
+  }
+  S = function(t){
+    res = 0.5 * (2 * RHO - 2) / (RHO - 2) * exp(-2 * t) - 1 / (RHO - 2) * exp(- RHO * t)
+    return(res)
+  }
+  psi = function(t){
+    return(exp(-2 * t))
+  }
+  Sx = function(t){
+    return(exp(-2 * t))
+  }
+  rou = function(t){
+    return((f(t)/psi(t) - 1)/(S(t)/Sx(t) - 1))
+  }
+  rho = function(t){
+    res = (f(t)/psi(t) - 1)/(S(t)/Sx(t) - 1)
+    if(S(t) == Sx(t)){
+      return(RHO)
+    }else{
+      return((f(t)/psi(t) - 1)/(S(t)/Sx(t) - 1))
+    }
+  }
+  # if t<=s
+  f_ts1 = function(t,s){
+    return(exp(-s-t))
+  }
+  # if t>s
+  f_ts2 = function(t,s){
+    return(RHO * exp((RHO - 2) * s - RHO * t))
+  }
+  
+  #### other functions, calculate sp1, sp2
+  
+  ni = function(i){
+    X = sort(data$time)
+    id = which(X == Xd[i])[1]
+    return(length(X) - id + 1)
+  }
+  
+  ci = function(i){
+    xi = Xd[i]
+    xi1 = Xd[i + 1]
+    temp = data[data$time > xi & data$time< xi1,] ## < or <=?
+    return(sum(temp$status == 0))
+  }
+  
+  part2_version1 = function(t){
+    # slud's function 
+    N = dim(data)[1]
+    dt = sum(data$time <= t & data$status == 1)
+    nt = sum(data$time > t)
+    temp = 0
+    if(dt == 0){
+      temp = 0
+    }else{
+      for(k in 0:(dt - 1)){
+        temp2 = 1
+        for(i in (1+k):dt){
+          xd = Xd[i]
+          if(Xd[i] == 0){xd = 10e-10}
+          part3 = ni(i) - 1 + rho(xd)
+          if(part3 == 0){
+            part3 = 10e-10
+          }
+          temp2 = temp2 *  (1 - min(part3/(part3+3), rho(xd)/part3)) 
+        }
+        temp = temp + ci(k) * temp2
+      }
+    }
+    return(temp /N)
+  }
+  
+  part2_version2 = function(t){
+    N = dim(data)[1]
+    dt = sum(data$time <= t & data$status == 1)
+    nt = sum(data$time > t)
+    temp = 0
+    if(dt == 0){
+      temp = 0
+    }else{
+      temp2 = ci(dt - 1)
+      if(dt < 2){
+        temp = 0 
+      }else{
+        for(k in 0:(dt - 2)){
+          temp3 = 1
+          for(i in (1+k):(dt-1)){
+            part3 = ni(i)
+            if(part3 == 0){
+              part3 = 10e-10
+            }
+            xd = Xd[i]
+            if(xd == 0){xd = 10e-10}
+            temp3 = temp3 * (1 - min(part3/(part3+3), rho(xd)/part3))
+          }
+          temp = temp + ci(k) * temp3
+        }
+      }
+      temp = temp + temp2
+    }
+    return(temp /N)
+  }
+  
+  Spt = function(t){
+    N = dim(data)[1]
+    nt = sum(data$time > t)
+    
+    part1 = 1/N * nt 
+    s11 = part1
+    
+    s1 = part1 + part2_version1(t)
+    s2 = part1 + part2_version2(t)
+    
+    return(list(s1 = s1, s2 = s2, s11 = s11))
+  }
+}
+
+```
+
+
+## Setting 
+
+### Functions
+
+Let **$\rho(t) = 0.1$**, the piecewise example:
+$$ f(t,s)=\left\{
+\begin{aligned}
+& exp(-t - s) & & \text{ } (t \leq s)\\
+& \rho exp( - 0.1 t -1.9 s)&  & \text{ } (t > s)
+\end{aligned}
+\right.$$
+And 
+$$f(t) = \frac{18 }{19} exp(-2t) + \frac{10}{19} exp(-10t)$$
+$$S(t) = \frac{9}{19}exp(-2t) - \frac{10}{19} exp(-\rho t)$$
+$$\psi(t) = exp(-2t)$$ 
+$$S_x(t) = exp(-2t)$$
+
+The simulation: 
+
+* Generated dataset size: 1000
+
+* Notation
+
+|  True $S(t)$ | Slud's estimator | Corrected Slud's estimator | $S(t)$ integral estimated by Riemann| $S(t)$ integral estimated by expectation |
+|:--:|:----:|:--------------------:|:-------------------:|:--------------------:|
+| $S(t)$ |  $S_{p1}(t)$|  $S_{p2}(t)$| $S_{r}(t)$| $S_e(t)$|
+
+All the estimators except KM were using the true value of $\rho(t)$, also $S_x(t)$.   
+
+```{R include = FALSE}
+
+fit_km = survfit(Surv(time, status) ~ 1, data=result2$data)
+s_est = fit_km$surv
+t_est = fit_km$time
+
+s_r = result2$s_ode
+s_e = result2$s_e
+```
+
+#### Mean absolute difference
+
+KM estimator
+```{R}
+round(mean(abs(s_est - S(t_est))),3)
+```
+
+Slud's estimator
+```{R}
+round(mean(abs(result2$s1 - S(t_est))),3)
+```
+
+Corrected Slud's estimator
+```{R}
+round(mean(abs(result2$s2 - S(t_est))),3)
+```
+
+Integral estimated by Riemann 
+
+```{R}
+round(mean(abs(s_r - S(t_est))),3)
+```
+
+Integral estimated by the expectation idea 
+
+```{R}
+round(mean(abs(s_e - S(t_est))),3)
+```
+
+## The plot
+
+```{R echo = FALSE, fig.width=5, fig.height=5,  fig.align = "center"}
+plot(t_est, S(t_est), type = 'l', ylim = c(0,1), xlab = 'time', ylab = 'S(t)')
+lines(t_est, s_est, col = 3, lty = 2)
+lines(t_est, s_r, col = 2, lty = 3, lwd = 2)
+lines(t_est, s_e, col = 4, lty = 4)
+lines(t_est, result2$s1, col = 8,lty = 7, lwd = 2)
+lines(t_est, result2$s2, col = 6, lty = 6)
+legend('topright', legend = c('True','KM','Riemann','Expectation','Slud','Corrected Slud'),
+       col = c(1,3,2,4,8,6), lty = 1:6)
+```
+
+
+## Why biased? 
+
+
+For KM estimator and Slud's estimator: 
+
+When $\rho_i = 0$, which means that $f(t) = \psi(t) \rightarrow \int_0^{\infty} (t,s) ds = \int_t^{\infty} f(t,s) ds\rightarrow \int_0^t f(t,s) ds = 0$. That is, when $s < t$, $f(t,s) = 0$, there is no censoring. 
+
+$S_{p1}(t) = \prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}+ \frac{1}{N} \sum_{k=1}^{d(t)} (\rho_k - 1)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1} = 1 - \frac{d(t)}{N}$
+
+$S_{km}(t) = \prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}$. 
+
+And if there is no censor, $n_i = N - i$, $\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i} = \prod_{i = 1}^{d(t)} \frac{N - i - 1}{N-i} = \frac{N-1 - d(t)}{N-1} = 1 - \frac{d(t)}{N-1}$.
+
+Therefore, $S_{p1}(t)  \approx S_{km}(t)$. Since $S_{km}(t)$ supposes independent, it is biased, and $S_{p1}(t)$, $S_{p2}(t)$ are also biased. 
+
+
+## How could we proof that the integral estimation method is unbiased? 
+
+\color{blue}
+
+I feel a little bit confused about how to proof the unbias.
+
+From Slud's paper, the $S(t)$ has the unique expression: 
+
+\begin{equation} 
+\begin{aligned} 
+S(t) =&  exp \big[ - \int_0^t \frac{\psi(s) \rho(s)}{Sx(s)}ds \big] \big( 1 + 
+ \int_0^t \psi(s) \{\rho(s) - 1\} exp \big[ \int_0^s \frac{\psi(u) \rho(u)}{Sx(u)} du \big] ds\big)
+\end{aligned} 
+\end{equation}
+
+And the intergal term can be estimated as: 
+$$\begin{aligned}
+g(t) \equiv \int_0^t \frac{\psi(s) \rho(s)}{Sx(s)} ds = &  \int_0^t \frac{ \rho(s)}{Sx(s)} d \Psi(s)\\
+= &  \int_0^t \frac{ \rho(s)}{Sx(s)} P(I = 1) d \frac{\Psi(s)}{P(I = 1)}  \\
+= &   \int_0^t \frac{ \rho(s)}{Sx(s)} P(I = 1) d \Psi_c(s) \\
+\approx & \frac{1}{N}\sum_{ 0 \leq s \leq t} \frac{ \rho(s)}{Sx(s)} P(I = 1) \equiv \hat g(t)
+\end{aligned}$$
+where $\Psi(t) = P(X < t, I = 1) = P(X < t | I = 1) P (I = 1) = \Psi_c(t) P(I = 1)$
+
+Empirically, the $\hat g(t)$ is the unbiased estimator of $g(t)$, i.e. $E(\hat g(t)) = g(t)$ 
+
+However, how could we say that $E(exp(- \hat g(t))) = exp(-g(t))$? Based on Jensen's inequality, $f(x) = exp(-x)$ is a concave function. Then 
+$$E(exp(- \hat g(t))) < exp(-E(\hat g(t))) = exp(-g(t))$$ 
+Then how could we show it? 
+
+

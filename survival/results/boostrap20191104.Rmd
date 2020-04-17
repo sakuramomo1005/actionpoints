@@ -1,0 +1,104 @@
+---
+title: "Boostrapping"
+date: 2019-11-04
+output: pdf_document
+fontsize: 12pt
+---
+
+# Outline
+
+* Model: Slud's piecewise example, with $\rho = 10$
+
+* Simulated the origin dataset with 200 subjects 
+
+* Sample 200 subjects with replacement form the origin dataset; Repeat time: 1000
+
+* The mean differences between true value and estimations are recorded, i.e. Kaplan Meier, Gerhard Dikta's m() function and our m() function. 
+
+* The estiamtes at time 1st, 30th, 50th, 100th, 150th (e.g. the 30th observed time in the data) were recorded and standard errors were calculated. 
+
+# Model 
+
+The pairwise example in Slud's paper. The joint distribution is: 
+$$ f(t,s)=\left\{
+\begin{aligned}
+& f_1(t) f_C(s) & & \text{ } (t \leq s)\\
+& f_C(s) \frac{S_1(s)}{S_2(s)} f_2(t) &  & \text{ } (t > s)
+\end{aligned}
+\right.$$
+
+Let 
+
+* $f_1(t) = \exp(-t)$, $S_1(s) = \exp(-x)$
+
+* $f_C(s) = \exp(-s)$, $S_C(s) = \exp(-s)$
+
+* $f_2(t) = \rho \exp(-\rho t)$ , $S_2(s) = ]exp(- \rho t)$
+
+* $\rho(t) = \frac{h_2(t)}{h_1(t)} = \rho$, which is a constant. 
+
+Then 
+$$ f(t,s)=\left\{
+\begin{aligned}
+&  \exp(-t - s) & & \text{ } (t \leq s)\\
+& \rho \exp( - \rho t + (\rho - 2)s)&  & \text{ } (t > s)
+\end{aligned}
+\right.$$
+And 
+$$f(t) = \frac{2 \rho - 2}{\rho - 2} \exp(-2t) - \frac{\rho}{\rho - 2} \exp(-\rho t)$$
+$$S(t) = \frac{ \rho - 1}{ \rho - 2}exp(-2t) - \frac{1}{\rho - 2} \exp(-\rho t)$$
+$$\psi(t) = \exp(-2t)$$
+$$S_H(t) = S_x(t) = \exp(-2t), \lambda_H(t) = 2 \text{ ,(consistent to previous notation)})$$
+Then the $m()$ function is 
+$$m(t) = \frac{\lambda_F(t)}{\lambda_H(t)} = \frac{\frac{\frac{2 \rho - 2}{\rho - 2} \exp(-2t) - \frac{\rho}{\rho - 2} \exp(-\rho t)}{ \frac{ \rho - 1}{ \rho - 2} \exp(-2t) - \frac{1}{\rho - 2} \exp(-\rho t)}}{2} =  \frac{(2 \rho - 2)  \exp(-2t) - \rho \exp(-\rho t)}{2(\rho - 1)  \exp(-2t) - 2\exp(-\rho t)}$$
+
+
+#  Result
+
+```{R include = FALSE}
+library(knitr)
+setwd("/Users/yaolanqiu/Desktop/NYU/Research/Survival/M function 20191101")
+load('boostrap20191104')
+```
+
+
+### Mean absolute differences between the true $S(t)$
+
+```{R echo = FALSE}
+temp = matrix(c(mean(result$md1), mean(result$md2), mean(result$md3)),1,3)
+rownames(temp) =NULL
+colnames(temp) = c('KM', 'Gerhard','New m()')
+kable(temp)
+```
+
+
+### Standard deviation
+
+Just looked at 5 time points: the 1st observed time, and the 30th, 50th, 100th, 150th ovserved time. 
+
+```{R echo = FALSE}
+t1 = result$data0$time[1]
+t2 = result$data0$time[30]
+t3 = result$data0$time[50]
+t4 = result$data0$time[100]
+t5 = result$data0$time[150]
+temp = matrix(c(t1,t2,t3,t4,t5),1,5)
+rownames(temp) =NULL
+colnames(temp) = c(1,30,50,100,150)
+kable(temp)
+```
+
+The standard deviation at those time points are: 
+
+```{r echo = FALSE}
+temp = matrix(c(sd(result$km_est1), sd(result$m_est1), sd(result$m2_est1),
+sd(result$km_est2), sd(result$m_est2), sd(result$m2_est2),
+sd(result$km_est3), sd(result$m_est3), sd(result$m2_est3),
+sd(result$km_est4), sd(result$m_est4), sd(result$m2_est4),
+sd(result$km_est5), sd(result$m_est5), sd(result$m2_est5)) , 3,5)
+colnames(temp) = c(1,30,50,100,150)
+rownames(temp) = c('KM', 'Gerhard','New m()')
+kable(temp)
+```
+
+

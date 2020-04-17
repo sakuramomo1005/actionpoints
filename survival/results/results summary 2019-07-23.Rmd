@@ -1,0 +1,365 @@
+---
+title: "Previous results summary"
+date: 2019-07-23
+fontsize: 12pt 
+geometry: tmargin=1.8cm,bmargin=1.8cm,lmargin=1.1cm,rmargin=2.1cm
+output: 
+  pdf_document:
+    toc: 3
+header-includes:
+  - \usepackage{color}
+---
+
+
+# Notation
+
+
+The two main equations in Slud'spaper:
+$$\rho(t) = \big[ \big\{ f(t)/\phi(t)\big\} - 1\big] \big[ \big\{S(t) / S_X(t) \big\}\big]^{-1}$$
+where,
+
+* $f(t,s)$ is the joint distribtuion of surivival time and censor time.
+
+* $f(t) = \int f(t,s) ds$
+
+* $S(t) = \int_t^{\infty} f(t)dt$ 
+
+* $S_X(t) = P(T > t, C > t)$
+
+* $\phi(t) = \int_{t}^{\infty} f(t,s) ds = \int_{t}^{\infty} f(s|t) f(t) ds =f(t)\int_{t}^{\infty} f(s|t)ds = f(t) P(C>t | T = t)$. It can be treated as the derivation of $\Psi(t)$, where 
+$$\begin{aligned}
+\Psi(t) = & \int_{0}^{t} \psi(t) dt = \int_{0}^{t}\int_{t}^{\infty} f(s,t)dsdt \\
+        = & P(T<t, C>t) = P(T < t < C)\\
+        = & P(min(T,C) < t, C > t) \\
+        =& P(X < t, I = 1) \text{ time before t and not censor}
+        \end{aligned},$$
+
+
+$\rho(t)$ shows the proportion of death hazard at time $t$, conditioning on censored before $t$ or after $t$, that is:
+$$
+\begin{aligned}
+\rho(t) =& \lim\limits_{\delta \rightarrow 0} \frac{P(t<T<t+\delta |T>t, C \leq t)}{P(t<T<t+\delta |T>t, C < t)} \\
+        =& \lim\limits_{\delta \rightarrow 0}  \frac{\frac{P(t<T<t + \delta, C \leq t)}{P(T > t, C \leq t)}}{\frac{P(t<T<t + \delta, C >t)}{P(T>t, C > t)}}\\
+        =& \lim\limits_{\delta \rightarrow 0} \frac{\frac{P(t<T<t + \delta, C \leq t)}{P(t<T<t + \delta, C >t)}}{\frac{P(T>t, C \leq  t)}{P(T > t, C > t)}}\\
+        =& \lim\limits_{\delta \rightarrow 0} \frac{\frac{P(t<T<t + \delta, C \leq t) }{P(t<T<t + \delta, C >t)} + 1 - 1}{\frac{P(T>t, C \leq  t)}{P(T > t, C > t)} + 1 - 1}\\
+        =& \lim\limits_{\delta \rightarrow 0} \frac{\frac{P(t<T<t + \delta)}{P(t<T<t + \delta, C>t)} - 1}{\frac{P(T>t)}{P(T>t, C>t)} - 1} \\
+        =& \lim\limits_{\delta \rightarrow 0} \frac{1/P(C>t |t<T<t + \delta) - 1}{S(t)/S_x(t) - 1}\\
+        =& \frac{1/P(C>t |T = t) - 1}{S(t)/S_x(t) - 1} \\
+        =& \big[ \big\{ f(t)/\phi(t)\big\} - 1\big] \big[ \big\{S(t) / S_X(t) -1\big\}\big]^{-1}
+\end{aligned}
+$$
+
+## The property of $\rho(t)$
+
+Since
+
+* $f(t)/\phi(t) = \frac{f(t)}{f(t) P(C>t | T = t)}= \frac{1}{P(C>t | T = t)} \geq  1$
+
+* $S(t) / S_X(t) = \frac{P(T>t)}{P(T>t, C>t)}\geq 1$
+
+Therefore, $\rho(t) \in [0, \infty]$
+
+* When $\rho(t) = 0$, $f(t)/\phi(t) = 1$, that is $P(C>t | T = t) = 1$, which means that there is no censoring.
+
+* When $\rho(t) = 1$, $1/P(C>t | T = t) = P(T>t)/P(T>t, C>t)$, which is $P(C>t | T = t) = P(C>t | T>t)$. That is, the C and T are independent. When  $\rho(t) = 1$ the survival time and the censor time are independent. 
+
+* When $\rho(t) > 1$, we have a positive dependence between censor and death. The larger the $\rho$ is, the larger the dependence is. 
+
+$~$
+
+$$\hat{S}_{p}(t) = \frac{1}{N}\big\{n(t) + \sum_{k=0}^{d(t) - 1} c_k \prod_{i = k+1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}\big\}$$
+
+where,
+
+* $N$ is the total subjects in the trial
+
+* $X_i$ is the time, $X_i = min(T_i, C_i)$, and $X_i$ is ordered from $1$ to $N$: $X_1 \leq X_2 \leq ... \leq X_N$
+
+* $d$ the total number of death
+
+* $X_{(i)}$ is the death time, and ordered as $X_{(1)} \leq X_{(2)} \leq ... \leq X_{(d)}$
+
+* $n(t)$ is the number of subjects who are still alive at time $t$ 
+
+* $d(t)$ is the number of total death people at time $t$
+
+* $n_i$ is the number of people who survived after the $i$th death time ($X_j \geq X_{(i)}$)
+
+* $c_i$ is the number of censer between the $i$th death time $X_{(i)}$ and the $(i+1)$th  death time $X_{(i+1)}$
+
+
+
+# Derivation of $S_{p2}(t)$
+
+To make it is easy to  distinguish Slud's equation and the new derivated equation, let's call Slud's one as $S_{p1}(t)$ and the new one $S_{p2}(t)$. 
+$$\hat{S}_{p1}(t) = \frac{1}{N}\big\{n(t) + \sum_{k=0}^{d(t) - 1} c_k \prod_{i = k+1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}\big\}$$
+$$\hat{S}_{p2}(t) = \frac{1}{N}\big\{n(t) + c_{d(t)-1} + \sum_{k=0}^{d(t) - 2} c_k \prod_{i = k+1}^{d(t) - 1} (1-\frac{\rho(X_{i})}{n_i})  \big\}$$
+
+To get $\hat{S}_{p2}(t)$, let's begin with:
+$$\begin{aligned}
+& P(T > X_{(j)}) = P(T > X_{(j)}, C< X_{(j-1)}) + P(T > X_{(j)}, C > X_{(j-1)}) \\
+& P(T > X_{(j)}) = P(T > X_{(j)}, C >  X_{(j)})  +  P(T > X_{(j)}, C <  X_{(j)})
+\end{aligned}$$
+Therefore, $$P(T > X_{(j)}, C< X_{(j-1)}) + P(T > X_{(j)}, C > X_{(j-1)}) = P(T > X_{(j)}, C >  X_{(j)})  +  P(T > X_{(j)}, C <  X_{(j)})$$
+
+Besides, the term 
+
+$\begin{aligned}
+P(T > X_{(j)}, C< X_{(j-1)})  
+=& P(T > X_{(j)}, T > X_{(j-1)}, C< X_{(j-1)})  \\
+=&  P(T > X_{(j)}| T > X_{(j-1)}, C< X_{(j-1)}) \times P(T > X_{(j-1)}, C< X_{(j-1)}) \\
+=& (1 - P(T < X_{(j)}| T > X_{(j-1)}, C< X_{(j-1)}) ) \times P(T > X_{(j-1)}, C< X_{(j-1)})\\
+\end{aligned}$
+
+The term
+
+$\begin{aligned}
+P(T > X_{(j)},  C > X_{(j- 1)}) =& P(T > X_{(j)}, T > X_{(j-1)},  C > X_{(j - 1)})\\
+=&  P(T > X_{(j)}| T > X_{(j-1)}  C > X_{(j - 1)}) P(T > X_{(j-1)}  C > X_{(j - 1)}) \\
+=& P(T > X_{(j)} | T > X_{(j-1)},  C > X_{(j - 1)})  \times P(W> X_{(j - 1)}) \\
+\approx & \frac{n_{j-1} - 1}{n_{j-1}} \times \frac{n_{j-1}}{N} = \frac{n_{j-1} - 1}{N}
+\end{aligned}$
+
+Therefore, 
+$$\begin{aligned} 
+P(T > X_{(j)}, C <  X_{(j)}) =& P(T > X_{(j)}, C< X_{(j-1)}) + P(T > X_{(j)}, C > X_{(j-1)}) - P(T > X_{(j)}, C >  X_{(j)}) \\
+=& (1 - P(T < X_{(j)}| T > X_{(j-1)}, C< X_{(j-1)}) ) \times P(T > X_{(j-1)}, C< X_{(j-1)}) \\
+& + P(T > X_{(j)} | T > X_{(j-1)},  C > X_{(j - 1)})  \times P(W> X_{(j - 1)})  - P(T > X_{(j)}, C >  X_{(j)})\\
+\end{aligned}$$
+As $X_{(j)} - X_{(j-1)} \rightarrow 0$,
+
+* $\rho_i = \frac{P(T < X_{(j)}| T > X_{(j-1)}, C< X_{(j-1)}) }{P(T < X_{(j)}| T > X_{(j-1)}, C>X_{(j-1)}) }$, then $P(T < X_{(j)}| T > X_{(j-1)}, C< X_{(j-1)}) = \rho_i P(T < X_{(j)}| T > X_{(j-1)}, C>X_{(j-1)})$
+
+* The $P(T < X_{(j)}| T > X_{(j-1)}, C>X_{(j-1)})$ can be estimated as $\frac{1}{n_{j-1}}$
+ 
+* $P(T > X_{(j-1)}, C >  X_{(j-1)}) \approx P(W> X_{(j - 1)}) = \frac{n_{j-1}}{N}$
+
+* $P(T > X_{(j)}, C >  X_{(j)}) \approx P(W> X_{(j)}) = \frac{n_j}{N}$
+
+* $P(T > X_{(j)} | T > X_{(j-1)},  C > X_{(j - 1)}) \approx \frac{n_{j-1} - 1}{n_{j-1}}$
+
+Therefore, as $X_{(j)} - X_{(j-1)} \rightarrow 0$,
+$$\begin{aligned} 
+P(T > X_{(j)}, C <  X_{(j)}) =& (1 - P(T < X_{(j)}| T > X_{(j-1)}, C< X_{(j-1)}) ) \times P(T > X_{(j-1)}, C< X_{(j-1)}) \\
+& + P(T > X_{(j)} | T > X_{(j-1)},  C > X_{(j - 1)})  \times P(W> X_{(j - 1)})  - P(T > X_{(j)}, C >  X_{(j)})\\
+\approx & (1 - \frac{\rho_{j-1}}{n_{j-1}}) \times P(T > X_{(j-1)}, C< X_{(j-1)})  +  \frac{n_{j-1} - 1}{n_{j-1}} \frac{n_{j-1}}{N} - \frac{n_j}{N} \\
+= &  (1 - \frac{\rho_{j-1}}{n_{j-1}}) \times P(T > X_{(j-1)}, C< X_{(j-1)}) + \frac{c_{j-1}}{N}
+\end{aligned}$$
+
+Let $Y_j = P(T > X_{(j)}, C <  X_{(j)})$, $A_j = 1 - \frac{\rho_j}{n_{j}}$, $B_j = \frac{c_{j}}{N}$ to make it is easier to see.
+
+Since $Y_0 = P(T > X_{(0)}, C <  X_{(0)})$, we can treat it as something that will never happen and probability = 0. Therefore, 
+
+* $Y_1 = A_0 Y_0 + B_0 = B_0$, since $Y_0 = 0$. Begin with $0$ since $k=0$ in the equation 0
+
+* $Y_2 = A_1 Y_1 + B_1 = A_1 B_0 + B_1$
+
+* $Y_3 = A_2 Y_2 + B_2 = A_2 A_1 B_0 + A_2 B_1 + B_2$
+
+* $...$
+
+* Therefore the equation is: 
+$$\begin{aligned}Y_n =& B_0 \prod_{i=1}^{n-1}A_i + B_1 \prod_{i=2}^{n-1}A_i + B_2 \prod_{i=3}^{n-1}A_i + ... B_{n-2} \prod_{i=n-1}^{n-1}A_i + B_{n-1} \\
+=& [\sum_{k = 0}^{n-2} B_k \prod_{i=k+1}^{n-1}A_i] + B_{n-1} \\
+=& [\sum_{k = 0}^{n-2} \frac{c_{k}}{N} \prod_{i=k+1}^{n-1} (1 - \frac{\rho(X_{i})}{n_{i}})] + \frac{c_{n-1}}{N}
+\end{aligned}$$ 
+Therefor, the $\hat{S}_{p2}(t)$ equation is:
+$$\hat{S}_{p2}(t) = \frac{1}{N}\big\{n(t) + c_{d(t)-1} + \sum_{k=0}^{d(t) - 2} c_k \prod_{i = k+1}^{d(t) - 1} (1-\frac{\rho(X_{i})}{n_i})  \big\}$$
+
+## The second version of  $\hat{S}_{p1}(t)$
+
+We know that: 
+
+$1. \text{ } c_k = n_k - n_{k+1} - 1$
+
+$\begin{aligned}
+2. \text{ } N =& n(t) + d(t) + \sum_{i = 0}{d(t) - 1} c_k \\
+  =& n(t) + d(t) + \sum_{i = 0}{d(t) - 1} (n_k - n_{k+1} - 1) \\
+  =& n(t) + d(t) + n_0 - n_{d(t)} - d(t)\\
+  =& n(t) + N + 1 - n_{d(t)}
+\end{aligned}$
+
+Therefore, $n(t) = n_{d(t)} - 1$
+
+Therefore,
+$$\begin{aligned}
+\hat{S}_{p}(t) =& \frac{1}{N}\big\{n(t) + \sum_{k=0}^{d(t) - 1} c_k \prod_{i = k+1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}\big\} \\
+=&\frac{1}{N}\big\{ n_{d(t)} - 1 + \sum_{k=0}^{d(t) - 1} (n_k - n_{k+1} - 1) \prod_{i = k+1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}\big\} \\
+=& \frac{1}{N}\big\{ n_{d(t)} - 1 + \sum_{k=0}^{d(t) - 1} (n_k - 1) \prod_{i = k+1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1} -  \sum_{k=0}^{d(t) - 1}  n_{k+1}\prod_{i = k+1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}   \big\} \\
+=& \frac{1}{N}\big\{ n_{d(t)} - 1 + \sum_{k=1}^{d(t) - 1} (n_k - 1) \prod_{i = k+1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1} + (n_0 - 1)\prod_{i = k+1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1} -  \sum_{k=0}^{d(t) - 1}  n_{k+1}\prod_{i = k+1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}   \big\} \\
+=& \frac{1}{N}\big\{ n_{d(t)} - 1 + \sum_{k=1}^{d(t) - 1} (n_k - 1) \prod_{i = k+1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1} + N\prod_{i = k+1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1} -  \sum_{k=0}^{d(t) - 1}  n_{k+1}\prod_{i = k+1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}   \big\} 
+\end{aligned}$$
+
+Besides, 
+
+$$\sum_{k=0}^{d(t) - 1}  n_{k+1}\prod_{i = k+1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1} = \sum_{k=1}^{d(t)}  n_{k}\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}$$
+And 
+$$\begin{aligned}
+\sum_{k=1}^{d(t) - 1} (n_k - 1) \prod_{i = k+1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1} = & \sum_{k=1}^{d(t) - 1} (n_k + \rho_k - 1) \frac{n_k - 1}{n_k + \rho_k - 1} \prod_{i = k+1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}\\ 
+=& \sum_{k=1}^{d(t) - 1} (n_k + \rho_k - 1) \prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}
+\end{aligned}$$
+
+$$n_{d(t)} - 1 =(n_{d(t)} + \rho_{d(t)}- 1) \frac{n_{d(t)} - 1}{n_{d(t)} + \rho_{d(t)}- 1}$$
+Therefore,
+$$\begin{aligned}
+& \frac{1}{N}\big\{ n_{d(t)} - 1 + \sum_{k=1}^{d(t) - 1} (n_k - 1) \prod_{i = k+1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1} + N\prod_{i = k+1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1} -  \sum_{k=0}^{d(t) - 1}  n_{k+1}\prod_{i = k+1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}   \big\} \\
+& = \frac{1}{N}\big\{ (n_{d(t)} + \rho_{d(t)}- 1) \frac{n_{d(t)} - 1}{n_{d(t)} + \rho_{d(t)}- 1} \\
+& + \sum_{k=1}^{d(t) - 1} (n_k + \rho_k - 1) \prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}+ N\prod_{i = k+1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1} - \sum_{k=1}^{d(t)}  n_{k}\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1} \big\} \\
+& = \frac{1}{N}\big\{ \sum_{k=1}^{d(t)} (n_k + \rho_k - 1) \prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}+ N\prod_{i = k+1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1} - \sum_{k=1}^{d(t)}  n_{k}\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1} \big\}\\
+& =  \frac{1}{N}\big\{ \sum_{k=1}^{d(t)} (\rho_k - 1) \prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1} + N\prod_{i = k+1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}\big\} \\
+& = \prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}+ \frac{1}{N} \sum_{k=1}^{d(t)} (\rho_k - 1)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}
+\end{aligned}$$
+
+Therefore, the another version of $S_{p1}(t)$ is:
+
+$$\hat{S}_{p1}(t) = \prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}+ \frac{1}{N} \sum_{k=1}^{d(t)} (\rho_k - 1)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}$$
+
+## The second version of  $\hat{S}_{p2}(t)$
+
+$$\begin{aligned} \hat{S}_{p2}(t) = & \frac{1}{N}\big\{n(t) + c_{d(t)-1} + \sum_{k=0}^{d(t) - 2} c_k \prod_{i = k+1}^{d(t) - 1} (1-\frac{\rho(X_{i})}{n_i})  \big\} \\
+=& \frac{1}{N}\big\{ n_{d(t)} - 1 + c_{d(t)-1} + \sum_{k=0}^{d(t) - 2} (n_k - n_{k+1} - 1) \prod_{i = k+1}^{d(t) - 1} \frac{n_i - \rho_i}{n_i}\big\} \\
+=&  \frac{1}{N}\big\{ n_{d(t)} - 1 + c_{d(t)-1}+ \sum_{k=0}^{d(t) - 2} (n_k - 1) \prod_{i = k+1}^{d(t) - 1} \frac{n_i - \rho_i}{n_i} - \sum_{k=0}^{d(t) - 2}n_{k+1} \prod_{i = k+1}^{d(t) - 1} \frac{n_i - \rho_i}{n_i}\big\}
+\end{aligned}$$
+And 
+
+$\begin{aligned} 1. \text{ } \sum_{k=0}^{d(t) - 2}n_{k+1} \prod_{i = k+1}^{d(t) - 1} \frac{n_i - \rho_i}{n_i} =& \sum_{k=1}^{d(t) - 1}n_{k} \prod_{i = k}^{d(t) - 1} \frac{n_i - \rho_i}{n_i}\\
+=& \sum_{k=1}^{d(t) - 2}n_{k} \frac{n_k - \rho_k}{n_k} \prod_{i = k+1}^{d(t) - 1} \frac{n_i - \rho_i}{n_i} + (n_{d(t) - 1} - \rho_{d(t) - 1})\\
+=& \sum_{k=1}^{d(t) - 2} (n_k - \rho_k)\prod_{i = k+1}^{d(t) - 1} \frac{n_i - \rho_i}{n_i} + (n_{d(t) - 1} - \rho_{d(t) - 1})
+\end{aligned}$
+
+$\begin{aligned}
+2. \text{ } \sum_{k=0}^{d(t) - 2} (n_k - 1) \prod_{i = k+1}^{d(t) - 1} \frac{n_i - \rho_i}{n_i} = \sum_{k=1}^{d(t) - 2} (n_k - 1) \prod_{i = k+1}^{d(t) - 1} \frac{n_i - \rho_i}{n_i} + (n_0 - 1) \prod_{i = 1}^{d(t) - 1} \frac{n_i - \rho_i}{n_i}\\
+\end{aligned}$
+
+Therefore, 
+$$\begin{aligned}S_{p2}(t) =& \frac{1}{N}\big\{n(t) +  c_{d(t)-1}+ \sum_{k=0}^{d(t) - 2} c_k \prod_{i = k+1}^{d(t)-1} (1-\frac{\rho_i}{n_i})\big\} \\
+=&\frac{1}{N}\big\{ n_{d(t)} - 1 
++  c_{d(t)-1} +\sum_{k=1}^{d(t) - 2} (n_k - 1) \prod_{i = k+1}^{d(t) - 1} \frac{n_i - \rho_i}{n_i} \\
+& + (n_0 - 1) \prod_{i = 1}^{d(t) - 1} \frac{n_i - \rho_i}{n_i} - \sum_{k=1}^{d(t) - 2} (n_k - \rho_k)\prod_{i = k+1}^{d(t) - 1} \frac{n_i - \rho_i}{n_i} - (n_{d(t) - 1} - \rho_{d(t) - 1}) \big\} \\
+=&\frac{1}{N}\big\{ n_{d(t)} - 1 + c_{d(t)-1} +\sum_{k=1}^{d(t) - 2} (\rho_i  -1 ) \prod_{i = k+1}^{d(t) - 1} \frac{n_i - \rho_i}{n_i} + N  \prod_{i = 1}^{d(t) - 1} \frac{n_i - \rho_i}{n_i} -(n_{d(t) - 1} - \rho_{d(t) - 1}) \big\} \\
+=& \prod_{i = 1}^{d(t) - 1} \frac{n_i - \rho_i}{n_i} + \frac{1}{N}\big\{\sum_{k=1}^{d(t) - 2} (\rho_i  -1 ) \prod_{i = k+1}^{d(t) - 1} \frac{n_i - \rho_i}{n_i} +  n_{d(t)} - n_{d(t) - 1} +  n_{d(t) - 1} - n_{d(t)} - 1   + \rho_{d(t) - 1} -1 \big\} \\
+= & \prod_{i = 1}^{d(t) - 1} \frac{n_i - \rho_i}{n_i} + \frac{1}{N}\big\{\sum_{k=1}^{d(t) - 2} (\rho_i  -1 ) \prod_{i = k+1}^{d(t) - 1} \frac{n_i - \rho_i}{n_i} + \rho_{d(t) - 1} -2 \big\} 
+\end{aligned}$$
+
+
+# Ratio of  $S_{p1}(t)$ and $S_{kM}(t)$
+
+Let's show when $\rho_i \rightarrow 0$, $S_{p1}(t) \rightarrow S_{kM}(t)$, which we can illustrate by $\frac{S_{p1}(t)}{S_{kM}(t)} \rightarrow 1$
+
+
+Let 
+
+* Each $\rho_i = 1 + \delta_i$, where $\delta_i \in [-\epsilon, \epsilon]$, $\epsilon \rightarrow 0$
+
+* $\epsilon_{max} = max_{[i \in [1, d(t)]}(\delta_i)$,  $\epsilon_{min} = min_{[i \in [1, d(t)]}(\delta_i)$
+
+* $\epsilon_1 = min_{[i \in [1, d(t)]}(\frac{n_i}{\delta_i})$,
+
+* $\epsilon_2 = max_{[i \in [1, d(t)]}(\frac{n_i}{\delta_i})$
+
+* $\epsilon_3 = min_{[i \in [1, d(t)]}(|\frac{n_i}{\delta_i}|)$
+
+* $\epsilon_4 = max_{[i \in [1, d(t)]}(|\frac{n_i}{\delta_i}|)$
+
+For the ratio: 
+$$\begin{aligned}
+\frac{S_{p1}(t) }{S_{KM}(t)} =& \frac{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}+ \frac{1}{N} \sum_{k=1}^{d(t)} (\rho_k - 1)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \rho_i - 1}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}} \\
+=& \frac{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}} + \frac{\frac{1}{N} \sum_{k=1}^{d(t)} (\delta_i)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}}
+\end{aligned}$$
+
+The first term equals to: 
+$$\begin{aligned}
+\frac{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}} =& \prod_{i = 1}^{d(t)}\frac{n_i}{n_i + \delta_i} = \prod_{i = 1}^{d(t)}(1 - \frac{1}{\frac{n_i}{\delta_i} + 1})\\
+\end{aligned}$$
+And 
+$$\prod_{i = 1}^{d(t)} (1 - \frac{1}{1+\epsilon_1}) \leq \prod_{i = 1}^{d(t)}(1 - \frac{1}{\frac{n_i}{\delta_i} + 1}) \leq \prod_{i = 1}^{d(t)} (1 - \frac{1}{1+\epsilon_2})$$
+$$(1 - \frac{1}{1+\epsilon_1})^{d(t)} \leq \prod_{i = 1}^{d(t)}(1 - \frac{1}{\frac{n_i}{\delta_i} + 1})  \leq  (1 - \frac{1}{1+\epsilon_2})^{d(t)}$$
+$$(1 - \frac{1}{1+\epsilon_1})^{ (1+\epsilon_1) \frac{d(t)}{1+\epsilon_1}} \leq \prod_{i = 1}^{d(t)}(1 - \frac{1}{\frac{n_i}{\delta_i} + 1})  \leq  (1 - \frac{1}{1+\epsilon_2})^{ (1+\epsilon_2) \frac{d(t)}{1+\epsilon_2}}$$
+where  $\epsilon_1 = min_{[i \in [1, d(t)]}(\frac{n_i}{\delta_i})$, $\epsilon_2 = max_{[i \in [1, d(t)]}(\frac{n_i}{\delta_i})$
+
+Since $\epsilon_1 = min_{i \in [1, d(t)]}(\frac{n_i}{\delta_i})$, $\epsilon_2 = max_{i \in [1, d(t)]}(\frac{n_i}{\delta_i})$, and $\delta_i \rightarrow 0$, $1 + \epsilon_1 \rightarrow \infty$ and  $1+  \epsilon_2 \rightarrow \infty$. (if all $\delta_i$ > 0, $1 + \epsilon_1 \rightarrow + \infty$,  $1+  \epsilon_2 \rightarrow + \infty$; if all $\delta_i$ < 0, $1 + \epsilon_1 \rightarrow - \infty$,  $1+  \epsilon_2 \rightarrow - \infty$; otherwise, $1 + \epsilon_1 \rightarrow - \infty$,  $1+  \epsilon_2 \rightarrow + \infty$. however, the sign of $\infty$ will not affect the result)
+
+
+Recall: 
+$$\lim_{n \rightarrow \infty}(1 + \frac{a}{n})^{bn} = e^{ab}$$
+Therefore, 
+$$\lim_{\epsilon_1 \rightarrow \infty} (1 - \frac{1}{1+\epsilon_1})^{ (1+\epsilon_1) \frac{d(t)}{1+\epsilon_1}} =\lim_{\epsilon_1 \rightarrow \infty} [e^{-d(t)}]^{\frac{1}{1+\epsilon_1}} = 1$$
+$$\lim_{\epsilon_2 \rightarrow \infty} (1 - \frac{1}{1+\epsilon_2})^{ (1+\epsilon_2) \frac{d(t)}{1+\epsilon_2}} =\lim_{\epsilon_2 \rightarrow \infty} [e^{-d(t)}]^{\frac{1}{1+\epsilon_2}} = 1$$
+Therefore, based on the squeeze theorem, $\lim_{\frac{n_i}{\delta_i} \rightarrow \infty} \prod_{i = 1}^{d(t)}(1 - \frac{1}{\frac{n_i}{\delta_i} + 1}) = 1$. That is, $\lim_{\frac{n_i}{\delta_i} \rightarrow \infty} \frac{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}} = 1$
+
+For the term 2: 
+$$\frac{1}{N} \sum_{k=1}^{d(t)} (\epsilon_{min})\prod_{i = k}^{d(t)} \frac{\frac{n_i - 1}{n_i + \delta_i}}{\frac{n_i - 1}{n_i}}\prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1} \leq \frac{\frac{1}{N} \sum_{k=1}^{d(t)} (\delta_i)\prod_{i = k}^{d(t)} \frac{n_i - 1}{n_i + \delta_i}}{\prod_{i = 1}^{d(t)} \frac{n_i - 1}{n_i}}  \leq \frac{1}{N} \sum_{k=1}^{d(t)} (\epsilon_{max})\prod_{i = k}^{d(t)} \frac{\frac{n_i - 1}{n_i + \delta_i}}{\frac{n_i - 1}{n_i}}\prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1}$$
+Let's look at the right part first: 
+$$\begin{aligned}\frac{1}{N} \sum_{k=1}^{d(t)} (\epsilon_{max})\prod_{i = k}^{d(t)} \frac{\frac{n_i - 1}{n_i + \delta_i}}{\frac{n_i - 1}{n_i}}\prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1} = & \frac{1}{N} \sum_{k=1}^{d(t)} (\epsilon_{max})\prod_{i = k}^{d(t)} \frac{1}{1 + \frac{\delta_i}{n_i}}\prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1} \\
+\leq & \frac{1}{N} \sum_{k=1}^{d(t)} (\epsilon_{max})\prod_{i = k}^{d(t)} \frac{1}{1 - 1/\epsilon_3}\prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1}, \text{ where } \epsilon_3 = min_{[i \in [1, d(t)]}(|\frac{n_i}{\delta_i}|) \\
+=&\frac{\epsilon_{max}}{N} \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t)} \sum_{k=1}^{d(t)}\prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1}
+\end{aligned}$$
+Since $n_i$ is a decreasing function, 
+$$\prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1} \leq \prod_{i = 1}^{k-1}\frac{n_{d(t)}}{n_{d(t)} - 1}  = [\frac{n_{d(t)}}{n_{d(t)} - 1}]^{k-1}$$
+Therefore,
+$$\begin{aligned}
+\frac{\epsilon_{max}}{N} \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t)} \sum_{k=1}^{d(t)}\prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1}  \leq &  \frac{\epsilon_{max}}{N} \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t)}  \sum_{k=1}^{d(t)}[\frac{n_{d(t)}}{n_{d(t)} - 1}]^{k-1} \\
+=& (n_{d(t)} - 1) \frac{\epsilon_{max}}{N} \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t)}  [(\frac{n_{d(t)}}{n_{d(t)} - 1})^{d(t)} - 1]\\
+=& \frac{\epsilon_{max}(n_{d(t)} - 1)}{N}\big[ \frac{n_{d(t)}}{(1 - 1/\epsilon_3)(n_{d(t)} - 1)} \big] ^{d(t)} - 
+\frac{\epsilon_{max}(n_{d(t)} - 1)}{N} \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t)}
+\end{aligned}$$
+If $\epsilon_{max} = o(\big[ \frac{n_{d(t)}}{(1 - 1/\epsilon_3)(n_{d(t)} - 1)} \big] ^{-d(t)})$, as $n \rightarrow \infty$, $\frac{\epsilon_{max}(n_{d(t) - 1})}{N}\big[ \frac{n_{d(t)}}{(1 - 1/\epsilon_3)(n_{d(t)} - 1)} \big] ^{d(t)} \rightarrow 0$, $\frac{\epsilon_{max}(n_{d(t) - 1})}{N} \big[\frac{1}{1 - 1/\epsilon_3}\big]^{d(t)} \rightarrow 0$. The above function goes to 0. 
+
+For the left part 
+$$\begin{aligned}\frac{1}{N} \sum_{k=1}^{d(t)} (\epsilon_{min})\prod_{i = k}^{d(t)} \frac{\frac{n_i - 1}{n_i + \delta_i}}{\frac{n_i - 1}{n_i}}\prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1} = & \frac{1}{N} \sum_{k=1}^{d(t)} (\epsilon_{min})\prod_{i = k}^{d(t)} \frac{1}{1 + \frac{\delta_i}{n_i}}\prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1} \\
+\geq & \frac{1}{N} \sum_{k=1}^{d(t)} (\epsilon_{max})\prod_{i = k}^{d(t)} \frac{1}{1 + 1/\epsilon_4}\prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1}, \text{ where } \epsilon_4 = max_{[i \in [1, d(t)]}(|\frac{n_i}{\delta_i}|) \\
+=&\frac{\epsilon_{min}}{N} \big[\frac{1}{1 + 1/\epsilon_4}\big]^{d(t)} \sum_{k=1}^{d(t)}\prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1}
+\end{aligned}$$
+Since $n_i$ is a decreasing function, 
+$$\prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1} \geq \prod_{i = 1}^{k-1}\frac{n_1}{n_1 - 1}  = [\frac{n_1}{n_1 - 1}]^{k-1} $$
+Therefore,
+$$\begin{aligned}
+\frac{\epsilon_{min}}{N} \big[\frac{1}{1 + 1/\epsilon_4}\big]^{d(t)} \sum_{k=1}^{d(t)}\prod_{i = 1}^{k-1} \frac{n_i}{n_i - 1}  \geq &  \frac{\epsilon_{min}}{N} \big[\frac{1}{1 + 1/\epsilon_4}\big]^{d(t)}  \sum_{k=1}^{d(t)}[\frac{n_1}{n_1 - 1}]^{k-1} \\
+=& (n_1 - 1) \frac{\epsilon_{min}}{N} \big[\frac{1}{1 + 1/\epsilon_4}\big]^{d(t)}  [(\frac{n_1}{n_1 - 1})^{d(t)} - 1]\\
+=& \frac{\epsilon_{min}(n_1 - 1)}{N}\big[ \frac{n_1}{(1 + 1/\epsilon_4)(n_1 - 1)} \big] ^{d(t)} - 
+\frac{\epsilon_{min}(n_1 - 1)}{N} \big[\frac{1}{1 + 1/\epsilon_4}\big]^{d(t)}
+\end{aligned}$$
+If $\epsilon_{min} = o(\big[ \frac{n_1}{(1 + 1/\epsilon_4)(n_1 - 1)} \big] ^{-d(t)})$, as $n \rightarrow \infty$, the above function goes to 0. 
+
+Above all, as $n \rightarrow \infty$  and  $\epsilon_{max} = o(\big[ \frac{n_{d(t)}}{(1 - 1/\epsilon_3)(n_{d(t)} - 1)} \big] ^{-d(t)})$, $\epsilon_{min} = o(\big[ \frac{n_1}{(1 + 1/\epsilon_4)(n_1 - 1)} \big] ^{-d(t)})$, then the term 2 goes to 0. 
+
+That is, combine the two parts, 
+$$\lim_{\rho_i \rightarrow 1}\frac{S_{p1}(t)}{S_{kM}(t)} = 1 + 0 \rightarrow 1$$
+
+
+
+# Difference between $S_{p1}(t)$ and $S_{p2}(t)$
+
+We find that there are less differneces between $S_{p1}(t)$ and  $S_{p2}(t)$ from the simulations. Let's look at their distance. 
+$$\hat{S}_{p}(t) = \frac{1}{N}\big\{n(t) + \sum_{k=0}^{d(t) - 1} c_k \prod_{i = k+1}^{d(t)} (1 - \frac{\rho_i}{n_i + \rho_i - 1})\big\}$$
+$$\hat{S}_{p, corrected}(t) = \frac{1}{N}\big\{n(t) + c_{d(t)-1} + \sum_{k=0}^{d(t) - 2} c_k \prod_{i = k+1}^{d(t) - 1} (1-\frac{\rho(X_{i})}{n_i})  \big\}$$
+Within those two equations, the different parts are: 
+$$part1 = \frac{1}{N}\sum_{k=0}^{d(t) - 1} c_k \prod_{i = k+1}^{d(t)} (1 - \frac{\rho_i}{n_i + \rho_i - 1})$$
+$$part2 = \frac{1}{N} c_{d(t)-1} + \frac{1}{N} \sum_{k=0}^{d(t) - 2} c_k \prod_{i = k+1}^{d(t) - 1} (1-\frac{\rho_i}{n_i})$$ 
+$$\begin{aligned} part2 - part1 =& \frac{1}{N} c_{d(t)-1} + \frac{1}{N} \sum_{k=0}^{d(t) - 2} c_k \prod_{i = k+1}^{d(t) - 1} (1-\frac{\rho_i}{n_i}) -  \frac{1}{N}\sum_{k=0}^{d(t) - 1} c_k \prod_{i = k+1}^{d(t)} (1 - \frac{\rho_i}{n_i + \rho_i - 1}) \\
+=&\frac{1}{N} c_{d(t)-1} + \frac{1}{N} \sum_{k=0}^{d(t) - 2} c_k\prod_{i = k+1}^{d(t) - 1} (1-\frac{\rho_i}{n_i}) - \frac{1}{N}\sum_{k=0}^{d(t) - 2} c_k\prod_{i = k+1}^{d(t) - 1} (1-\frac{\rho_i}{n_i})(\frac{1 - \frac{\rho_i}{n_i + \rho_i - 1}}{1-\frac{\rho_i}{n_i}}) \\
+&-\frac{1}{N}c_{d(t)-1} (1 - \frac{\rho_{d(t)-1}}{n_{d(t)-1} + \rho_{d(t)-1} - 1})\\
+=& \frac{1}{N} c_{d(t)-1} \frac{\rho_{d(t)-1}}{n_{d(t)-1} + \rho_{d(t)-1} - 1} + \frac{1}{N} \sum_{k=0}^{d(t) - 2} c_k\prod_{i = k+1}^{d(t) - 1} (1-\frac{\rho_i}{n_i}) \prod_{i = k+1}^{d(t) - 1} (1 - \frac{1 - \frac{\rho_i}{n_i + \rho_i - 1}}{1-\frac{\rho_i}{n_i}}) \text{ equation (*)}
+\end{aligned}$$
+
+If $\rho_i \leq 1$ (which is our case), $\frac{\rho_i}{n_i + \rho_i - 1} \geq \frac{\rho_i}{n_i}$
+
+Then 
+$$\begin{aligned}
+\text{equation (*)} \leq & \frac{1}{N} c_{d(t)-1} \frac{\rho_{d(t)-1}}{n_{d(t)-1} + \rho_{d(t)-1} - 1} + \frac{1}{N} \sum_{k=0}^{d(t) - 2} c_k\prod_{i = k+1}^{d(t) - 1} (1-\frac{\rho_i}{n_i}) A^{d(t) - 1 - k} \\
+\leq & \frac{1}{N} c_{d(t)-1} \frac{\rho_{d(t)-1}}{n_{d(t)-1} + \rho_{d(t)-1} - 1} + (part2 - \frac{1}{N} c_{d(t)-1}) A \text{ equation (**)}
+\end{aligned}$$
+where A = max($1 - \frac{1 - \frac{\rho_i}{n_i + \rho_i - 1}}{1-\frac{\rho_i}{n_i}}$), $i \in [k+1, d(t) - 1]$. 
+
+Then we need to find A, or $B = min(\frac{1 - \frac{\rho_i}{n_i + \rho_i - 1}}{1-\frac{\rho_i}{n_i}}$).
+$$\begin{aligned}
+\frac{1 - \frac{\rho_i}{n_i + \rho_i - 1}}{1-\frac{\rho_i}{n_i}} =& \frac{(n_i - 1)n_i}{(n_i - 1)n_i + \rho_i - \rho_i^2}
+\end{aligned}$$
+With fixed $n_i$, when $\rho_i = 0.5$, $B$ get the min value; with fixed $\rho_i$, $B$ is a monotune increasing function w.r.t $n_i$ $(n_i \geq 1)$.
+
+Therefore, $A = \frac{(n_{d(t) -1} - 1)n_{d(t) -1}}{(n_{d(t) -1} - 1)n_{d(t) -1} + \rho_{0.5} - \rho_{0.5}^2}$, $\rho_{0.5}$ is the $\rho$ value that closed to 0.5.  
+
+And $\text{equation (**)} \approx \text{part2 }  A$, since $c_{d(t)-1}/N$ is usually small. 
+
+Ususally, part2 is small (less than 0.01) and $A$ is small and less than 1. Therefore, the difference between Slud's equation and corrected Slud's equation is relatively small (usually less than 0.01). 
+

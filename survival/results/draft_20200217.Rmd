@@ -1,0 +1,1497 @@
+---
+title: "some results"
+date: 2020-02-16
+fontsize: 12pt
+output: pdf_document
+---
+
+
+```{R include = FALSE}
+
+library(knitr)
+library(kableExtra)
+```
+
+
+# Relaxed Assumption 
+
+
+We denote $T_i, i = 1, ..., N$ are the independent, identically, distributed (iid) lifetimes, whose corresponding cumulative distribution function (CDF) is $F$, probability distribution function (PDF) is $f$; the censoring time is defined as $C_i, i = 1,..., N$. $C_i$s are also iid, with CDF denoted as $G$ and PDF denoted as $g$. We set the censors happen on the right and the observed time is $Z_i = T_i \wedge C_i$, whose CDF is $H$ and PDF is $h$. The $\delta_i = I_{[T_i \leq C_i]}$ is the status indicator, which shows whether the event of the $i$th subject is censored ($\delta_i = 0$) or observed ($\delta_i = 1$). The corresponding hazard function of lifetime is $\lambda_F$ and cumulative hazard function is $\Lambda_F$. Besides, we set $\lambda_H$ as the hazard function for the observed time, which is known as crude hazard rate as well, and its cumulative hazard function is $\Lambda_H$.
+The most commonly applied Kaplan Meier prodcut limit estimator is defined as
+$$S^{KM}(t) =\prod_{Z_i \leq t} \big(1 - \frac{\delta_i}{n - R_{i,n} + 1} \big)$$
+Dikta (1998) proposed another product limited estimator defined as 
+$$S^{D1} = \prod_{Z_i \leq t} \big(1 - \frac{m_n(Z_{k:n})}{n - R_{i,n} + 1} \big)$$
+where the $m(t)$ is defined as the conditional expectation of $\delta$ given observed time $Z$  
+$$m(t) = P(\delta = 1|Z = t) = E(\delta|Z= t)$$
+He argued that the semiparameter $S^{D1}$ is unbiased and has less variance than Kaplan Meier estimator. He also produced a new semi-parametric estimator based on it as 
+$$S^{D2} = \prod_{Z_i \leq t} \big(1 - \frac{m_n(Z_{k:n})}{n - R_{i,n} + m_n(Z_{k:n})} \big)$$
+and its self consistency has been proved by Dikta (2011). 
+However, all those estimators need independence between $T$ and $C$, which is hard to satisfy in practice. 
+Instead of the strong condition, Slud demonstrated an alternative assumption on the independence between survival time $T$ and the censoring time $C$. He defined a function $\rho(t)$ as 
+\begin{equation}
+    \rho(t) = \lim_{\delta \rightarrow 0} \frac{P(t<T < t + \delta| T > t, C \leq t)}{P(t<T < t + \delta| T > t, C > t)}
+\end{equation}
+If $\rho(t) > 1$ for all $t$, we have positive dependence between death and censoring while if $\rho(t) < 1$ uniformly, we have negative dependence. Besides, if the censoring time and the death time are independent, the $\rho(t) = 1$ for all $t$. However, when $\rho(t) = 1$, it does not equivalent to the independence but the diagonal independence, i.e. this assumption is weaker then the independence since it only restricts on the timepoint where $T = t = C$. However, he did not give detalied illstration about its application. We then propose a more relaxed assumption, 
+<!-- \begin{equation} -->
+<!-- \lim_{dt \rightarrow 0} \big[ P(C > t, T \geq t + dt) - P(C > t) P(T \geq t + dt) \big] = 0 -->
+<!-- \end{equation} -->
+<!-- As well as -->
+<!-- \begin{equation} -->
+<!-- P(C > t, T \geq t)  = P(C > t) P(T \geq t) -->
+<!-- \end{equation} -->
+\begin{equation} \lim_{dt \rightarrow 0} \big\{P(T > t + dt, C >t) - P(T > t + dt)P(C > t) \big\} = 0\end{equation}
+As well as
+\begin{equation}P(C > t, T \geq t)  = P(C > t) P(T \geq t)\end{equation}
+Or we may write it as
+\begin{equation}\exists \epsilon > 0, s.t.  \text{ for }\forall |dt| < \epsilon,  P(T \geq t + dt, C > t) - P(T \geq t + dt) P(C > t)= 0, \text{ for }\forall |dt| < \epsilon\end{equation}
+The new relaxed condtioin is weaker than Slud's assumption of independence, i.e., $\rho(t) =1$, since when the relaxed assumption is satifsied, the $\rho(t)$ is not necessory to be 1. Proof of the relationship between these two assumption can be found in the Appendix.
+
+When the relaxed condition holds, we have 
+$$\begin{aligned}
+m(t) = P(\delta = 1|Z = t) = & \frac{P(C > t, T = t)}{P(Z = t)}
+= \frac{P(C > t| T = t) P(T = t)}{P(Z = t)} \\
+= & \frac{P(C > t | T > t) P(T = t)}{P(Z = t)} = \frac{P(T = t)}{P(Z = t)} \frac{P(C > t, T > t)}{P(T > t)} \\
+= & \frac{f(t)S_x(t)}{h(t)S(t)} = \frac{\lambda_F(t)}{\lambda_H(t)}
+\end{aligned}$$
+Therefore,
+\begin{equation}
+m(t) = \frac{\lambda_F(t)}{\lambda_H(t)}
+\end{equation}
+Therefore, we derive the same $m(t)$ function as proposed by Dikta (1998) under the weaker independence assumption. 
+We show that Dikta's methods still give good estimation under our relaxed assumption in the next section. 
+
+
+\newpage 
+
+# Numerical Simulation
+
+In this section, we illustrate numerical examples and conduct simulation studies to prove our assumptions mentioned in the above section: 
+
+* (i) The semi-parametric estimatros, e.g. cox PH model, the two estimators proposed by Dikta and the new constructed estimator, perform well under the relaxed assumption regarding of survival time and censoring time; 
+* (ii) Under some informative censoring set, the cox PH model can be mis-specified and then generate biases. For example, the censoring is related to some covariates and when conditioning on the covariates, the event time and censoring time are not still independent. In this scenariol, the semi-parametric methods using $m()$ function can provide a better estimation than cox-PH model. 
+
+<!-- (i) The both the semi-parametric estimators proposed by Dikta and the new constructed estimator have good performances under the relaxed assumption regarding of survival time and censoring time; (ii) The semi-parametric methods can have better estimation than Kaplan Meier estimator and Cox PH model when there are some covariates related to censoring.  -->
+
+To illustrate the above conclusion, let us consider a class of joint distribution of $T$ and $C$, 
+$$S_{T,C}(t,s; X) = \begin{cases} 
+S_T(t; X) K(t,s; X) & t \geq s\\
+S_T(t; X) S_C(s;  X) & t < s 
+\end{cases}$$
+where $F_T(t; X) = 1 - S_T(t; X)$ and $F_C(s;  X) = 1- S_C(s;  X)$ are CDF functions. The $X$ is a vector, which represents the baseline covariates and serves as parameters for the joint distribution.  Besides, 
+$K(t,s; X)$ is a joint function of $T$ and $C$, where 
+
+* 1. cannot be factored as a production of a function that only contain $T$ and a function that only contain $C$, i.e. $K(t,s; X) \geq K_T(t;X) K_S(s;X)$.
+
+* 2. $K(t,s; X) \geq 0$ when $t, s \geq 0$
+
+* 3. $K(t,0; X) = 1$
+
+* 4. $K(s,s; X) = S_C(s; X)$
+
+* 5. $K(t,s; X) = 0$ as $t, s \rightarrow \infty$
+
+Then, the marginal distribution for event time is 
+$$\begin{aligned}
+P(T > t; X) & = \int_{t}^\infty f_T(t;X) dt \\
+& = \int_t^\infty \big\{\int_0^\infty f_{T,C}(t,s;X)ds \big \}dt  \\
+& = P(T > t, C > 0;X) = S_T(t;X) K(t,0;X) \\
+& = S_T(t;X)
+\end{aligned}$$
+The marginal distribution for the censoring time is 
+$$\begin{aligned}P(C> s;X) & = \int_{s}^\infty f_C(s;X) ds  \\
+& = \int_s^\infty \big\{\int_0^\infty f_{T,C}(t,s;X)dt \big \}ds \\
+& = P(T > 0, C > s;X) = S_T(0;X)S_C(s;X) \\
+& = S_C(s;X)
+\end{aligned}$$
+The distribution for the observed time $Z = T \wedge C$ is 
+$$S_Z(t;X) = P(T > t, C > t;X) = S_T(t;X) S_C(t;X)$$
+with pdf: 
+$$f_Z(t;X) = - \frac{\partial [S_T(t;X) S_C(t;X)]}{\partial t} = f_T(t;X) S_C(t;X) + S_T(t;X)f_C(t;X)$$
+Suppose the hazard for event is 
+$$\lambda_T(t;X) = \frac{f_T(t;X)}{S_T(t;X)}$$
+The hazard for the censoring is 
+$$\lambda_C(t;X) = \frac{f_C(t;X)}{S_C(t;X)}$$
+Then the $m(t;X)$ is 
+$$m(t;X) = \frac{\lambda_T(t;X)}{\lambda_C(t;X)}  = \frac{\frac{f_T(t;X)}{S_T(t;X)}}{\frac{f_Z(t;X)}{S_Z(t;X)}} = \frac{S_T(t;X)S_C(t;X)\frac{f_T(t;X)}{S_T(t;X)}}{f_T(t;X) S_C(t;X) + S_T(t;X)f_C(t;X)} = \frac{\lambda_T(t;X)}{\lambda_T(t;X) + \lambda_C(t;X)}$$
+If we suppose the event time is from a cox PH model, where $S_T(t;X) = S_0(t)^{\exp(\beta X)}$ and $\lambda_T(t;X) = \lambda_0(t) \exp(\beta X)$. Then 
+$$\begin{aligned}
+m(t;X)= & \frac{\lambda_T(t;X)}{\lambda_T(t;X) + \lambda_C(t;X)} = \frac{1}{1 + \frac{\lambda_C(t;X)}{\lambda_0(t) }\exp(-\beta X)} \\
+= & \frac{1}{1 + \exp\big(\ln(\lambda_C(t;X)) -\ln(\lambda_0(t)) -\beta X \big)} \text{ }\text{ (if }\lambda_C(t;X) \neq 0)
+\end{aligned}$$
+The $m(t;X)$ function can be treated as a logistic regression, with independent variables, transformed $X$, the baseline covariates and transformed $t$, the observed time. 
+
+To make the model more clear, let's look at a model structrue from the above joint distribution class.  
+
+Let construct a joint distribution as following
+$$S_{T,C}(t,s;\theta_1, \theta_2) = \begin{cases}
+e^{-\theta_1 t} e^{ - (e^{\theta_2 s} - 1) ( (t - s)^2 + 1)} &  \text{ when } t \geq s\\
+e^{-\theta_1 t} e^{ - (e^{\theta_2 s} - 1)} & \text{ when } t < s
+\end{cases}$$
+where
+$$S_T(t;X) = e^{-\theta_1 t}, S_C(s; X) = e^{ - (e^{\theta_2 s} - 1)}; K(t,s;X) = e^{ - (e^{\theta_2 s} - 1) ( (t - s) ^2 + 1)}$$
+$$f_T(t;X) = \theta_1 e^{- \theta_1 t}, f_C(s; X) = \theta_2 e^{- e^{\theta_2 s} + \theta_2 s+ 1}$$
+$$S_Z(t;X) = e^{-e^{\theta_2 t} - \theta_1 t + 1}, f_Z(t;X) =  (\theta_1 + \theta_2 e^{\theta_2 t})e^{-e^{\theta_2 t} - \theta_1 t + 1}$$
+$$\lambda_T(t;X) = \theta_1, \lambda_C(s;X) = \theta_2 e^{\theta_2 s}, \lambda_Z(t; X) = \theta_1 + \theta_2 e^{\theta_2 t}$$
+and $\theta_1 , \theta_2$ are parameters associated with $X$.
+The associated $m(t;X)$ function is 
+$$\begin{aligned}
+m(t;X) = & \frac{\theta_1}{\theta_1+ \theta_2 e^{\theta_2 s}}  \\ 
+= & \frac{1}{ 1 + \frac{\theta_2}{\theta_1}  e^{\theta_2 s}} \\
+=& \frac{1}{1 + \exp(-\ln(\theta_1) + \ln(\theta_2) + \theta_2 s)} \text{ if } \theta_1, \theta_2 \neq 0
+\end{aligned}$$
+Let's look at several settings for the $\theta_1$ and $\theta_2$
+
+
+\begin{longtable}[t]{ccc}
+\caption{\label{tab:} Example settings}\\
+\toprule
+Parameters & Setting1 &  Setting2   \\
+\midrule
+$\theta_1$ & $\beta x$ & $\beta x$  \\
+$\theta_2$ & $\beta x \times I(sex = F)$ & $\beta x \times (I(sex = F) + 1)$ \\
+\midrule
+$\theta_1$ & $\exp(\beta x)$ & $\exp(\beta x)$ \\
+$\theta_2$ &  $\exp(\beta x)  \times I(sex = F)$ & $\exp(\beta x) x \times (I(sex = F) + 1)$ \\
+\bottomrule
+\end{longtable}
+
+
+### Setting 1
+
+Suppose $x_1$ is a discrete covariate, e.g. age level, blood pressure level, who has four levels 1,2,3,4; $x_2$ is an indicator for gender, who has two levels 0,1, which 
+$$x_2 = I(sex = F) = \begin{cases} 1 & \text{female} \\ 0  & \text{male} \end{cases}$$
+Let $\theta_1 = \beta x_1, \theta_2 = \beta x_1 x_2$. Therefore, the joint distribution can be expressed as:
+$$S_{T,C}(t,s;x_1, x_2) = \begin{cases}
+e^{- \beta x_1 t} e^{ - (e^{ (\beta x_1 x_2) s} - 1) ( (t - s)^2 + 1)} &  \text{ when } t \geq s\\
+e^{- \beta x_1 t} e^{ - (e^{ (\beta x_1 x_2) s} - 1)} & \text{ when } t < s
+\end{cases}$$
+That is, for females: 
+$$S_{T,C}(t,s;x_1, x_2) = \begin{cases}
+e^{- \beta x_1 t} e^{ - (e^{ (\beta x_1) s} - 1) ( (t - s)^2 + 1)} &  \text{ when } t \geq s\\
+e^{- \beta x_1 t} e^{ - (e^{ (\beta x_1 ) s} - 1)} & \text{ when } t < s
+\end{cases}$$
+For males: 
+$$S_{T,C}(t,s;x_1, x_2) = \begin{cases}
+e^{- \beta x_1 t}  &  \text{ when } t \geq s\\
+e^{- \beta x_1 t}  & \text{ when } t < s
+\end{cases} = e^{- \beta x_1 t}$$
+which means that there is no censorship in males. We may also derivative the margnial distributions. For the event time distribution,
+$$S_T(t; x_1, x_2) = e^{- \beta x_1 t} = [e^{-t}]^{\beta x_1} = [e^{-t}]^{\exp(\ln(\beta x_1))} = [e^{-t}]^{\exp(\ln(\beta) + \ln(x_1))}$$
+Therefore, $S_T(t; x_1, x_2)$ is a cox PH model. 
+And $$f_T(t; x_1, x_2) = \beta x_1 e^{- \beta x_1 t},$$ 
+$$\lambda_T(t; x_1, x_2) = \frac{f_T(t)}{S_T(t)} = \frac{\beta x_1 e^{- \beta x_1 t}}{e^{- \beta x_1 t}} = \beta x_1 = \lambda_{T0}(t) \exp(\ln(\beta) + \ln(x_1)), \text{ }\text{ } \text{ }\lambda_{T0}(t) = 1$$
+The censoring time is 
+$$S_C(t;x_1, x_2) =e^{ - (e^{ (\beta x_1 x_2) s} - 1)}$$
+$$f_C(s; x_1, x_2) = \big(\beta x_1 x_2\big)e^{ - e^{ (\beta x_1 x_2) s} + (\beta x_1 x_2) s + 1}$$
+$$\lambda_C(s; x_1, x_2) = \frac{f_C(s; x_1, x_2)}{S_C(s; x_1, x_2)} = \big(\beta x_1 x_2\big)e^{(\beta x_1 x_2) s}$$
+The associated $m()$ function is 
+$$\begin{aligned}
+m(t; x_1, x_2) = & \frac{\lambda_T(t; x_1, x_2)}{\lambda_T(t; x_1, x_2) + \lambda_C(t; x_1, x_2)} \\
+= & \frac{\beta x_1}{ \beta x_1 + \big(\beta x_1 x_2\big)e^{(\beta x_1 x_2)t}} \\
+= & \frac{1}{1 + x_2  e^{(\beta x_1 x_2)t}} \\
+= & \begin{cases}
+\frac{1}{1 +  e^{(\beta x_1 )t}}  & x_2 = 1, \text{female} \\
+\frac{1}{1 + 0} = 1 & x_2 = 0, \text{male}
+\end{cases}
+\end{aligned}$$
+
+For the simulation, we set $\beta = 1.5$. The propotion of females is $0.5$, with sample size $n = 200$. The four levels of $X_1$ are all have the same probabilty to be included in the dataset, with $p = 0.25$. 100 repetitions have been conducted for the simulation. Four methods, the Cox PH model, two semi-parametric estimators from Dikta and the new propsed model are applied to estimate the data. Illustrations and codes about the model and the simulation can be found in the Appendix. 
+
+<!-- = & \frac{1}{1 + e^{\ln(x_2) + (\beta x_1 x_2)t}}  -->
+From this example, the censoring is associated with both $x_1$ and $x_2$. However, when simulating a data set from this joint distribution, we find that the cox PH model is only significant with $x_1$, where $x_2$ can be easily ignored when constructing the model. 
+
+```{R include = FALSE}
+
+
+library(survival)
+library(lme4)
+library(MASS)
+
+
+for(functions in 1){
+  
+  inversesample = function(n,time,surv){
+    res = c()
+    for(i in 1:n){
+      u = runif(1)
+      nn = which(abs(time - u) == min(abs(time - u)))
+      res = c(res, surv[nn])
+    }
+    return(res)
+  }
+  
+  s_est_function = function(est_time, quant){
+    nnn = which(abs(est_time - quant) == min(abs(est_time - quant)))
+    if(est_time[nnn] > quant){
+      nnn = nnn -1
+    }
+    return(nnn)
+  }
+  
+  m_est_old1 = function(t,data){
+    n = dim(data)[1]
+    res = 1
+    for(i in 1:Ri(t,data)){
+      para1 = data$parm1[i]
+      para2 = data$parm2[i]
+      time = data$time[i]
+      res = res * ((n - i)/(n - i + 1))^(m(para1, para2, time))
+    }
+    return(res)
+  }
+  
+  m_est_old2 = function(t,data){
+    n = dim(data)[1]
+    res = 1
+    for(i in 1:Ri(t,data)){
+      para1 = data$parm1[i]
+      para2 = data$parm2[i]
+      time = data$time[i]
+      res = res * ((n - i)/(n - i + m(para1, para2, time)))
+    }
+    return(res)
+  }
+  
+  m = function(para1, para2, time){
+    return(para1 / (para1 + para2 * exp(para2 * time)))
+  }
+  
+  Ri = function(t,data){
+    return(sum(data$time <= t))
+  } 
+  
+  ## hazard function of observed time, calculated with tie
+  # data$time
+  lambda_H = function(t,data,fit_km){
+    i = which(abs(data$time - t) == min(abs(data$time - t)))
+    if(data$time[i] > t & i > 1 ){i = i - 1}
+    h = (fit_km$n.event[i] + fit_km$n.censor[i])/ fit_km$n.risk[i]
+    return(h)
+  }
+  
+  ## hazard 
+  lambda_F = function(t,para1,para2,data,fit_km){
+    h = lambda_H(t,data,fit_km) * m(para1, para2, t)
+    return(h)
+  }
+  
+  ## cumulative hazard
+  Lambda_F = function(t, data, fit_km){
+    i = which(abs(data$time - t) == min(abs(data$time - t)))[1]
+    if(data$time[i] > t & i > 1){i = i -1}
+    HH = c()
+    for(ii in 1:i){
+      # cov = data$x[ii] * data$sex[ii]
+      para1 = data$parm1[ii]
+      para2 = data$parm2[ii]
+      HH = c(HH, lambda_F(data$time[ii], para1, para2, data, fit_km))
+    }
+    return(sum(HH))
+  }
+  
+  ## estimate the S() with m function
+  S_est = function(t, data, fit_km){
+    return(exp(-Lambda_F(t, data, fit_km)))
+  }
+  
+}
+for(datagenerationfunction in 1){
+  
+  # inverse function 
+  
+  inverse_gx_p = function(x,Funs,res,a,b){
+    res1 = c()
+    for(i in seq(0.00000001, x, 1)){
+      res1 = c(res1, Funs(x,i,a,b))
+    }
+    temp = seq(0.00000001, 100, 1)[which(abs(res1 - res) == min(abs(res1 - res)))[1]]
+    
+    res2 = c()
+    for(i in seq(max(0,(temp - 1)), (temp+1), 0.1)){
+      res2 = c(res2, Funs(x,i,a,b))
+    }
+    temp = seq(max(0,(temp - 1)), (temp+1), 0.1)[which(abs(res2 - res) == min(abs(res2 - res)))[1]]
+    
+    res3 = c()
+    for(i in seq(max(0, (temp - 0.1)), (temp+0.1), 0.01)){
+      res3 = c(res3, Funs(x,i,a,b))
+    }
+    temp = seq(max(0, (temp - 0.1)), (temp + 0.1), 0.01)[which(abs(res3 - res) == min(abs(res3 - res)))[1]]
+    
+    res4 = c()
+    for(i in seq(max(0,(temp - 0.01)), (temp + 0.01), 0.001)){
+      res4 = c(res4, Funs(x,i,a,b))
+    }
+    temp =seq(max(0,(temp - 0.01)), (temp + 0.01), 0.001)[which(abs(res4 - res) == min(abs(res4 - res)))[1]]
+    
+    res5 = c()
+    for(i in seq(max(0,(temp - 0.001)), (temp + 0.001), 0.0001)){
+      res5 = c(res5, Funs(x,i,a,b))
+    }
+    temp = seq(max(0,(temp - 0.001)), (temp + 0.001), 0.0001)[which(abs(res5 - res) == min(abs(res5 - res)))[1]]
+    
+    res6 = c()
+    for(i in seq(max(0, (temp - 0.0001)), (temp + 0.0001), 0.00001)){
+      res6 = c(res6, Funs(x,i,a,b))
+    }
+    temp = seq(max(0, (temp - 0.0001)), (temp + 0.0001), 0.00001)[which(abs(res6 - res) == min(abs(res6 - res)))[1]]
+    
+    return(temp)
+  }
+  inverse_lx_p = function(x,Funs,res,a,b){
+    res1 = c()
+    for(i in seq(x - 0.00000001, 20, 1)){
+      res1 = c(res1, Funs(x,i,a,b))
+    }
+    temp = seq(0.00000001, 100, 1)[which(abs(res1 - res) == min(abs(res1 - res)))[1]]
+    
+    res2 = c()
+    for(i in seq((temp - 1), (temp+1), 0.1)){
+      res2 = c(res2, Funs(x,i,a,b))
+    }
+    temp = seq((temp - 1), (temp+1), 0.1)[which(abs(res2 - res) == min(abs(res2 - res)))[1]]
+    
+    res3 = c()
+    for(i in seq((temp - 0.1), (temp+0.1), 0.01)){
+      res3 = c(res3, Funs(x,i,a,b))
+    }
+    temp = seq((temp - 0.1), (temp + 0.1), 0.01)[which(abs(res3 - res) == min(abs(res3 - res)))[1]]
+    
+    res4 = c()
+    for(i in seq((temp - 0.01), (temp + 0.01), 0.001)){
+      res4 = c(res4, Funs(x,i,a,b))
+    }
+    temp =seq((temp - 0.01), (temp + 0.01), 0.001)[which(abs(res4 - res) == min(abs(res4 - res)))[1]]
+    
+    res5 = c()
+    for(i in seq((temp - 0.001), (temp + 0.001), 0.0001)){
+      res5 = c(res5, Funs(x,i,a,b))
+    }
+    temp = seq((temp - 0.001), (temp + 0.001), 0.0001)[which(abs(res5 - res) == min(abs(res5 - res)))[1]]
+    
+    res6 = c()
+    for(i in seq((temp - 0.0001), (temp + 0.0001), 0.00001)){
+      res6 = c(res6, Funs(x,i,a,b))
+    }
+    temp = seq((temp - 0.0001), (temp + 0.0001), 0.00001)[which(abs(res6 - res) == min(abs(res6 - res)))[1]]
+    
+    return(temp)
+  }
+  inverse = function(x,Funs){
+    res1 = c()
+    for(i in seq(0.00000001, 20, 1)){
+      res1 = c(res1, Funs(i))
+    }
+    temp = seq(0.00000001, 100, 1)[which(abs(res1 - x) == min(abs(res1 - x)))[1]]
+    
+    res2 = c()
+    for(i in seq((temp - 1), (temp+1), 0.1)){
+      res2 = c(res2, Funs(i))
+    }
+    temp = seq((temp - 1), (temp+1), 0.1)[which(abs(res2 - x) == min(abs(res2 - x)))[1]]
+    
+    res3 = c()
+    for(i in seq((temp - 0.1), (temp+0.1), 0.01)){
+      res3 = c(res3, Funs(i))
+    }
+    temp = seq((temp - 0.1), (temp + 0.1), 0.01)[which(abs(res3 - x) == min(abs(res3 - x)))[1]]
+    
+    res4 = c()
+    for(i in seq((temp - 0.01), (temp + 0.01), 0.001)){
+      res4 = c(res4, Funs(i))
+    }
+    temp =seq((temp - 0.01), (temp + 0.01), 0.001)[which(abs(res4 - x) == min(abs(res4 - x)))[1]]
+    
+    res5 = c()
+    for(i in seq((temp - 0.001), (temp + 0.001), 0.0001)){
+      res5 = c(res5, Funs(i))
+    }
+    temp = seq((temp - 0.001), (temp + 0.001), 0.0001)[which(abs(res5 - x) == min(abs(res5 - x)))[1]]
+    
+    res6 = c()
+    for(i in seq((temp - 0.0001), (temp + 0.0001), 0.00001)){
+      res6 = c(res6, Funs(i))
+    }
+    temp = seq((temp - 0.0001), (temp + 0.0001), 0.00001)[which(abs(res6 - x) == min(abs(res6 - x)))[1]]
+    
+    return(temp)
+  }
+  Fc = function(x){
+    temp = exp(-exp(parm * x) + 1)
+    return(1 - temp)
+  }
+  fc = function(x){
+    temp = parm*exp(-exp(parm*x) + parm*x + 1)
+    return(temp)
+  }
+  
+  ## conditional cdf
+  ## when x > y
+  F_x_g_y = function(x,y,a,b){
+    temp = (1/a) * (2*(exp(b*y) - 1)*(x-y) + a) * exp(-(exp(b*y)-1)*((x-y)^2+1))
+    temp = 1 - temp
+    return(temp)
+  }
+  ## when x < y
+  F_x_l_y = function(x,y,a,b){
+    temp = exp(1 - exp(b*x)) - exp(1 - exp(b*y))
+    return(temp)
+  }
+  
+  
+  
+}
+
+inverse_gx_p(3, F_x_g_y, F_x_g_y(3,2.1,1,0.4),1,0.4)
+inverse_lx_p(1, F_x_l_y, F_x_l_y(1,2.1,1,0.4),1,0.4)
+
+foverall = function(x){
+  parm = exp(beta * (1:4))
+  temp = parm[1]*exp(-parm[1] * x) + parm[2]*exp(-parm[2] * x) + 
+    parm[3]*exp(-parm[3] * x) + parm[4]*exp(-parm[4] * x)
+  temp = temp/4
+  return(temp)
+}
+
+
+Foverall = function(x){
+  parm = exp(beta * (1:4))
+  temp = exp(-parm[1] * x) + exp(-parm[2] * x) + 
+    exp(-parm[3] * x) + exp(-parm[4] * x)
+  temp = temp/4
+  return(temp)
+}
+
+
+p_x = p_xsex = p_sex = c()
+lg_x_sex = c(); best = c()
+
+Survlist = list(); Timelist = list(); Mdiff = c()
+roc_cox = roc1 = roc2 = roc3 = roc4 = roc5 = roc6 = c()
+Gof_cox = Gof1 = Gof2 =Gof3 = Gof4 = Gof5 = Gof6 = c()
+
+set.seed(123)
+    beta = 1.5
+    n = 100 # 200 subjects in total 
+    
+    # generate male data
+    for(males_gen in 1){
+      # x < y
+      sex = 0
+      x1 = sample(c(1,2,3,4), n, replace = TRUE)
+      
+      parm1 = (beta * x1)
+      parm2 = parm1 * sex
+      
+      n1 = n * 0.4; n2 = n - n1
+      
+      death = c(); censor = c()
+      for(i in 1:n){
+        xtemp = rexp(1, parm1[i])
+        death = c(death, xtemp)
+      }
+      
+      for(i in 1:n1){
+        xtemp = death[i]
+        maxtemp = F_x_l_y(xtemp, 1000, parm1[i], parm2[i])
+        u = runif(1,0,maxtemp)
+        ytemp = inverse_gx_p(xtemp, F_x_l_y, u, parm1[i], parm2[i])
+        if(ytemp <= 0 & parm2[i] == 0){ytemp = 1000}
+        censor = c(censor, ytemp)
+      }
+      
+      for(i in (n1+1):n){
+        # x > y
+        xtemp = death[i]
+        maxtemp = F_x_g_y(xtemp, xtemp, parm1[i], parm2[i])
+        u = runif(1,0,maxtemp)
+        ytemp = inverse_gx_p(xtemp, F_x_g_y, u, parm1[i], parm2[i])
+        if(ytemp <= 0 & parm2[i] ==0){ytemp = xtemp}
+        censor = c(censor, ytemp)
+      }
+      data_male1 = data.frame(death = death, censor = censor, 
+                              x1 = x1, sex = sex, 
+                              parm1 = parm1, parm2 = parm2)
+    }
+    
+    data_male1$status = ifelse(data_male1$death <= data_male1$censor, 1, 0)
+    data_male1$time = ifelse(data_male1$status == 1, 
+                             data_male1$death, data_male1$censor)
+    data_male1 = data_male1[order(data_male1$time),]
+    rownames(data_male1) = NULL
+    
+    # whether it is correct or not? 
+    # hist(data_male1$death, freq = FALSE, breaks = 20)
+    # lines(seq(0,4,0.1), foverall(seq(0,4,0.1)))
+    
+    for(female_gen in 1){
+      # when x < y
+      
+      nn = 5 * n
+      sex = 1
+      x1 = sample(c(1,2,3,4), nn, replace = TRUE)
+      
+      parm1 = (beta * x1)
+      parm2 = parm1 * sex 
+      
+      death = censor = c()
+      for(i in 1:nn){
+        xtemp = rexp(1, parm1[i])
+        death = c(death, xtemp)
+        maxtemp = F_x_l_y(xtemp, 1000, parm1[i], parm2[i])
+        u = runif(1,0,maxtemp)
+        ytemp = inverse_gx_p(xtemp, F_x_l_y, u, parm1[i], parm2[i])
+        if(ytemp <= 0 & parm2[i] == 0){ytemp = 1000}
+        censor = c(censor, ytemp)
+      }
+      
+      data_temp = data.frame(death = death, censor = censor, 
+                             x1 = x1,  sex = sex, 
+                             parm1 = parm1, parm2 = parm2)
+      data_temp = data_temp[which(data_temp$death < data_temp$censor), ]
+      
+      # hist(death, freq = FALSE, breaks = 20)
+      # hist(data_temp$death, freq = FALSE, breaks = 20)
+      # lines(seq(0,4,0.1), foverall(seq(0,4,0.1)))
+      # 
+      # when x > y
+      sex = 1
+      x1 = sample(c(1,2,3,4), nn, replace = TRUE)
+      parm1 = (beta * x1)
+      parm2 = parm1 * sex 
+      
+      death = censor = c()
+      
+      for(i in 1:nn){
+        xtemp = rexp(1, parm1[i])
+        death = c(death, xtemp)
+      }
+      for(i in 1:nn){
+        xtemp = death[i]
+        maxtemp = F_x_g_y(xtemp, xtemp, parm1[i], parm2[i])
+        u = runif(1,0,maxtemp)
+        ytemp = inverse_gx_p(xtemp, F_x_g_y, u, parm1[i], parm2[i])
+        if(ytemp <= 0 & parm2[i] ==0){ytemp = xtemp}
+        censor = c(censor, ytemp)
+      }
+      data_temp2 = data.frame(death = death, censor = censor, 
+                              x1 = x1, sex = sex, 
+                              parm1 = parm1, parm2 = parm2)
+      
+      data_temp2 = data_temp2[which(data_temp2$death > data_temp2$censor), ]
+      rownames(data_temp2) = NULL
+      dim(data_temp2)
+      
+      # hist(death, freq = FALSE, breaks = 20)
+      # hist(data_temp2$death, freq = FALSE, breaks = 20)
+      # lines(seq(0,4,0.1), foverall(seq(0,4,0.1)))
+      # 
+    }
+    
+    n1 = round(n * 0.4); n2 = n - n1
+    data = rbind(data_temp[sample(1:dim(data_temp)[1], n1),],
+                 data_temp2[sample(1:dim(data_temp2)[1], n2),])
+    # hist(data$death, freq = FALSE, breaks = 20)
+    # lines(seq(0,4,0.1), foverall(seq(0,4,0.1)))
+    # hist(data$censor, freq = FALSE, breaks = 20)
+    # 
+    data$status = ifelse(data$death < data$censor, 1, 0)
+    data$time = ifelse(data$status == 1, data$death, data$censor)
+    data = rbind(data, data_male1)
+    data = data[order(data$time),]
+    rownames(data) = NULL
+    
+    dim(data)
+    
+    fitcox_reduce = coxph(Surv(time, status) ~ x1 + sex, data = data)
+    fitcox_reduce 
+
+```
+
+```{R}
+fitcox_reduce = coxph(Surv(time, status) ~ x1 + sex, data = data)
+fitcox_reduce 
+```
+
+```{R}
+m_logistic = glm(status ~  x1  + sex - 1, data = data, family = 'binomial')
+summary(m_logistic)$coefficients
+```
+
+```{R include = FALSE}
+
+  Res_list1 = Res_list2 = Res_list3 = list()
+  
+  for(theta in 1:4){
+    data_temp = data[data$x1 == theta,]; rownames(data_temp) = NULL
+    
+    fit_km = survfit(Surv(time, status) ~ 1, data = data_temp)
+    fitKM = survfit(Surv(time, status) ~ 1, data = data_temp)
+    
+    res1 = c()
+    for(i in 1:dim(data_temp)[1]){
+      res1 = c(res1, m_est_old1(data_temp$time[i], data = data_temp))
+    }
+    Res_list1[[theta]] = res1
+    
+    res2 = c()
+    for(i in 1:dim(data_temp)[1]){
+      res2 = c(res2, m_est_old2(data_temp$time[i], data = data_temp))
+    }
+    Res_list2[[theta]] = res2
+    
+    res3 = c()
+    for(i in 1:dim(data_temp)[1]){
+      res3 = c(res3, S_est(data_temp$time[i], data_temp, fitKM))
+    }
+    
+    Res_list3[[theta]] = res3
+    # 
+    # b = best[iters]
+    # 
+    # estres1 = c()
+    # for(i in 1:dim(data_temp)[1]){
+    #   estres1 = c(estres1, m_est_old1(data_temp$time[i], data = data_temp))
+    # }
+    # Est_res_list1[[theta]] = estres1
+    # 
+    # estres2 = c()
+    # for(i in 1:dim(data_temp)[1]){
+    #   estres2 = c(estres2, m_est_old2(data_temp$time[i], data = data_temp))
+    # }
+    # Est_res_list2[[theta]] = estres2
+    # 
+    # estres3 = c()
+    # for(i in 1:dim(data_temp)[1]){
+    #   aaa = S_est(data_temp$time[i], data_temp, fitKM)
+    #   #print(aaa)
+    #   estres3 = c(estres3, aaa)
+    # }
+    # Est_res_list3[[theta]] = estres3
+    # 
+    # b = b0
+  }
+
+```
+
+```{R fig.width=9, fig.height=3,echo=FALSE,  fig.align = "center"}
+par(mfrow =c(1,4))
+ for(theta in 1:4){
+      
+      data_temp = data[data$x1 == theta,]; rownames(data_temp) = NULL
+      fitKM = survfit(Surv(time, status) ~ 1, data = data_temp)
+      plot(fitKM, xlab = 'time', ylab = 'survival', main = paste('x =', theta))
+      fitCOX = survfit(fitcox_reduce, newdata = data.frame(x1 = theta))
+      lines(fitCOX$time, fitCOX$surv, col = 4)
+      lines(data_temp$time, exp(-theta * data_temp$time), col = 2)
+      
+      res1 = Res_list1[[theta]]; 
+      res2 = Res_list2[[theta]]; 
+      res3 = Res_list3[[theta]]
+      lines(data_temp$time, res1, col = 6, lwd =2)  
+      lines(data_temp$time, res2, col = 5, lwd =1)
+      lines(data_temp$time, res3, col = 3, lwd =1)
+      
+ }
+```
+
+
+
+### Setting 2 
+
+To avoid $\theta_1, \theta_2$ generating 0, we reset the range for $x_2$, where 
+$$x_2 = \begin{cases} 2 & \text{female} \\ 1  & \text{male} \end{cases}$$
+The other functions are the same. That is
+$$S_{T,C}(t,s;x_1, x_2) = \begin{cases}
+e^{- \beta x_1 t} e^{ - (e^{ (\beta x_1 x_2) s} - 1) ( (t - s)^2 + 1)} &  \text{ when } t \geq s\\
+e^{- \beta x_1 t} e^{ - (e^{ (\beta x_1 x_2) s} - 1)} & \text{ when } t < s
+\end{cases}$$
+For females: 
+$$S_{T,C}(t,s;x_1, x_2) = \begin{cases}
+e^{- \beta x_1 t} e^{ - (e^{ (2\beta x_1) s} - 1) ( (t - s)^2 + 1)} &  \text{ when } t \geq s\\
+e^{- \beta x_1 t} e^{ - (e^{ (2\beta x_1 ) s} - 1)} & \text{ when } t < s
+\end{cases}$$
+For males: 
+$$S_{T,C}(t,s;x_1, x_2) = \begin{cases}
+e^{- \beta x_1 t} e^{ - (e^{ (\beta x_1) s} - 1) ( (t - s)^2 + 1)} &  \text{ when } t \geq s\\
+e^{- \beta x_1 t} e^{ - (e^{ (\beta x_1 ) s} - 1)} & \text{ when } t < s
+\end{cases}$$
+And the associated $m()$ function is 
+$$\begin{aligned}
+m(t; x_1, x_2) = & \frac{\lambda_T(t; x_1, x_2)}{\lambda_T(t; x_1, x_2) + \lambda_C(t; x_1, x_2)} \\
+= & \frac{\beta x_1}{ \beta x_1 + \big(\beta x_1 x_2\big)e^{(\beta x_1 x_2)t}} \\
+= & \frac{1}{1 + x_2  e^{(\beta x_1 x_2)t}} \\
+= & \frac{1}{1 + e^{\ln(x_2) + (\beta x_1 x_2)t}} \\
+= & \begin{cases}
+\frac{1}{1 +  e^{ \ln(2) + (2 \beta x_1 )t}}  & x_2 = 2, \text{female} \\
+\frac{1}{1 + e^{(\beta x_1 )t}} & x_2 = 1, \text{male}
+\end{cases}
+\end{aligned}$$
+
+
+
+
+```{R include = FALSE}
+set.seed(123)
+    beta = 1.5
+    n = 100 # 200 subjects in total 
+    
+    # generate male data
+    for(males_gen in 1){
+      # x < y
+      sex = 1
+      x1 = sample(c(1,2,3,4), n, replace = TRUE)
+      
+      parm1 = (beta * x1)
+      parm2 = parm1 * sex
+      
+      n1 = n * 0.4; n2 = n - n1
+      
+      death = c(); censor = c()
+      for(i in 1:n){
+        xtemp = rexp(1, parm1[i])
+        death = c(death, xtemp)
+      }
+      
+      for(i in 1:n1){
+        xtemp = death[i]
+        maxtemp = F_x_l_y(xtemp, 1000, parm1[i], parm2[i])
+        u = runif(1,0,maxtemp)
+        ytemp = inverse_gx_p(xtemp, F_x_l_y, u, parm1[i], parm2[i])
+        if(ytemp <= 0 & parm2[i] == 0){ytemp = 1000}
+        censor = c(censor, ytemp)
+      }
+      
+      for(i in (n1+1):n){
+        # x > y
+        xtemp = death[i]
+        maxtemp = F_x_g_y(xtemp, xtemp, parm1[i], parm2[i])
+        u = runif(1,0,maxtemp)
+        ytemp = inverse_gx_p(xtemp, F_x_g_y, u, parm1[i], parm2[i])
+        if(ytemp <= 0 & parm2[i] ==0){ytemp = xtemp}
+        censor = c(censor, ytemp)
+      }
+      data_male1 = data.frame(death = death, censor = censor, 
+                              x1 = x1, sex = sex, 
+                              parm1 = parm1, parm2 = parm2)
+    }
+    
+    data_male1$status = ifelse(data_male1$death <= data_male1$censor, 1, 0)
+    data_male1$time = ifelse(data_male1$status == 1, 
+                             data_male1$death, data_male1$censor)
+    data_male1 = data_male1[order(data_male1$time),]
+    rownames(data_male1) = NULL
+    
+    # whether it is correct or not? 
+    # hist(data_male1$death, freq = FALSE, breaks = 20)
+    # lines(seq(0,4,0.1), foverall(seq(0,4,0.1)))
+    
+    for(female_gen in 1){
+      # when x < y
+      
+      nn = 5 * n
+      sex = 2
+      x1 = sample(c(1,2,3,4), nn, replace = TRUE)
+      
+      parm1 = (beta * x1)
+      parm2 = parm1 * sex 
+      
+      death = censor = c()
+      for(i in 1:nn){
+        xtemp = rexp(1, parm1[i])
+        death = c(death, xtemp)
+        maxtemp = F_x_l_y(xtemp, 1000, parm1[i], parm2[i])
+        u = runif(1,0,maxtemp)
+        ytemp = inverse_gx_p(xtemp, F_x_l_y, u, parm1[i], parm2[i])
+        if(ytemp <= 0 & parm2[i] == 0){ytemp = 1000}
+        censor = c(censor, ytemp)
+      }
+      
+      data_temp = data.frame(death = death, censor = censor, 
+                             x1 = x1,  sex = sex, 
+                             parm1 = parm1, parm2 = parm2)
+      data_temp = data_temp[which(data_temp$death < data_temp$censor), ]
+      
+      # hist(death, freq = FALSE, breaks = 20)
+      # hist(data_temp$death, freq = FALSE, breaks = 20)
+      # lines(seq(0,4,0.1), foverall(seq(0,4,0.1)))
+      # 
+      # when x > y
+      sex = 2
+      x1 = sample(c(1,2,3,4), nn, replace = TRUE)
+      parm1 = (beta * x1)
+      parm2 = parm1 * sex 
+      
+      death = censor = c()
+      
+      for(i in 1:nn){
+        xtemp = rexp(1, parm1[i])
+        death = c(death, xtemp)
+      }
+      for(i in 1:nn){
+        xtemp = death[i]
+        maxtemp = F_x_g_y(xtemp, xtemp, parm1[i], parm2[i])
+        u = runif(1,0,maxtemp)
+        ytemp = inverse_gx_p(xtemp, F_x_g_y, u, parm1[i], parm2[i])
+        if(ytemp <= 0 & parm2[i] ==0){ytemp = xtemp}
+        censor = c(censor, ytemp)
+      }
+      data_temp2 = data.frame(death = death, censor = censor, 
+                              x1 = x1, sex = sex, 
+                              parm1 = parm1, parm2 = parm2)
+      
+      data_temp2 = data_temp2[which(data_temp2$death > data_temp2$censor), ]
+      rownames(data_temp2) = NULL
+      dim(data_temp2)
+      
+      # hist(death, freq = FALSE, breaks = 20)
+      # hist(data_temp2$death, freq = FALSE, breaks = 20)
+      # lines(seq(0,4,0.1), foverall(seq(0,4,0.1)))
+      # 
+    }
+    
+    n1 = round(n * 0.4); n2 = n - n1
+    data = rbind(data_temp[sample(1:dim(data_temp)[1], n1),],
+                 data_temp2[sample(1:dim(data_temp2)[1], n2),])
+    # hist(data$death, freq = FALSE, breaks = 20)
+    # lines(seq(0,4,0.1), foverall(seq(0,4,0.1)))
+    # hist(data$censor, freq = FALSE, breaks = 20)
+    # 
+    data$status = ifelse(data$death < data$censor, 1, 0)
+    data$time = ifelse(data$status == 1, data$death, data$censor)
+    data = rbind(data, data_male1)
+    data = data[order(data$time),]
+    rownames(data) = NULL
+    
+    dim(data)
+  
+```
+
+
+```{R}
+fitcox_reduce = coxph(Surv(time, status) ~ x1 + sex, data = data)
+fitcox_reduce 
+summary(glm(status ~  x1  + sex - 1, data = data, family = 'binomial'))
+```
+
+
+```{R include = FALSE}
+fitcox_reduce = coxph(Surv(time, status) ~ x1 , data = data)
+fitcox_reduce 
+```    
+
+
+
+```{R include = FALSE}
+  fitcox_reduce = coxph(Surv(time, status) ~ x1 + sex, data = data)
+  fitcox_reduce = coxph(Surv(time, status) ~ x1 , data = data)
+  
+  Res_list1 = Res_list2 = Res_list3 = list()
+  
+  for(theta in 1:4){
+    data_temp = data[data$x1 == theta,]; rownames(data_temp) = NULL
+    
+    fit_km = survfit(Surv(time, status) ~ 1, data = data_temp)
+    fitKM = survfit(Surv(time, status) ~ 1, data = data_temp)
+    
+    res1 = c()
+    for(i in 1:dim(data_temp)[1]){
+      res1 = c(res1, m_est_old1(data_temp$time[i], data = data_temp))
+    }
+    Res_list1[[theta]] = res1
+    
+    res2 = c()
+    for(i in 1:dim(data_temp)[1]){
+      res2 = c(res2, m_est_old2(data_temp$time[i], data = data_temp))
+    }
+    Res_list2[[theta]] = res2
+    
+    res3 = c()
+    for(i in 1:dim(data_temp)[1]){
+      res3 = c(res3, S_est(data_temp$time[i], data_temp, fitKM))
+    }
+    
+    Res_list3[[theta]] = res3
+    # 
+    # b = best[iters]
+    # 
+    # estres1 = c()
+    # for(i in 1:dim(data_temp)[1]){
+    #   estres1 = c(estres1, m_est_old1(data_temp$time[i], data = data_temp))
+    # }
+    # Est_res_list1[[theta]] = estres1
+    # 
+    # estres2 = c()
+    # for(i in 1:dim(data_temp)[1]){
+    #   estres2 = c(estres2, m_est_old2(data_temp$time[i], data = data_temp))
+    # }
+    # Est_res_list2[[theta]] = estres2
+    # 
+    # estres3 = c()
+    # for(i in 1:dim(data_temp)[1]){
+    #   aaa = S_est(data_temp$time[i], data_temp, fitKM)
+    #   #print(aaa)
+    #   estres3 = c(estres3, aaa)
+    # }
+    # Est_res_list3[[theta]] = estres3
+    # 
+    # b = b0
+  }
+```
+
+
+
+```{R fig.width=9, fig.height=3,echo=FALSE,  fig.align = "center"}
+par(mfrow =c(1,4))
+ for(theta in 1:4){
+      
+      data_temp = data[data$x1 == theta,]; rownames(data_temp) = NULL
+      fitKM = survfit(Surv(time, status) ~ 1, data = data_temp)
+      plot(fitKM, xlab = 'time', ylab = 'survival', main = paste('x =', theta))
+      fitCOX = survfit(fitcox_reduce, newdata = data.frame(x1 = theta))
+      lines(fitCOX$time, fitCOX$surv, col = 4)
+      lines(data_temp$time, exp(-theta * data_temp$time), col = 2)
+      
+      res1 = Res_list1[[theta]]; 
+      res2 = Res_list2[[theta]]; 
+      res3 = Res_list3[[theta]]
+      lines(data_temp$time, res1, col = 6, lwd =2)  
+      lines(data_temp$time, res2, col = 5, lwd =1)
+      lines(data_temp$time, res3, col = 3, lwd =1)
+      
+ }
+```
+
+
+
+
+
+### Setting 3 
+
+To mimic the cox PH model sitation, we set $\theta_1 = \exp(\beta x_1), \theta_2 = \exp(\beta x_1 x_2)$,
+where $x_1$ has four levels 1,2,3,4 and $x_2$ has two levels 0,1, which is an indicator for gender, 
+$$x_2 = \begin{cases} 1 & \text{female} \\ 0  & \text{male} \end{cases}, \text{ }\text{ }\text{ }\theta_2 = \begin{cases} \exp(\beta x_1) & \text{female} \\ 1 & \text{male} \end{cases}$$
+$$S_{T,C}(t,s;x_1, x_2) = \begin{cases}
+e^{- \big(e^{\beta x_1}\big) t} e^{ - (e^{ \big(e^{\beta x_1 x_2}\big) s} - 1) ( (t - s)^2 + 1)} &  \text{ when } t \geq s\\
+e^{- \big(e^{\beta x_1}\big) t} e^{ - (e^{ \big(e^{\beta x_1 x_2}\big) s} - 1)} & \text{ when } t < s
+\end{cases}$$
+That is,  for females: 
+$$S_{T,C}(t,s;x_1, x_2) = \begin{cases}
+e^{- \big(e^{\beta x_1}\big) t} e^{ - (e^{ \big(e^{\beta x_1 }\big) s} - 1) ( (t - s)^2 + 1)} &  \text{ when } t \geq s\\
+e^{- \big(e^{\beta x_1}\big) t} e^{ - (e^{ \big(e^{\beta x_1 }\big) s} - 1)} & \text{ when } t < s
+\end{cases}$$
+For males: 
+$$S_{T,C}(t,s;x_1, x_2) = \begin{cases}
+e^{- \big(e^{\beta x_1}\big) t} e^{ - (e^{  s} - 1) ( (t - s)^2 + 1)} &  \text{ when } t \geq s\\
+e^{- \big(e^{\beta x_1}\big) t} e^{ - (e^{  s} - 1)} & \text{ when } t < s
+\end{cases}$$
+where $$S_T(t; x_1, x_2) = e^{- \big(e^{\beta x_1}\big) t} = [e^{-t}]^{\big(e^{\beta x_1}\big)} =[e^{-t}]^{\exp(\beta x_1)}$$ where $S_0(t) = e^{-t}$.
+Therefore, $S_T(t; x_1, x_2)$ is a cox PH model. 
+And $$f_T(t; x_1, x_2) = \exp(\beta x_1) e^{- \exp(\beta x_1) t},$$ 
+$$\lambda_T(t; x_1, x_2) = \frac{f_T(t)}{S_T(t)} =\exp(\beta x_1) = \lambda_{T0}(t)\exp(\beta x_1), \text{ }\text{ } \text{ }\lambda_{T0}(t) = 1$$
+The censoring time is 
+$$S_C(t;x_1, x_2) =e^{ - (e^{ \exp(\beta x_1) x_2 s} - 1)}$$
+$$f_C(s; x_1, x_2) = \exp\big(\beta x_1\big)  x_2e^{ - e^{ \exp(\beta x_1) x_2 s} + \exp(\beta x_1) x_2 s + 1}$$
+$$\lambda_C(s; x_1, x_2) = \frac{f_C(s; x_1, x_2)}{S_C(s; x_1, x_2)} = \exp\big(\beta x_1 \big)x_2e^{\exp(\beta x_1) x_2 s}$$
+The associated $m()$ function is 
+$$\begin{aligned}
+m(t; x_1, x_2) = & \frac{\lambda_T(t; x_1, x_2)}{\lambda_T(t; x_1, x_2) + \lambda_C(t; x_1, x_2)} \\
+= & \frac{\exp(\beta x_1)}{\exp(\beta x_1) + \exp\big(\beta x_1 \big) x_2e^{\exp(\beta x_1 )x_2t}} \\
+= & \frac{1}{1 + \exp(-\ln(x_2) + \exp({\beta x_1 )x_2t})} \\
+= & \begin{cases}
+\frac{1}{1 +  e^{(\beta x_1 )t}}  & x_2 = 1, \text{female} \\
+1 & x_2 = 0, \text{male}
+\end{cases}
+\end{aligned}$$
+
+
+```{R include = FALSE}
+ beta = 0.3
+    n = 100 # 200 subjects in total 
+    set.seed(123)
+    # generate male data
+    for(males_gen in 1){
+      # x < y
+      sex = 0
+      x1 = sample(c(1,2,3,4), n, replace = TRUE)
+      
+      parm1 = exp(beta * x1)
+      parm2 = parm1 * sex
+      
+      n1 = n * 0.4; n2 = n - n1
+      
+      death = c(); censor = c()
+      for(i in 1:n){
+        xtemp = rexp(1, parm1[i])
+        death = c(death, xtemp)
+      }
+      
+      for(i in 1:n1){
+        xtemp = death[i]
+        maxtemp = F_x_l_y(xtemp, 1000, parm1[i], parm2[i])
+        u = runif(1,0,maxtemp)
+        ytemp = inverse_gx_p(xtemp, F_x_l_y, u, parm1[i], parm2[i])
+        if(ytemp <= 0 & parm2[i] == 0){ytemp = 1000}
+        censor = c(censor, ytemp)
+      }
+      
+      for(i in (n1+1):n){
+        # x > y
+        xtemp = death[i]
+        maxtemp = F_x_g_y(xtemp, xtemp, parm1[i], parm2[i])
+        u = runif(1,0,maxtemp)
+        ytemp = inverse_gx_p(xtemp, F_x_g_y, u, parm1[i], parm2[i])
+        if(ytemp <= 0 & parm2[i] ==0){ytemp = xtemp}
+        censor = c(censor, ytemp)
+      }
+      data_male1 = data.frame(death = death, censor = censor, 
+                              x1 = x1, sex = sex, 
+                              parm1 = parm1, parm2 = parm2)
+    }
+    
+    data_male1$status = ifelse(data_male1$death <= data_male1$censor, 1, 0)
+    data_male1$time = ifelse(data_male1$status == 1, 
+                             data_male1$death, data_male1$censor)
+    data_male1 = data_male1[order(data_male1$time),]
+    rownames(data_male1) = NULL
+    
+    # whether it is correct or not? 
+    # hist(data_male1$death, freq = FALSE, breaks = 20)
+    # lines(seq(0,4,0.1), foverall(seq(0,4,0.1)))
+    
+    for(female_gen in 1){
+      # when x < y
+      
+      nn = 5 * n
+      sex = 1
+      x1 = sample(c(1,2,3,4), nn, replace = TRUE)
+      
+      parm1 = exp(beta * x1)
+      parm2 = parm1 * sex 
+      
+      death = censor = c()
+      for(i in 1:nn){
+        xtemp = rexp(1, parm1[i])
+        death = c(death, xtemp)
+        maxtemp = F_x_l_y(xtemp, 1000, parm1[i], parm2[i])
+        u = runif(1,0,maxtemp)
+        ytemp = inverse_gx_p(xtemp, F_x_l_y, u, parm1[i], parm2[i])
+        if(ytemp <= 0 & parm2[i] == 0){ytemp = 1000}
+        censor = c(censor, ytemp)
+      }
+      
+      data_temp = data.frame(death = death, censor = censor, 
+                             x1 = x1,  sex = sex, 
+                             parm1 = parm1, parm2 = parm2)
+      data_temp = data_temp[which(data_temp$death < data_temp$censor), ]
+      
+      # hist(death, freq = FALSE, breaks = 20)
+      # hist(data_temp$death, freq = FALSE, breaks = 20)
+      # lines(seq(0,4,0.1), foverall(seq(0,4,0.1)))
+      # 
+      # when x > y
+      sex = 1
+      x1 = sample(c(1,2,3,4), nn, replace = TRUE)
+      parm1 = exp(beta * x1)
+      parm2 = parm1 * sex 
+      
+      death = censor = c()
+      
+      for(i in 1:nn){
+        xtemp = rexp(1, parm1[i])
+        death = c(death, xtemp)
+      }
+      for(i in 1:nn){
+        xtemp = death[i]
+        maxtemp = F_x_g_y(xtemp, xtemp, parm1[i], parm2[i])
+        u = runif(1,0,maxtemp)
+        ytemp = inverse_gx_p(xtemp, F_x_g_y, u, parm1[i], parm2[i])
+        if(ytemp <= 0 & parm2[i] ==0){ytemp = xtemp}
+        censor = c(censor, ytemp)
+      }
+      data_temp2 = data.frame(death = death, censor = censor, 
+                              x1 = x1, sex = sex, 
+                              parm1 = parm1, parm2 = parm2)
+      
+      data_temp2 = data_temp2[which(data_temp2$death > data_temp2$censor), ]
+      rownames(data_temp2) = NULL
+      dim(data_temp2)
+      
+      # hist(death, freq = FALSE, breaks = 20)
+      # hist(data_temp2$death, freq = FALSE, breaks = 20)
+      # lines(seq(0,4,0.1), foverall(seq(0,4,0.1)))
+      # 
+    }
+    
+    n1 = round(n * 0.4); n2 = n - n1
+    data = rbind(data_temp[sample(1:dim(data_temp)[1], n1),],
+                 data_temp2[sample(1:dim(data_temp2)[1], n2),])
+    # hist(data$death, freq = FALSE, breaks = 20)
+    # lines(seq(0,4,0.1), foverall(seq(0,4,0.1)))
+    # hist(data$censor, freq = FALSE, breaks = 20)
+    # 
+    data$status = ifelse(data$death < data$censor, 1, 0)
+    data$time = ifelse(data$status == 1, data$death, data$censor)
+    data = rbind(data, data_male1)
+    data = data[order(data$time),]
+    rownames(data) = NULL
+    
+    dim(data)
+    
+    fitcox_reduce = coxph(Surv(time, status) ~ x1 + sex, data = data)
+    fitcox_reduce 
+    fitcox_reduce = coxph(Surv(time, status) ~ x1 , data = data)
+    fitcox_reduce 
+   
+```
+
+
+```{R fig.width=9, fig.height=3,echo=FALSE,  fig.align = "center"}
+
+  fitcox_reduce = coxph(Surv(time, status) ~ x1 + sex, data = data)
+  fitcox_reduce = coxph(Surv(time, status) ~ x1 , data = data)
+  
+  Res_list1 = Res_list2 = Res_list3 = list()
+  
+  for(theta in 1:4){
+    data_temp = data[data$x1 == theta,]; rownames(data_temp) = NULL
+    
+    fit_km = survfit(Surv(time, status) ~ 1, data = data_temp)
+    fitKM = survfit(Surv(time, status) ~ 1, data = data_temp)
+    
+    res1 = c()
+    for(i in 1:dim(data_temp)[1]){
+      res1 = c(res1, m_est_old1(data_temp$time[i], data = data_temp))
+    }
+    Res_list1[[theta]] = res1
+    
+    res2 = c()
+    for(i in 1:dim(data_temp)[1]){
+      res2 = c(res2, m_est_old2(data_temp$time[i], data = data_temp))
+    }
+    Res_list2[[theta]] = res2
+    
+    res3 = c()
+    for(i in 1:dim(data_temp)[1]){
+      res3 = c(res3, S_est(data_temp$time[i], data_temp, fitKM))
+    }
+    
+    Res_list3[[theta]] = res3
+    # 
+    # b = best[iters]
+    # 
+    # estres1 = c()
+    # for(i in 1:dim(data_temp)[1]){
+    #   estres1 = c(estres1, m_est_old1(data_temp$time[i], data = data_temp))
+    # }
+    # Est_res_list1[[theta]] = estres1
+    # 
+    # estres2 = c()
+    # for(i in 1:dim(data_temp)[1]){
+    #   estres2 = c(estres2, m_est_old2(data_temp$time[i], data = data_temp))
+    # }
+    # Est_res_list2[[theta]] = estres2
+    # 
+    # estres3 = c()
+    # for(i in 1:dim(data_temp)[1]){
+    #   aaa = S_est(data_temp$time[i], data_temp, fitKM)
+    #   #print(aaa)
+    #   estres3 = c(estres3, aaa)
+    # }
+    # Est_res_list3[[theta]] = estres3
+    # 
+    # b = b0
+  }
+
+par(mfrow = c(1,4))
+  for(modelfitandplot in 1){
+    for(theta in 1:4){
+
+      data_temp = data[data$x1 == theta,]; rownames(data_temp) = NULL
+      fitKM = survfit(Surv(time, status) ~ 1, data = data_temp)
+      plot(fitKM, xlab = 'time', ylab = 'survival', main = paste('x =', theta))
+      fitCOX = survfit(fitcox_reduce, newdata = data.frame(x1 = theta))
+      lines(fitCOX$time, fitCOX$surv, col = 4)
+      lines(data_temp$time, exp(-theta * data_temp$time), col = 2)
+
+      res1 = Res_list1[[theta]];
+      res2 = Res_list2[[theta]];
+      res3 = Res_list3[[theta]]
+      lines(data_temp$time, res1, col = 6, lwd =2)
+      lines(data_temp$time, res2, col = 5, lwd =1)
+      lines(data_temp$time, res3, col = 3, lwd =1)
+
+    }
+  }
+
+
+```
+
+
+
+
+### Setting 4
+
+To mimic the cox PH model sitation, we set $\theta_1 = \exp(\beta x_1), \theta_2 = \exp(\beta x_1 x_2)$,
+where $x_1$ has four levels 1,2,3,4 and $x_2$ has two levels 0,1, which is an indicator for gender, 
+$$x_2 = \begin{cases} 2 & \text{female} \\ 1  & \text{male} \end{cases}, \text{ }\text{ }\text{ }\theta_2 = \begin{cases} 2\exp(\beta x_1) & \text{female} \\ \exp(\beta x_1) & \text{male} \end{cases}$$
+$$S_{T,C}(t,s;x_1, x_2) = \begin{cases}
+e^{- \big(e^{\beta x_1}\big) t} e^{ - (e^{ \big(e^{\beta x_1} x_2\big) s} - 1) ( (t - s)^2 + 1)} &  \text{ when } t \geq s\\
+e^{- \big(e^{\beta x_1}\big) t} e^{ - (e^{ \big(e^{\beta x_1} x_2\big) s} - 1)} & \text{ when } t < s
+\end{cases}$$
+That is,  for females: 
+$$S_{T,C}(t,s;x_1, x_2) = \begin{cases}
+e^{- \big(e^{\beta x_1}\big) t} e^{ - (e^{ \big(2e^{\beta x_1 }\big) s} - 1) ( (t - s)^2 + 1)} &  \text{ when } t \geq s\\
+e^{- \big(e^{\beta x_1}\big) t} e^{ - (e^{ \big(2e^{\beta x_1 }\big) s} - 1)} & \text{ when } t < s
+\end{cases}$$
+For males: 
+$$S_{T,C}(t,s;x_1, x_2) = \begin{cases}
+e^{- \big(e^{\beta x_1}\big) t} e^{ - (e^{  s} - 1) ( (t - s)^2 + 1)} &  \text{ when } t \geq s\\
+e^{- \big(e^{\beta x_1}\big) t} e^{ - (e^{  s} - 1)} & \text{ when } t < s
+\end{cases}$$
+where $$S_T(t; x_1, x_2) = e^{- \big(e^{\beta x_1}\big) t} = [e^{-t}]^{\big(e^{\beta x_1}\big)} =[e^{-t}]^{\exp(\beta x_1)}$$ where $S_0(t) = e^{-t}$.
+Therefore, $S_T(t; x_1, x_2)$ is a cox PH model. 
+And $$f_T(t; x_1, x_2) = \exp(\beta x_1) e^{- \exp(\beta x_1) t},$$ 
+$$\lambda_T(t; x_1, x_2) = \frac{f_T(t)}{S_T(t)} =\exp(\beta x_1) = \lambda_{T0}(t)\exp(\beta x_1), \text{ }\text{ } \text{ }\lambda_{T0}(t) = 1$$
+The censoring time is 
+$$S_C(t;x_1, x_2) =e^{ - (e^{ \exp(\beta x_1 x_2) s} - 1)}$$
+$$f_C(s; x_1, x_2) = \exp\big(\beta x_1 x_2\big)e^{ - e^{ \exp(\beta x_1 x_2) s} + \exp(\beta x_1 x_2) s + 1}$$
+$$\lambda_C(s; x_1, x_2) = \frac{f_C(s; x_1, x_2)}{S_C(s; x_1, x_2)} = \exp\big(\beta x_1 x_2\big)e^{\exp(\beta x_1 x_2) s}$$
+The associated $m()$ function is 
+$$\begin{aligned}
+m(t; x_1, x_2) = & \frac{\lambda_T(t; x_1, x_2)}{\lambda_T(t; x_1, x_2) + \lambda_C(t; x_1, x_2)} \\
+= & \frac{\exp(\beta x_1)}{\exp(\beta x_1) + \exp\big(\beta x_1 x_2\big)e^{\exp(\beta x_1 x_2)t}} \\
+= & \frac{1}{1 + \exp(-\beta x_1 + \beta x_1 x_2) exp({(\beta x_1 x_2)t})} \\
+= & \frac{1}{1 + \exp(-\beta x_1 + \beta x_1 x_2 + {(\beta x_1 x_2)t})} \\
+= & \begin{cases}
+\frac{1}{1 +  e^{(\beta x_1 )t}}  & x_2 = 1, \text{female} \\
+\frac{1}{1 + e^{ -\beta x_1}}  & x_2 = 0, \text{male}
+\end{cases}
+\end{aligned}$$
+
+
+
+
+
+```{R include = FALSE}
+ beta = 0.3
+    n = 100 # 200 subjects in total 
+    set.seed(123)
+    # generate male data
+    for(males_gen in 1){
+      # x < y
+      sex = 1
+      x1 = sample(c(1,2,3,4), n, replace = TRUE)
+      
+      parm1 = exp(beta * x1)
+      parm2 = parm1 * sex
+      
+      n1 = n * 0.4; n2 = n - n1
+      
+      death = c(); censor = c()
+      for(i in 1:n){
+        xtemp = rexp(1, parm1[i])
+        death = c(death, xtemp)
+      }
+      
+      for(i in 1:n1){
+        xtemp = death[i]
+        maxtemp = F_x_l_y(xtemp, 1000, parm1[i], parm2[i])
+        u = runif(1,0,maxtemp)
+        ytemp = inverse_gx_p(xtemp, F_x_l_y, u, parm1[i], parm2[i])
+        if(ytemp <= 0 & parm2[i] == 0){ytemp = 1000}
+        censor = c(censor, ytemp)
+      }
+      
+      for(i in (n1+1):n){
+        # x > y
+        xtemp = death[i]
+        maxtemp = F_x_g_y(xtemp, xtemp, parm1[i], parm2[i])
+        u = runif(1,0,maxtemp)
+        ytemp = inverse_gx_p(xtemp, F_x_g_y, u, parm1[i], parm2[i])
+        if(ytemp <= 0 & parm2[i] ==0){ytemp = xtemp}
+        censor = c(censor, ytemp)
+      }
+      data_male1 = data.frame(death = death, censor = censor, 
+                              x1 = x1, sex = sex, 
+                              parm1 = parm1, parm2 = parm2)
+    }
+    
+    data_male1$status = ifelse(data_male1$death <= data_male1$censor, 1, 0)
+    data_male1$time = ifelse(data_male1$status == 1, 
+                             data_male1$death, data_male1$censor)
+    data_male1 = data_male1[order(data_male1$time),]
+    rownames(data_male1) = NULL
+    
+    # whether it is correct or not? 
+    # hist(data_male1$death, freq = FALSE, breaks = 20)
+    # lines(seq(0,4,0.1), foverall(seq(0,4,0.1)))
+    
+    for(female_gen in 1){
+      # when x < y
+      
+      nn = 5 * n
+      sex = 2
+      x1 = sample(c(1,2,3,4), nn, replace = TRUE)
+      
+      parm1 = exp(beta * x1)
+      parm2 = parm1 * sex 
+      
+      death = censor = c()
+      for(i in 1:nn){
+        xtemp = rexp(1, parm1[i])
+        death = c(death, xtemp)
+        maxtemp = F_x_l_y(xtemp, 1000, parm1[i], parm2[i])
+        u = runif(1,0,maxtemp)
+        ytemp = inverse_gx_p(xtemp, F_x_l_y, u, parm1[i], parm2[i])
+        if(ytemp <= 0 & parm2[i] == 0){ytemp = 1000}
+        censor = c(censor, ytemp)
+      }
+      
+      data_temp = data.frame(death = death, censor = censor, 
+                             x1 = x1,  sex = sex, 
+                             parm1 = parm1, parm2 = parm2)
+      data_temp = data_temp[which(data_temp$death < data_temp$censor), ]
+      
+      # hist(death, freq = FALSE, breaks = 20)
+      # hist(data_temp$death, freq = FALSE, breaks = 20)
+      # lines(seq(0,4,0.1), foverall(seq(0,4,0.1)))
+      # 
+      # when x > y
+      sex = 2
+      x1 = sample(c(1,2,3,4), nn, replace = TRUE)
+      parm1 = exp(beta * x1)
+      parm2 = parm1 * sex 
+      
+      death = censor = c()
+      
+      for(i in 1:nn){
+        xtemp = rexp(1, parm1[i])
+        death = c(death, xtemp)
+      }
+      for(i in 1:nn){
+        xtemp = death[i]
+        maxtemp = F_x_g_y(xtemp, xtemp, parm1[i], parm2[i])
+        u = runif(1,0,maxtemp)
+        ytemp = inverse_gx_p(xtemp, F_x_g_y, u, parm1[i], parm2[i])
+        if(ytemp <= 0 & parm2[i] ==0){ytemp = xtemp}
+        censor = c(censor, ytemp)
+      }
+      data_temp2 = data.frame(death = death, censor = censor, 
+                              x1 = x1, sex = sex, 
+                              parm1 = parm1, parm2 = parm2)
+      
+      data_temp2 = data_temp2[which(data_temp2$death > data_temp2$censor), ]
+      rownames(data_temp2) = NULL
+      dim(data_temp2)
+      
+      # hist(death, freq = FALSE, breaks = 20)
+      # hist(data_temp2$death, freq = FALSE, breaks = 20)
+      # lines(seq(0,4,0.1), foverall(seq(0,4,0.1)))
+      # 
+    }
+    
+    n1 = round(n * 0.4); n2 = n - n1
+    data = rbind(data_temp[sample(1:dim(data_temp)[1], n1),],
+                 data_temp2[sample(1:dim(data_temp2)[1], n2),])
+    # hist(data$death, freq = FALSE, breaks = 20)
+    # lines(seq(0,4,0.1), foverall(seq(0,4,0.1)))
+    # hist(data$censor, freq = FALSE, breaks = 20)
+    # 
+    data$status = ifelse(data$death < data$censor, 1, 0)
+    data$time = ifelse(data$status == 1, data$death, data$censor)
+    data = rbind(data, data_male1)
+    data = data[order(data$time),]
+    rownames(data) = NULL
+    
+    dim(data)
+    
+    fitcox_reduce = coxph(Surv(time, status) ~ x1 + sex, data = data)
+    fitcox_reduce 
+    fitcox_reduce = coxph(Surv(time, status) ~ x1 , data = data)
+    fitcox_reduce 
+   
+```
+
+
+```{R fig.width=9, fig.height=3,echo=FALSE,  fig.align = "center"}
+
+  fitcox_reduce = coxph(Surv(time, status) ~ x1 + sex, data = data)
+  fitcox_reduce = coxph(Surv(time, status) ~ x1 , data = data)
+  
+  Res_list1 = Res_list2 = Res_list3 = list()
+  
+  for(theta in 1:4){
+    data_temp = data[data$x1 == theta,]; rownames(data_temp) = NULL
+    
+    fit_km = survfit(Surv(time, status) ~ 1, data = data_temp)
+    fitKM = survfit(Surv(time, status) ~ 1, data = data_temp)
+    
+    res1 = c()
+    for(i in 1:dim(data_temp)[1]){
+      res1 = c(res1, m_est_old1(data_temp$time[i], data = data_temp))
+    }
+    Res_list1[[theta]] = res1
+    
+    res2 = c()
+    for(i in 1:dim(data_temp)[1]){
+      res2 = c(res2, m_est_old2(data_temp$time[i], data = data_temp))
+    }
+    Res_list2[[theta]] = res2
+    
+    res3 = c()
+    for(i in 1:dim(data_temp)[1]){
+      res3 = c(res3, S_est(data_temp$time[i], data_temp, fitKM))
+    }
+    
+    Res_list3[[theta]] = res3
+    # 
+    # b = best[iters]
+    # 
+    # estres1 = c()
+    # for(i in 1:dim(data_temp)[1]){
+    #   estres1 = c(estres1, m_est_old1(data_temp$time[i], data = data_temp))
+    # }
+    # Est_res_list1[[theta]] = estres1
+    # 
+    # estres2 = c()
+    # for(i in 1:dim(data_temp)[1]){
+    #   estres2 = c(estres2, m_est_old2(data_temp$time[i], data = data_temp))
+    # }
+    # Est_res_list2[[theta]] = estres2
+    # 
+    # estres3 = c()
+    # for(i in 1:dim(data_temp)[1]){
+    #   aaa = S_est(data_temp$time[i], data_temp, fitKM)
+    #   #print(aaa)
+    #   estres3 = c(estres3, aaa)
+    # }
+    # Est_res_list3[[theta]] = estres3
+    # 
+    # b = b0
+  }
+
+  par(mfrow = c(1,4))
+
+  for(modelfitandplot in 1){
+    for(theta in 1:4){
+
+      data_temp = data[data$x1 == theta,]; rownames(data_temp) = NULL
+      fitKM = survfit(Surv(time, status) ~ 1, data = data_temp)
+      plot(fitKM, xlab = 'time', ylab = 'survival', main = paste('x =', theta))
+      fitCOX = survfit(fitcox_reduce, newdata = data.frame(x1 = theta))
+      lines(fitCOX$time, fitCOX$surv, col = 4)
+      lines(data_temp$time, exp(-theta * data_temp$time), col = 2)
+
+      res1 = Res_list1[[theta]];
+      res2 = Res_list2[[theta]];
+      res3 = Res_list3[[theta]]
+      lines(data_temp$time, res1, col = 6, lwd =2)
+      lines(data_temp$time, res2, col = 5, lwd =1)
+      lines(data_temp$time, res3, col = 3, lwd =1)
+
+    }
+  }
+
+
+```

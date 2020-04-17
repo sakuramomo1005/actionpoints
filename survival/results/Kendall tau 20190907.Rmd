@@ -1,0 +1,158 @@
+---
+title: "Calculate the Kendall's tau for Tsiatis Copula"
+date: 2019-09-07
+output: pdf_document
+header-includes:
+  - \usepackage{color}
+fontsize: 12pt
+geometry: tmargin=1.8cm,bmargin=1.8cm,lmargin=2.1cm,rmargin=2.1cm
+---
+
+
+
+# Copula 
+
+In the Tsiatis's paper, the related functions are: 
+
+|   Function |   Description | Expression|
+|:---------------|:---------------------|------------------------------------------------:|
+|$P(T < t, C < c)$ |Joint CDF | $1 + exp(-\lambda t - \mu c -\theta tc) - exp(-\lambda t) -  exp(-\mu c)$| 
+|$f(t, c)$ | Joint PDF|$(\lambda \mu - \theta + \lambda \theta t + \mu \theta c + \theta^2 t c) exp(-\lambda t - \mu c - \theta c t )$|
+|$f_t(t)$  |Marginal PDF of T|$\lambda exp(-\lambda t)$|
+|$S_t(t)$  |Survival function of T|$exp(-\lambda t)$ |
+|$f_c(c)$  | Marginal PDF of C| $\mu exp(-\mu c)$ | 
+|$S_c(c)$  | $P_c(C > c)$|$exp(-\mu c)$ | 
+|$S_x(t)$  | $P(T > t, C > t)$|$exp(-\lambda t - \mu t -\theta t^2)$|
+|$\psi(t)$ | $\int_{t}^{\infty} f(t,c) dc$ | $(\lambda + \theta t) exp(-\lambda t - \mu t - \theta t^2 )$|
+
+Therefore, 
+$$F(t,c) = C(F(t), G(c))F(t)G(c)$$
+Where 
+
+* F(t,c) is the joint pdf of survival time and censor time
+
+* F(t) is the marginal function of survival time
+
+* G(c) is the marginal function of censor time
+
+That is:
+$$\begin{aligned}
+C(U,V) = & \frac{1 + exp(-\lambda t - \mu c -\theta tc) - exp(-\lambda t) -  exp(-\mu c)}{(1-exp(-\lambda t))(1-exp(-\mu t))} \\
+=& \frac{1 + (1-U) (1-V)exp(-\frac{\theta}{\mu \lambda} ln(1-U) ln (1-V)) - (1-U) - (1-V)}{UV} \\
+=& \frac{U + V -1 + (1-U)(1-V)exp(-\frac{\theta}{\mu \lambda} ln(1-U) ln (1-V))  }{UV}
+\end{aligned}$$
+
+The pdf of the copula distribution is: 
+
+$$c(F(t),G(c)) = \frac{f(t,c)}{f_t(t)g(c)} = \frac{(\lambda \mu - \theta + \lambda \theta t + \mu \theta c + \theta^2 t c) exp(-\lambda t - \mu c - \theta c t )}{\lambda exp(-\lambda t) \mu exp(-\mu c)}$$
+Therefore, 
+$c(U,V) = \frac{1}{\lambda \mu} \big[(\lambda - \frac{\theta}{\mu} ln(1-V)) (\mu - \frac{\theta}{\lambda}ln(1-U)) - \theta \big] exp(-\frac{\theta}{\mu\lambda} ln(1-U) ln(1-V))$
+
+According to the relationship between the copula function and Kendall's $\tau$: 
+$$\tau = 4 E(C(u,v)) -1$$
+
+$$\begin{aligned}
+E(C(u,v)) = &  \int_0^1 \int_0^1 C(u,v) d C(u,v) \\
+= & \int_0^1 \int_0^1 C(u,v) c(u,v) du dv \\
+= & \int_0^1 \int_0^1 \frac{u + v -1 + (1-u)(1-v)exp(-\frac{\theta}{\mu \lambda} ln(1-u) ln (1-v)}{uv} \\
+ & \frac{1}{\lambda \mu} \big[(\lambda - \frac{\theta}{\mu} ln(1-v)) (\mu - \frac{\theta}{\lambda}ln(1-u)) - \theta \big] exp(-\frac{\theta}{\mu\lambda} ln(1-u) ln(1-v)) du dv
+\end{aligned}$$
+
+\color{red} However, no antiderivative could be found since the formula is too complicated. 
+
+\color{black}
+
+
+
+# Survival Copula 
+
+
+The joint survival function is: 
+
+$$P(T > t, C> c) = S(t, c) = exp(- \lambda t - \mu c - \theta tc)$$
+The survival function is: 
+$$P(T > t) = S_t(t) = exp( -\lambda t)$$
+The censor function is: 
+$$P(C > c) = S_c(c) = exp(-\mu c)$$
+Therefore, the survival copula is:
+$$C_s(S_t(t), S_c(c)) = S(t,c)/(S_t(t)S_c(c)) = \frac{exp(- \lambda t - \mu c - \theta tc)}{ exp( -\lambda t)exp(-\mu c)} = exp(-\theta tc)$$
+That is:
+$$C_s(U,V) = exp(-\frac{\theta}{\lambda \mu} ln(U) ln(V))$$
+
+### The survival copula is also a copula
+
+This is because
+$$\begin{aligned}
+S(t,c) =& P(T > t, C > c) \\
+=& P(T > t) - P(T > t, C < c) \\
+=& P(T > t) - (P(C < c) - P(T < t, C < c)) \\
+=& 1 - F_t(t) - F_c(C) + F(t,c) \\
+=& S_t(t) + S_c(c) + C(1- S_t(t), 1-S_c(c))  \\
+=& C_s(S_t(t), S_c(t))
+\end{aligned}$$
+That is
+$$C_s(u,v) = u + v -1 + C(1-u,1-v)$$
+The margins of $C_s$ are uniform:
+
+* $C_s(u,1) = u + C(1-u, 0) = u$, $C_s(1,v) = v + C(0, 1-v) = v$
+
+We may also proof that $C_s(t,c) \geq 0$ and it is a non-negative function. 
+
+$C_s$ is 2-nondecreasing:
+
+If $0 \leq u_1 \leq u_2 < \infty$,  $0 \leq v_1 \leq v_2 < \infty$
+$$\begin{aligned}
+ & C_s(v_1,v_2) + C_s(u_1,u_2) - C_s(u_1, v_2) - C_s(u_2,v_1) \\
+ & = C(1 - v_1, 1 - v_2) + C(1-u_1,1-u_2) - C_s(1 - u_1, 1 - v_2) - C_s(1 - u_2,1 -v_1)\\
+ & \geq 0
+\end{aligned}$$
+
+Therefore, survival copula is a copula has a more simple formula than the copula. 
+
+According to the relationship between the copula function and Kendall's $\tau$: 
+$$\tau = 4 E(C_s(u,v)) -1$$
+The kendall's tau for the Tsiatis Copula should be:
+$$\begin{aligned}
+E(C_s(u,v)) = \int_0^1 \int_0^1 C_s(u,v) d C_s(u,v)
+\end{aligned}$$
+
+$$\begin{aligned}
+c_s(u,v) =& d C_s(u,v) = \frac{\partial C_s(u,v)}{\partial u \partial v} = \frac{\partial exp(-\frac{\theta}{\lambda \mu} ln(u) ln(v))}{\partial u \partial v} \\
+= & \frac{\partial \big[ -\frac{\theta log v}{\lambda \mu u}  exp(-\frac{\theta}{\lambda \mu} ln(u) ln(v)) \big]}{\partial v} \\
+= & -\frac{\theta}{\lambda \mu uv }exp(-\frac{\theta}{\lambda \mu} ln(u) ln(v)) +\frac{\theta^2 ln(u) ln(v)}{\lambda^2 \mu^2 uv }  exp(-\frac{\theta}{\lambda \mu} ln(u) ln(v)) 
+\end{aligned}$$
+Therefore, 
+$$\begin{aligned}
+E(C_s(u,v)) = & \int_0^1 \int_0^1 C_s(u,v) d C(u,v) \\
+=& \int_0^1 \int_0^1 exp(-\frac{\theta}{\lambda \mu} ln(u) ln(v)) \big[ -\frac{\theta}{\lambda \mu uv }exp(-\frac{\theta}{\lambda \mu} ln(u) ln(v)) \\ + & \frac{\theta^2 ln(u) ln(v)}{\lambda^2 \mu^2 uv }  exp(-\frac{\theta}{\lambda \mu} ln(u) ln(v))  \big] du dv \\
+= & \int_0^1 \int_0^1 -\frac{\theta}{\lambda \mu uv }exp(-\frac{2\theta}{\lambda \mu} ln(u) ln(v)) +\frac{\theta^2 ln(u) ln(v)}{\lambda^2 \mu^2 uv }  exp(-\frac{2\theta}{\lambda \mu} ln(u) ln(v))  du dv \\
+= & \int_0^1 \int_{-\infty}^0 -\frac{\theta}{\lambda \mu v }exp(-\frac{2\theta}{\lambda \mu} X ln(v)) +\frac{\theta^2 X ln(v)}{\lambda^2 \mu^2 v }  exp(-\frac{2\theta}{\lambda \mu} X ln(v))  d X dv \text{ ,(where } X = ln(u))
+\end{aligned}$$
+For $\int_{-\infty}^0 -\frac{\theta}{\lambda \mu v }exp(-\frac{2\theta}{\lambda \mu} X ln(v)) +\frac{\theta^2 X ln(v)}{\lambda^2 \mu^2 v }  exp(-\frac{2\theta}{\lambda \mu} X ln(v))  d X$, 
+
+Let $A = \frac{\theta}{\mu \lambda}$ to make it look more clear. 
+$$\begin{aligned} 
+& \int_{-\infty}^0 -\frac{A}{v}exp(- 2A ln(v) X) + \frac{A^2 ln(v) X}{v} exp(- 2A ln(v) X)  d X \\
+= & \frac{1}{2 v ln(v)} exp(- 2A ln(v) X) |_{-\infty}^0 + \big(-\frac{A}{2v} exp(- 2A ln(v) X) X |_{-\infty}^0 + \int_{-\infty}^0 \frac{A}{2v} exp(- 2A ln(v) X)  dx \big) \\
+= & \frac{1}{2 v ln(v)} exp(- 2A ln(v) X) |_{-\infty}^0 + \big[-\frac{A}{2v} exp(- 2A ln(v) X) X |_{-\infty}^0 + \big( - \frac{1}{4v ln(v)}  exp(- 2A ln(v) X) |_{-\infty}^0 \big) \big] \\
+= & \frac{1}{2 v ln(v)} + (0 - \frac{1}{4v ln(v)}  ) \\
+= & \frac{1}{4vln(v)}
+\end{aligned}$$
+
+And then: 
+$$\begin{aligned}
+\int_0^1 \frac{1}{4vln(v)}dv =& \int_{-\infty}^{0} \frac{1}{4Y} d Y, \text{ (where } Y = ln(v)) \\
+= & \frac{1}{4}ln(|Y|)|_{-\infty}^0
+\end{aligned}$$
+The intergral is divergent. 
+
+\color{red} The Kendall's Tau is not avaiable for this copula? 
+
+\color{black}
+
+
+
+
+
+
+
