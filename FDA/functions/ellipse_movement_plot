@@ -1,0 +1,142 @@
+# function 
+
+
+ellipse_movement = function(beta1, beta2, 
+                            gamma1, gamma2, 
+                            bi_sigma1, bi_sigma2,
+                            nplots = 5, steps = 0.1, 
+                            xlab0 = xlab0, ylab0 = ylab0, names = '', savings = 0){
+  
+  print("draw the ellipse movement plots")
+  
+  theta = seq(0, 2 * pi, length=(1000))
+  
+  eigens1 = eigen(bi_sigma1)
+  evs1 = sqrt(eigens1$values)
+  evecs1 = eigens1$vectors
+  alpha1 = atan(evecs1[,1][2] / evecs1[,1][1])
+  
+  a1 = evs1[1]
+  b1 = evs1[2]
+  x01 = beta1[1]
+  y01 = beta1[2]
+  
+  eigens2 = eigen(bi_sigma2)
+  evs2 = sqrt(eigens2$values)
+  evecs2 = eigens2$vectors
+  alpha2 = atan(evecs2[,1][2] / evecs2[,1][1])
+  
+  a2 = evs2[1]
+  b2 = evs2[2]
+  x02 = beta2[1]
+  y02 = beta2[2]
+  
+  x1 = x01 + a1 * cos(theta) * cos(alpha1) - b1 * sin(theta) * sin(alpha1) 
+  y1 = y01 + a1 * cos(theta) * sin(alpha1) + b1 * sin(theta) * cos(alpha1)
+  x2 = x02 + a2 * cos(theta) * cos(alpha2) - b2 * sin(theta) * sin(alpha2) 
+  y2 = y02 + a2 * cos(theta) * sin(alpha2) + b2 * sin(theta) * cos(alpha2)
+  
+  plot(x1, y1, type = "l", ylim = ylab0, xlim = xlab0,
+       main = expression("x = a cos " * theta * " + " * x[0] *
+                           " and y = b sin " * theta * " + " * y[0]), asp = 1)
+  # arrows(x01, y01, a1 * evecs1[,1][1] + x01, a1 * evecs1[,1][2] + y01)
+  # arrows(x01, y01, b1 * evecs1[,2][1] + x01, b1 * evecs1[,2][2] + y01)
+  Arrows(x01, y01, a1 * evecs1[,1][1] + x01, a1 * evecs1[,1][2] + y01
+         ,lwd=2, arr.type="triangle")
+  Arrows(x01, y01, b1 * evecs1[,2][1] + x01, b1 * evecs1[,2][2] + y01
+         ,lwd=2, arr.type="triangle")
+  
+  lines(x2, y2, asp = 1, col = 2)
+  # arrows(x02, y02, a2 * evecs2[,1][1] + x02, a2 * evecs2[,1][2] + y02)
+  # arrows(x02, y02, b2 * evecs2[,2][1] + x02, b2 * evecs2[,2][2] + y02)
+  Arrows(x02, y02, a2 * evecs2[,1][1] + x02, a2 * evecs2[,1][2] + y02
+         ,lwd=2, arr.type="triangle", col = 2)
+  Arrows(x02, y02, b2 * evecs2[,2][1] + x02, b2 * evecs2[,2][2] + y02
+         ,lwd=2, arr.type="triangle", col = 2)
+  
+  count = 0
+  for(i in (-nplots):nplots){
+    count = count + 1
+    if(savings == 1){
+      png(paste(names, '_', count, '.png', sep = ''))
+    }
+    
+    x1 = steps * i * gamma1[1] + 
+      x01 + a1 * cos(theta) * cos(alpha1) - b1 * sin(theta) * sin(alpha1) 
+    y1 = steps * i * gamma1[2] + 
+      y01 + a1 * cos(theta) * sin(alpha1) + b1 * sin(theta) * cos(alpha1)
+    x2 = steps * i * gamma2[1] + 
+      x02 + a2 * cos(theta) * cos(alpha2) - b2 * sin(theta) * sin(alpha2) 
+    y2 = steps * i * gamma2[2] + 
+      y02 + a2 * cos(theta) * sin(alpha2) + b2 * sin(theta) * cos(alpha2)
+    
+    plot(x1, y1, type = "l", ylim = ylab0, xlim = xlab0,
+         main = paste(names,' -- w =',i), asp = 1)
+    # arrows(x01 + steps * i * gamma1[1], 
+    #        y01 + steps * i * gamma1[2],
+    #        a1 * evecs1[,1][1] + x01 + steps * i * gamma1[1], 
+    #        a1 * evecs1[,1][2] + y01 + steps * i * gamma1[2])
+    # arrows(x01 + steps * i * gamma1[1], 
+    #        y01 + steps * i * gamma1[2], 
+    #        b1 * evecs1[,2][1] + x01 + steps * i * gamma1[1], 
+    #        b1 * evecs1[,2][2] + y01 + steps * i * gamma1[2])
+    Arrows(x01 + steps * i * gamma1[1], 
+           y01 + steps * i * gamma1[2],
+           a1 * evecs1[,1][1] + x01 + steps * i * gamma1[1], 
+           a1 * evecs1[,1][2] + y01 + steps * i * gamma1[2]
+           ,lwd=2, arr.type="triangle")
+    Arrows(x01 + steps * i * gamma1[1], 
+           y01 + steps * i * gamma1[2], 
+           b1 * evecs1[,2][1] + x01 + steps * i * gamma1[1], 
+           b1 * evecs1[,2][2] + y01 + steps * i * gamma1[2]
+           ,lwd=2, arr.type="triangle")
+    
+    lines(x2, y2, asp = 1, col = 2)
+    # arrows(x02 + steps * i * gamma2[1], 
+    #        y02 + steps * i * gamma2[2], 
+    #        a2 * evecs2[,1][1] + x02 + steps * i * gamma2[1], 
+    #        a2 * evecs2[,1][2] + y02 + steps * i * gamma2[2])
+    # arrows(x02 + steps * i * gamma2[1], 
+    #        y02 + steps * i * gamma2[2], 
+    #        b2 * evecs2[,2][1] + x02 + steps * i * gamma2[1],
+    #        b2 * evecs2[,2][2] + y02 + steps * i * gamma2[2])
+    Arrows(x02 + steps * i * gamma2[1], 
+           y02 + steps * i * gamma2[2], 
+           a2 * evecs2[,1][1] + x02 + steps * i * gamma2[1], 
+           a2 * evecs2[,1][2] + y02 + steps * i * gamma2[2]
+           ,lwd=2, arr.type="triangle", col = 2)
+    Arrows(x02 + steps * i * gamma2[1], 
+           y02 + steps * i * gamma2[2], 
+           b2 * evecs2[,2][1] + x02 + steps * i * gamma2[1],
+           b2 * evecs2[,2][2] + y02 + steps * i * gamma2[2]
+           ,lwd=2, arr.type="triangle", col = 2)
+    
+    if(savings == 1){
+      dev.off()
+    }
+  }
+  
+}
+
+
+# example 
+
+beta1 = c(1,1)
+beta2 = c(0.9,1.1)
+gamma1 = c(2,0)
+gamma2 = c(0,1)
+bi_sigma1 = diag(c(1,2))
+bi_sigma2 = matrix(c(1,0.5,0.5,1),2,2)
+
+steps = 1
+xlab0 = range(c(beta1[1] + steps * gamma1[1] + 3, beta1[1] - steps * gamma1[1] - 3,
+                beta2[1] + steps * gamma2[1] + 3, beta2[1] - steps * gamma2[1] - 3))
+
+ylab0 = range(c(beta1[2] + steps * gamma1[2] + 3, beta1[2] - steps * gamma1[2] - 3,
+                beta2[2] + steps * gamma2[2] + 3, beta2[2] - steps * gamma2[2] - 3))
+
+ellipse_movement(beta1, beta2, 
+                 gamma1, gamma2, 
+                 bi_sigma1, bi_sigma2,
+                 nplots = 5, steps = 0.1, 
+                 xlab0, ylab0, names = "set3", savings = 0)
