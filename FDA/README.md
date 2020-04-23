@@ -1,14 +1,17 @@
 
 ## 2020-04-23
 
-* trajectory plots -- embarc
 
+* trajectory plots -- embarc
+   
 * trajectory plots -- hcaf
 
 * simulation: 
    + angle between gamma1 and gamam2
    + the length of gamma1 and gamma2; (moving speed)
-   
+  
+  
+   + why the variance of allpbo alldrg are quite small
    
 
 
