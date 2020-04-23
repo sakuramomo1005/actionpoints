@@ -10,9 +10,8 @@
    + angle between gamma1 and gamam2
    + the length of gamma1 and gamma2; (moving speed)
   
-  
    + why the variance of allpbo alldrg are quite small
-   [result](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA/results/20200422/small_variance%2020200422.pdf)
+   [--result](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA/results/20200422/small_variance%2020200422.pdf)
 
 
 
