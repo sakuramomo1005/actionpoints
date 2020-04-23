@@ -1,4 +1,19 @@
 
+## 2020-04-23
+
+* trajectory plots -- embarc
+
+* trajectory plots -- hcaf
+
+* simulation: 
+   + angle between gamma1 and gamam2
+   + the length of gamma1 and gamma2; (moving speed)
+   
+   
+
+
+
+
 ## 2020-04-16
 
 * check the angles between gamma1 and gamma2 for EMBARC dataset with different parameter settings
