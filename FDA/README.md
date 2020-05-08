@@ -1,4 +1,17 @@
 
+
+
+## 2020-05-07
+
+Variable selection 
+* forward stepwise
+* use lasso choose variable first and then use KL
+* change different start points
+
+
+
+## 2020-04-30
+
 ## 2020-04-23
 
 
