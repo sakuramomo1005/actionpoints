@@ -1,5 +1,12 @@
 
 
+## 2020-05-14
+
+Variable selection 
+
+why it doesnt work well?
+try to delete the concavity term for random effect 
+
 
 ## 2020-05-07
 
