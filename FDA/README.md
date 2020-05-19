@@ -7,6 +7,8 @@ Variable selection
 why it doesnt work well?
 try to delete the concavity term for random effect 
 
+chose based on ipwe
+
 
 ## 2020-05-07
 
