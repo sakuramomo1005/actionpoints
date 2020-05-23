@@ -1,6 +1,6 @@
 
 
-## 2020-05-21
+## 2020-05-22
 
 * Try EMBARC with orthogonal polynomial transformation. draw ellipses
 * keep in mind how to interpret the model, how to make it useful
