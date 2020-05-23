@@ -1,5 +1,15 @@
 
 
+## 2020-05-21
+
+* Try EMBARC with orthogonal polynomial transformation. draw ellipses
+* keep in mind how to interpret the model, how to make it useful
+* good point of the longitudinal model. can a kind of distinguish trajectories, while SIMML just pulls scaler. 
+* LASSO, how to implent a lasso type penalty in longitudinal model? can check with lasso in GLM, glmnet. 
+* lasso with longitudnial model 
+* to make it complete, check simulation, pbo, drg group with different combination of linear combination (different alpha), whether it is stable or not. 
+
+
 ## 2020-05-14
 
 Variable selection 
