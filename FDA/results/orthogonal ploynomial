@@ -1,0 +1,21 @@
+t <- as.matrix(0:6) # pt = the order of time points
+ni <- length(t) # 7
+X = cbind(matrix(1, length(t), 1), t, t^2)
+Xtpo <- X
+tbar = mean(t) # 3
+Xtpo[, 2] = X[, 2] - tbar
+Xtpo[, 3] = (t - tbar)^2 - (ni^2 - 1) / 12
+c0 <- sqrt(sum(Xtpo[,1]^2))
+c1 <- sqrt(sum(Xtpo[,2]^2))
+c2 <- sqrt(sum(Xtpo[,3]^2))
+Xtpo[,1] = Xtpo[,1] / c0
+Xtpo[,2] = Xtpo[,2] / c1
+Xtpo[,3] = Xtpo[,3] / c2
+A <- matrix(0,3,3) # A = transformation matrix
+A[1, 1] <- 1 / c0
+A[1, 2] <- - tbar / c1
+A[2, 2] <- 1 / c1
+A[1, 3] <- (tbar^2 - (ni^2 - 1) / 12) / c2
+A[2, 3] <- -2*tbar / c2
+A[3, 3] <- 1 / c2
+p <- dim(X)[2]
