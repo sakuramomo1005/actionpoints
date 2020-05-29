@@ -1,5 +1,16 @@
 
 
+## 2020-05-28
+
+* choose two alpha for drug and placebo, make them different but not that too different (Ip, 1:p)
+* draw trajectory, how alpha x impact on the shape of trajectory, for drug and placebo (as alpha x from small to big, how does the shape change ? does placebo and drug have different changes and responses?)
+* tunning parameter lambda: inverse weight, cross validation
+* looking for paper about variable selection for single index
+   + penalty issue: 2 treatment
+   + penalty issue: restriction norm = 1
+   
+* penatly on: purity, or change in angle?
+
 ## 2020-05-22
 
 * Try EMBARC with orthogonal polynomial transformation. draw ellipses
