@@ -1,5 +1,22 @@
 
 
+
+## 2020-06-11
+
+* run lasso with only 3 covariates
+* draw max purity with lambda values 
+* draw mean or median of IPWE with lambda 
+* check the purity expression
+* cov(beta_0, beta_1)
+* check the change of beta, gamma and d
+
+
+## 2020-06-04
+
+* Check the lasso algorithm, whether one covariate is set as 0, it keeps 0 as iterations. 
+* soft threshold 
+* sim with only 3 covariates 
+
 ## 2020-05-28
 
 * choose two alpha for drug and placebo, make them different but not that too different (Ip, 1:p)
