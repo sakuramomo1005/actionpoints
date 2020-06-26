@@ -2,6 +2,8 @@
 
 ## 2020-06-25
 
+* simulate a non single index model, compare loglikelihood and purity
+* try loglikelihood method on EMBARC
 
 ## 2020-06-18
 
