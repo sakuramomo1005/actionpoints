@@ -1,5 +1,11 @@
 
 
+
+
+## 2020-07-02
+
+
+
 ## 2020-06-25
 
 * simulate a non single index model, compare loglikelihood and purity
