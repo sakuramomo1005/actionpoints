@@ -4,6 +4,11 @@
 
 ## 2020-07-02
 
+* change the alpha, only two different alpha, one for drug group and one for placebo group. 
+* In what scenario, likelihood method works better and in what scenarios, purity method works better
+* Read the gem paper supplementary
+* try weighted integral instead of change score
+* draw ellipse movement for different alpha 
 
 
 ## 2020-06-25
