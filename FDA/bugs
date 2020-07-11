@@ -1,5 +1,10 @@
 
 
+# 2020-07-11
+
+In the new function pl, i used (intercept, slope, concavity) as the coefficient instead of (slope, concavity), comparing with old functions kl...
+
+
 # 2020-04-10
 
 I forget seed when generating the train dataset in file "sim_kl.R" and "sim_linear.R"
