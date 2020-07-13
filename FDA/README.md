@@ -1,5 +1,8 @@
 
 
+## 2020-07-09
+
+* likelihood ratio test
 
 
 ## 2020-07-02
