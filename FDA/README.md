@@ -2,8 +2,12 @@
 
 ## 2020-07-09
 
-* likelihood ratio test
-
+* make a likelihood ratio test, to test whether the single index model is true or not
+* to calculate the integral:
+   + use curves, instead of discrete method
+   + set all curves have the same intercept, instead all subjects have the same first point
+* try more weights functions. use the weights function in the paper
+* joint likelihod function (x,y)
 
 ## 2020-07-02
 
