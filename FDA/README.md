@@ -2,8 +2,11 @@
 
 ## 2020-07-17
 
-* p value calculation (run more simulation times)
-
+* p value calculation for likelihood ratio test (run more simulation times)
+* draw the histogram of test statistics (chisq p or chisq p-1)?
+* if doesn't work well, increase the sample size
+* think about why purity works better than likelihood in EMBARC
+* try different parameter setting 
 
 ## 2020-07-09
 
