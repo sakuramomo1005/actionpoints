@@ -1,5 +1,10 @@
 
 
+## 2020-07-17
+
+* p value calculation (run more simulation times)
+
+
 ## 2020-07-09
 
 * make a likelihood ratio test, to test whether the single index model is true or not
