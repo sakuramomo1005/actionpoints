@@ -1,6 +1,8 @@
 
 # Result Summary 
 
+2020-08-06
+
 ## Purity calculation 
 
 We define a longitudinal single index approach for treatment decision rule optimization. The approach is aimed to maximizes the purity, which is calculated based on Kullback Leibler divergence.
