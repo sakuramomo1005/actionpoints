@@ -1,5 +1,5 @@
 
-# Result Summary 
+# Results Summary 
 
 2020-08-06
 
@@ -14,4 +14,10 @@ We show it by simulation, that whether the alogrithm could find the optimal alph
 We simulate dataset with p = 2 dimension of predictors. We calculate the purity with alpha = (cos(theta), sin(theta)). 
 
 The plot of theta v.s. purity is drawn. 
+
+Note: 
+
+* 1. 
+* 2. 
+* 3. 
 
