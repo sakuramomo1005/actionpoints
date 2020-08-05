@@ -21,4 +21,4 @@ Note:
 * 2. The theta that maximizes the purity maybe not the true theta that used to generate simulation dataset
     + It depends on the sample size. The true theta and estimated theta are more close to each other when n = 2000 than n = 200.  
 
-![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig2.png) ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig3.png) ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig4.png)
+![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig2.png)<!-- .element height="50%" width="50%" --> ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig3.png)<!-- .element height="50%" width="50%" --> ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig4.png)<!-- .element height="50%" width="50%" -->
