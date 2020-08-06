@@ -24,6 +24,10 @@ Note:
     
  ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig3.png) ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig4.png)
 
+
+<img align="left" width="600" height="200" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig3.png">
+
+
 [more details in result file](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/purityvslikelihood0711.pdf) 
 
 ### 1.2. Control for the random effect
