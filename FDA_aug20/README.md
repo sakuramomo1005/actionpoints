@@ -8,7 +8,7 @@ Table of contents
 
 <!--ts-->
 
-   * [Purity calculation ](#1.-Purity-calculation)
+   * [Purity calculation ](#Results-Summary)
    * [Usage](#usage)
       * [STDIN](#stdin)
       * [Local files](#local-files)
