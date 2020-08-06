@@ -25,6 +25,8 @@ Note:
     + It depends on the sample size. The true theta and estimated theta are more close to each other when n = 2000 than n = 200. 
     
  ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig3.png) ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig4.png)
+ 
+ <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig3.png" width="425"/> <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig4.png.png" width="425"/> 
 
 
 [more details in result file](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/purityvslikelihood0711.pdf) 
