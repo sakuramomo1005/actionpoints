@@ -1,3 +1,6 @@
+<div class="text-purple">
+  This text is purple
+</div>
 
 # Results Summary 
 
