@@ -1,6 +1,3 @@
-<p align="center">
-  <img width="300" height="250" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig3.png">
-</p>
 
 # Results Summary 
 
@@ -24,8 +21,6 @@ Note:
 * 2. The theta that maximizes the purity maybe not the true theta that used to generate simulation dataset
     + It depends on the sample size. The true theta and estimated theta are more close to each other when n = 2000 than n = 200. 
     
- ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig3.png) ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig4.png)
- 
  <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig3.png" width="425"/> <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig4.png" width="425"/> 
 
 
@@ -51,7 +46,9 @@ With the penalty, the estimation of purity can be more smooth (the plot of theta
 
 The histogram of estimated theta value: 
 
-![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig5.png)
+<p align="center">
+  <img width="400" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig5.png">
+</p>
 
 Result files
 
@@ -65,7 +62,10 @@ If we look at the outcome distribution, the results have the similar performace 
 * The alpha that optimize the purity is the same in those two method
 * The plots of theta v.s. purity (p = 2) has similar shape, the outcome one is more smooth. 
 
-![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig6.png)
+
+<p align="center">
+  <img width="400" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig6.png">
+</p>
 
 Result files 
 
