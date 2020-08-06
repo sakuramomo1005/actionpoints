@@ -41,6 +41,16 @@ To solve that, we considered
 
 #### Penalty in random effect 
 
+With the penalty, the estimation of purity can be more smooth (the plot of theta v.s. purity becomes more smooth)
+
+The histogram of estimated theta value: 
+
+![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig5.png)
+Result files
+
+* [theta v.s. purity plot](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/add_identy_matrix.pdf)
+* [histogram of theta](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/plot_with_penalty_on_the_covariance_matrix_debug.pdf)
+
 #### Change estimation distribution (coefficient/outcome)
 
 
