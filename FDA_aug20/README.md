@@ -15,8 +15,6 @@ We define a longitudinal single index approach for treatment decision rule optim
 
 We show it by simulation, that whether the alogrithm could find the optimal alpha value. We simulate dataset with p = 2 dimension of predictors. We calculate the purity with alpha = (cos(theta), sin(theta)). The plot of theta v.s. purity is drawn. 
 
-[result file](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/purityvslikelihood0711.pdf) 
-
 Note: 
 
 * 1. The estimation of purity can be unstable, which depends on the random effects 
@@ -24,3 +22,39 @@ Note:
     + It depends on the sample size. The true theta and estimated theta are more close to each other when n = 2000 than n = 200. 
     
  ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig3.png) ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig4.png)
+
+[more details in result file](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/purityvslikelihood0711.pdf) 
+
+### 2. Distribution for purity calculation (coefficient/outcome)
+
+
+## Treatment Decision 
+
+### 1. Comparison
+
+### 2. Change comparison criterion
+
+### 3. 
+
+
+
+
+## EMBARC
+
+## HCAF
+
+## Variable selection 
+
+### 1. stepwise selection 
+
+### 2. LASSO
+
+#### Iteration by hand
+
+#### Optim function in R
+
+## Optimization based on likelihood 
+
+
+## GEM model hypothesis test 
+
