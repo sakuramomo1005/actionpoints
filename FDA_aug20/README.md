@@ -27,7 +27,18 @@ Note:
 
 ### 2. Control for the random effect
 
-The 
+Since we observed several huge purity values, which are caused by 
+
+* LME model does not converge within iteration times
+* estimated D is singular
+* small estimated D matrix and then corresponding big inverse value of D. 
+
+To solve that, we considered
+
+* Add penalty in random effect: D = D + lambdaI or add a value lambda at the D[3,3]
+* Use outcome as the distribution, instead of coefficient
+
+
 #### Penalty in random effect 
 
 #### Change estimation distribution (coefficient/outcome)
