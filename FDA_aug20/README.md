@@ -1,3 +1,23 @@
+ls
+cat <<EOF >> test.md | tee 
+## Table of Contents
+
+<!-- toc -->
+- old toc 1
+- old toc 2
+- old toc 3
+<!-- tocstop -->
+
+## abc
+This is a b c.
+
+## xyz
+This is x y z.
+EOF
+ls
+cat test.md
+npx markdown-toc -i test.md
+cat test.md
 
 # Results Summary 
 
@@ -183,6 +203,12 @@ From simulation,
 
 
 ## 5. GEM model hypothesis test 
+
+<p align="center">
+  <img width="800" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/gemtest.png">
+</p>
+
+
 
 [different alpha](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/results20200528.pdf)
 
