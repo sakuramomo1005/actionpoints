@@ -88,7 +88,7 @@ The random error sigma does not have big effect on the results.
 As the dimension get larger, the cosine similarity gets larger. 
 
 
- <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig8.png" width="600"/> <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig9.png" width="600"/> 
+ <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig8.png" width="500"/> <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig9.png" width="500"/> 
 
 ### 2.2. Change comparison criterion
 
@@ -102,7 +102,13 @@ The one with only fixed effect has the best results, since the estimated outcome
 
 
 <p align="center">
-  <img width="600" height="600" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig10.png">
+  <img width="600" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig10.png">
+</p>
+
+### 2.3 comparison with SIMML
+
+<p align="center">
+  <img width="600" height="550" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/sim2.png">
 </p>
 
 
