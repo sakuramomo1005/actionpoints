@@ -10,7 +10,24 @@ Table of contents
    * 1.1 [Check the optimization.](#d11)
    * 1.2 [Control for the random effect.](#d12)
        + 1.2.1 [Penalty in random effect.](#d121)
-2. [ Usage tips. ](#usage)
+       + 1.2.2 [Change estimation distribution (coefficient/outcome).](#d122)
+       
+2. [ Treatment Decision. ](#d2)
+   * 2.1 [Comparison.](#d21)
+   * 2.2 [Change comparison criterion.](#d22)
+   * 2.3 [comparison with SIMML](#d23)
+   
+3. [Variable selection.](#d3)
+   * 3.1 [Stepwise selection](#d31)
+   * 3.2 [LASSO](#d32)
+       + 3.2.1 [Variable selection based on linear change score model](#d321)
+       + 3.2.2 [Iteration by hand](#d322)
+       + 3.2.3 [Optim function in R](#d323)
+   
+4. [Optimization based on likelihood. ](#d4)
+
+5. [GEM model hypothesis test](#d5)
+
 
 
 <a name="d1"></a>
@@ -69,6 +86,7 @@ Result files
 * [theta v.s. purity plot](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/add_identy_matrix.pdf)
 * [histogram of theta](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/plot_with_penalty_on_the_covariance_matrix_debug.pdf)
 
+<a name="d122"></a>
 #### 1.2.2. Change estimation distribution (coefficient/outcome)
 
 If we look at the outcome distribution, the results have the similar performace as using the coefficient as the distribution. 
@@ -86,7 +104,7 @@ Result files
 * [purity calculation with outcome distribution](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/notes_change_distributions.pdf)
 * [results](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/change_distribution_20200118.pdf)
 
-
+<a name="d2"></a>
 ## 2. Treatment Decision 
 
 Firstly we compared the performance of longitudinal single index method with linear change score model. 
@@ -96,7 +114,7 @@ We also check the estimated coefficients
 [check coefficients](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/test%20model%20fitting%2020200308.pdf)
 
 
-
+<a name="d21"></a>
 ### 2.1. Comparison
 
 We tried several parameter scenarios. 
@@ -112,6 +130,7 @@ As the dimension get larger, the cosine similarity gets larger.
  * [comparison](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/debug.pdf)
  * [comparison2](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/debug_agreement3.pdf)
 
+<a name="d22"></a>
 ### 2.2. Change comparison criterion
 
 To get more significant differences between those methods,  we would like to see the effect of those variance. Therefore, to calculate the change score
@@ -132,6 +151,7 @@ Derivation:
 Results
 [Results](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/plot20200402.pdf)
 
+<a name="d23"></a>
 ### 2.3 comparison with SIMML
 
 <p align="center">
@@ -144,9 +164,11 @@ Results
 </p>
 
 
+<a name="d3"></a>
 ## 3. Variable selection 
 
-### 3.1. stepwise selection 
+<a name="d31"></a>
+### 3.1. Stepwise selection 
 
 
 [forward](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/forwardselection.pdf)
@@ -159,9 +181,10 @@ Results
   <img width="600" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/boxplot.png">
 </p>
 
-
+<a name="d32"></a>
 ### 3.2. LASSO
 
+<a name="d321"></a>
 #### 3.2.1 Variable selection based on linear change score model
 
 We use LASSO for the linear change score method, and use the selected vaiable to work on the ..... the IPWE is not very good. 
@@ -176,14 +199,17 @@ We use LASSO for the linear change score method, and use the selected vaiable to
 
 [lasso](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/lassoselection.pdf)
 
+<a name="d322"></a>
 #### 3.2.2. Iteration by hand
 
+<a name="d323"></a>
 #### 3.2.3. Optim function in R
 
 <p align="center">
   <img width="800" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/lasso_sim_optim.png">
 </p>
 
+<a name="d4"></a>
 ## 4. Optimization based on likelihood 
 
 To maximize the purity, we use the Kullback Leibler divergence. We could also use likelihood function as the criterion. We then compare the two criteria, purity and likelihood function. 
@@ -195,7 +221,7 @@ From simulation,
 * We expect that: 
    + when the GEM model is not true, i.e. the drug group and placebo group have different alpha value, the purity method should performance better than the likelihood method, since purity method does not depend on the structrue of model. 
 
-
+<a name="d5"></a>
 ## 5. GEM model hypothesis test 
 
 <p align="center">
