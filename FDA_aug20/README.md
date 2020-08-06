@@ -3,7 +3,7 @@
 
 2020-08-06
 
-## Purity calculation 
+## 1. Purity calculation 
 
 We define a longitudinal single index approach for treatment decision rule optimization. The approach is aimed to maximizes the purity, which is calculated based on Kullback Leibler divergence.
 
@@ -11,7 +11,7 @@ We define a longitudinal single index approach for treatment decision rule optim
 
 ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/purity%20calculation.png)
 
-### 1. Check the optimization 
+### 1.1. Check the optimization 
 
 We show it by simulation, that whether the alogrithm could find the optimal alpha value. We simulate dataset with p = 2 dimension of predictors. We calculate the purity with alpha = (cos(theta), sin(theta)). The plot of theta v.s. purity is drawn. 
 
@@ -25,7 +25,7 @@ Note:
 
 [more details in result file](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/purityvslikelihood0711.pdf) 
 
-### 2. Control for the random effect
+### 1.2. Control for the random effect
 
 Since we observed several huge purity values, which are caused by 
 
@@ -39,7 +39,7 @@ To solve that, we considered
 * Use outcome as the distribution, instead of coefficient
 
 
-#### Penalty in random effect 
+#### 1.2.1. Penalty in random effect 
 
 With the penalty, the estimation of purity can be more smooth (the plot of theta v.s. purity becomes more smooth)
 
@@ -52,7 +52,7 @@ Result files
 * [theta v.s. purity plot](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/add_identy_matrix.pdf)
 * [histogram of theta](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/plot_with_penalty_on_the_covariance_matrix_debug.pdf)
 
-#### Change estimation distribution (coefficient/outcome)
+#### 1.2.2. Change estimation distribution (coefficient/outcome)
 
 If we look at the outcome distribution, the results have the similar performace as using the coefficient as the distribution. 
 
@@ -67,34 +67,30 @@ Result files
 * [results](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/change_distribution_20200118.pdf)
 
 
-## Treatment Decision 
+## 2. Treatment Decision 
 
-### 1. Comparison
+### 2.1. Comparison
 
-### 2. Change comparison criterion
+### 2.2. Change comparison criterion
 
 ### 3. 
 
 
 
 
-## EMBARC
+## 3. Variable selection 
 
-## HCAF
+### 3.1. stepwise selection 
 
-## Variable selection 
+### 3.2. LASSO
 
-### 1. stepwise selection 
+#### 3.2.1. Iteration by hand
 
-### 2. LASSO
+#### 3.2.2. Optim function in R
 
-#### Iteration by hand
+## 4. Optimization based on likelihood 
 
-#### Optim function in R
-
-## Optimization based on likelihood 
-
-## GEM model hypothesis test 
+## 5. GEM model hypothesis test 
 
 
 Results: 
@@ -104,6 +100,11 @@ Results:
 * [simulation result scenario 2](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/results20200728-2.pdf)
 
 
+
+
+## EMBARC
+
+## HCAF
 
 ## Result type 
 
