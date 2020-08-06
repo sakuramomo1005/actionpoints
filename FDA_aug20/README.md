@@ -46,12 +46,25 @@ With the penalty, the estimation of purity can be more smooth (the plot of theta
 The histogram of estimated theta value: 
 
 ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig5.png)
+
 Result files
 
 * [theta v.s. purity plot](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/add_identy_matrix.pdf)
 * [histogram of theta](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/plot_with_penalty_on_the_covariance_matrix_debug.pdf)
 
 #### Change estimation distribution (coefficient/outcome)
+
+If we look at the outcome distribution, the results have the similar performace as using the coefficient as the distribution. 
+
+* The alpha that optimize the purity is the same in those two method
+* The plots of theta v.s. purity (p = 2) has similar shape, the outcome one is more smooth. 
+
+![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig6.png)
+
+Result files 
+
+* [purity calculation with outcome distribution](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/notes_change_distributions.pdf)
+* [results](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/change_distribution_20200118.pdf)
 
 
 ## Treatment Decision 
