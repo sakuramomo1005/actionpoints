@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="200" height="200" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig3.png">
+  <img width="300" height="250" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig3.png">
 </p>
 
 # Results Summary 
