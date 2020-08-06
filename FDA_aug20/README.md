@@ -77,6 +77,12 @@ Result files
 
 Firstly we compared the performance of longitudinal single index method with linear change score model. 
 
+We also check the estimated coefficients 
+
+[check coefficients](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/test%20model%20fitting%2020200308.pdf)
+
+
+
 ### 2.1. Comparison
 
 We tried several parameter scenarios. 
@@ -87,8 +93,10 @@ The random error sigma does not have big effect on the results.
 
 As the dimension get larger, the cosine similarity gets larger. 
 
-
  <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig8.png" width="500"/> <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig9.png" width="500"/> 
+ 
+ * [comparison](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/debug.pdf)
+ * [comparison2](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/debug_agreement3.pdf)
 
 ### 2.2. Change comparison criterion
 
@@ -100,10 +108,15 @@ To get more significant differences between those methods,  we would like to see
 
 The one with only fixed effect has the best results, since the estimated outcome is also calculated with only fixed effect. 
 
-
 <p align="center">
   <img width="600" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig10.png">
 </p>
+
+Derivation: 
+[Derivation](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/result20200402.pdf)
+
+Results
+[Results](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/plot20200402.pdf)
 
 ### 2.3 comparison with SIMML
 
