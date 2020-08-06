@@ -148,14 +148,27 @@ Results
 
 ### 3.2. LASSO
 
+#### 3.2.1 Variable selection based on linear change score model
+
 We use LASSO for the linear change score method, and use the selected vaiable to work on the ..... the IPWE is not very good. 
+
+<p align="center">
+  <img width="600" height="200" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/lasso_on_cs1.png">
+</p>
+
+<p align="center">
+  <img width="600" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/lasso_on_cs2.png">
+</p>
 
 [lasso](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/lassoselection.pdf)
 
+#### 3.2.2. Iteration by hand
 
-#### 3.2.1. Iteration by hand
+#### 3.2.3. Optim function in R
 
-#### 3.2.2. Optim function in R
+<p align="center">
+  <img width="600" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/lasso_sim_optim.png">
+</p>
 
 ## 4. Optimization based on likelihood 
 
