@@ -47,7 +47,7 @@ With the penalty, the estimation of purity can be more smooth (the plot of theta
 The histogram of estimated theta value: 
 
 <p align="center">
-  <img width="550" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig5.png">
+  <img width="600" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig5.png">
 </p>
 
 Result files
@@ -75,13 +75,35 @@ Result files
 
 ## 2. Treatment Decision 
 
+Firstly we compared the performance of longitudinal single index method with linear change score model. 
+
 ### 2.1. Comparison
+
+We tried several parameter scenarios. 
+
+The longitudinal single index model has slightly better results than linear change score model. 
+
+The random error sigma does not have big effect on the results.
+
+As the dimension get larger, the cosine similarity gets larger. 
+
+
+ <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig8.png" width="600"/> <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig9.png" width="600"/> 
 
 ### 2.2. Change comparison criterion
 
-### 3. 
+To get more significant differences between those methods,  we would like to see the effect of those variance. Therefore, to calculate the change score
+
+* Observed change score: outcome Y is calculated with fixed, random effect and random error
+* Only fixed effect:  outcome Y is calculated with fixed effect
+* Fixed + random effect:  outcome Y is calculated with fixed and random effect. 
+
+The one with only fixed effect has the best results, since the estimated outcome is also calculated with only fixed effect. 
 
 
+<p align="center">
+  <img width="600" height="600" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig10.png">
+</p>
 
 
 ## 3. Variable selection 
