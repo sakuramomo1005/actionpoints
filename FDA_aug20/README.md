@@ -3,24 +3,18 @@
 
 2020-08-06
 
-Table of contents
-=================
+1. [ Description. ](#desc)
+2. [ Usage tips. ](#usage)
 
-<!--ts-->
+<a name="desc"></a>
+## 1. Description
 
-   * [Purity calculation ](#Results-Summary)
-   * [Usage](#usage)
-      * [STDIN](#Check-the-optimization )
-      * [Local files](#Penalty-in-random-effect )
-      * [Remote files](#remote-files)
-      * [Multiple files](#multiple-files)
-      * [Combo](#combo)
-      * [Auto insert and update TOC](#auto-insert-and-update-toc)
-      * [GitHub token](#github-token)
-   * [Tests](#tests)
-   * [Dependency](#dependency)
-<!--te-->
+sometext
 
+<a name="usage"></a>
+## 2. Usage tips
+
+sometext
 
 
 ## 1. Purity calculation 
