@@ -153,7 +153,7 @@ Results
 We use LASSO for the linear change score method, and use the selected vaiable to work on the ..... the IPWE is not very good. 
 
 <p align="center">
-  <img width="600" height="200" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/lasso_on_cs1.png">
+  <img width="600" height="100" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/lasso_on_cs1.png">
 </p>
 
 <p align="center">
@@ -167,7 +167,7 @@ We use LASSO for the linear change score method, and use the selected vaiable to
 #### 3.2.3. Optim function in R
 
 <p align="center">
-  <img width="600" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/lasso_sim_optim.png">
+  <img width="800" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/lasso_sim_optim.png">
 </p>
 
 ## 4. Optimization based on likelihood 
