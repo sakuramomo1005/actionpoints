@@ -1,27 +1,27 @@
-ls
-cat <<EOF >> test.md | tee 
-## Table of Contents
-
-<!-- toc -->
-- old toc 1
-- old toc 2
-- old toc 3
-<!-- tocstop -->
-
-## abc
-This is a b c.
-
-## xyz
-This is x y z.
-EOF
-ls
-cat test.md
-npx markdown-toc -i test.md
-cat test.md
 
 # Results Summary 
 
 2020-08-06
+
+Table of contents
+=================
+
+<!--ts-->
+
+   * [Purity calculation ](#1.-Purity-calculation)
+   * [Usage](#usage)
+      * [STDIN](#stdin)
+      * [Local files](#local-files)
+      * [Remote files](#remote-files)
+      * [Multiple files](#multiple-files)
+      * [Combo](#combo)
+      * [Auto insert and update TOC](#auto-insert-and-update-toc)
+      * [GitHub token](#github-token)
+   * [Tests](#tests)
+   * [Dependency](#dependency)
+<!--te-->
+
+
 
 ## 1. Purity calculation 
 
