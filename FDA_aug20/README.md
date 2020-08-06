@@ -4,6 +4,7 @@
 ! orange
 # gray
 ```
+$x^2$
 
 # Results Summary 
 
