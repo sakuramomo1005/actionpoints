@@ -1,4 +1,6 @@
-<img align="left" width="600" height="200" src="https://www.python.org/python-.png">
+<p align="center">
+  <img width="600" height="200" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig3.png">
+</p>
 
 # Results Summary 
 
@@ -23,9 +25,6 @@ Note:
     + It depends on the sample size. The true theta and estimated theta are more close to each other when n = 2000 than n = 200. 
     
  ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig3.png) ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig4.png)
-
-
-<img align="left" width="600" height="200" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig3.png">
 
 
 [more details in result file](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/purityvslikelihood0711.pdf) 
