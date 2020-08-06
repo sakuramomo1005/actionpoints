@@ -162,3 +162,11 @@ Results:
    + assignment of the trajectories
    + individual trajectory estimation
  
+
+# Question 
+
+The optim
+
+when the dimension is large, it dependents on the parameter setting. 
+
+not converge. 
