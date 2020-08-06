@@ -154,8 +154,19 @@ We use LASSO for the linear change score method, and use the selected vaiable to
 
 ## 4. Optimization based on likelihood 
 
+To maximize the purity, we use the Kullback Leibler divergence. We could also use likelihood function as the criterion. We then compare the two criteria, purity and likelihood function. 
+
+From simulation, 
+
+* likelihood method has quite similar performance as purity method
+* likelihood method is more stable than the purity method. 
+* We expect that: 
+   + when the GEM model is not true, i.e. the drug group and placebo group have different alpha value, the purity method should performance better than the likelihood method, since purity method does not depend on the structrue of model. 
+
+
 ## 5. GEM model hypothesis test 
 
+[different alpha](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/results20200528.pdf)
 
 Results: 
 
@@ -163,12 +174,15 @@ Results:
 * [simulation result scenario 1](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/results20200728.pdf)
 * [simulation result scenario 2](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/results20200728-2.pdf)
 
-
-
-
 ## EMBARC
 
 ## HCAF
+
+We also checked the HCAF dataset, the longitudinal method has better IPWE than linear change score. 
+
+The ellipse movement has similar performance as EBMARC dataset 
+
+[hcaf results](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/hcafplots.html)
 
 ## Result type 
 
