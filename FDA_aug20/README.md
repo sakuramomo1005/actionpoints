@@ -1,9 +1,9 @@
-<div class="text-purple">
-  This text is purple
-</div>
-<div class="text-purple">
-  This text is purple, <a href="#" class="text-inherit">including the link</a>
-</div>
+```diff
+- 123
++ green
+! orange
+# gray
+```
 
 # Results Summary 
 
