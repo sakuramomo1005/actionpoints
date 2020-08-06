@@ -125,6 +125,11 @@ Results
 </p>
 
 
+<p align="center">
+  <img width="600" height="550" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/cgif.gif">
+</p>
+
+
 ## 3. Variable selection 
 
 ### 3.1. stepwise selection 
