@@ -62,6 +62,11 @@ Note:
 ## GEM model hypothesis test 
 
 
+[df calculation](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/likelihood%20ratio%20test%20setting%2020200721.pdf)
+
+[simulation result scenario 1](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/results20200728.pdf)
+
+[simulation result scenario 2](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/results20200728-2.pdf)
 
 
 
