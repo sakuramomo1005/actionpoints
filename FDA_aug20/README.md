@@ -47,7 +47,7 @@ With the penalty, the estimation of purity can be more smooth (the plot of theta
 The histogram of estimated theta value: 
 
 <p align="center">
-  <img width="400" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig5.png">
+  <img width="600" height="500" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig5.png">
 </p>
 
 Result files
