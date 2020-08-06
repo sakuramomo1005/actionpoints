@@ -3,24 +3,17 @@
 
 2020-08-06
 
-1. [ Description. ](#desc)
-   * 1.1 [dsfs](#abc)
+Table of contents
+=================
+
+1. [ Purity calculation. ](#d1)
+   * 1.1 [Check the optimization.](#d11)
+   * 1.2 [Control for the random effect.](#d12)
+       + 1.2.1 [Penalty in random effect.](#d121)
 2. [ Usage tips. ](#usage)
 
-<a name="desc"></a>
-## 1. Description
 
-sometext
-
-<a name="abc"></a>
-## 1.1. abc
-
-<a name="usage"></a>
-## 2. Usage tips
-
-sometext
-
-
+<a name="d1"></a>
 ## 1. Purity calculation 
 
 We define a longitudinal single index approach for treatment decision rule optimization. The approach is aimed to maximizes the purity, which is calculated based on Kullback Leibler divergence.
@@ -29,6 +22,7 @@ We define a longitudinal single index approach for treatment decision rule optim
 
 ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/purity%20calculation.png)
 
+<a name="d11"></a>
 ### 1.1. Check the optimization 
 
 We show it by simulation, that whether the alogrithm could find the optimal alpha value. We simulate dataset with p = 2 dimension of predictors. We calculate the purity with alpha = (cos(theta), sin(theta)). The plot of theta v.s. purity is drawn. 
@@ -44,6 +38,7 @@ Note:
 
 [more details in result file](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/purityvslikelihood0711.pdf) 
 
+<a name="d12"></a>
 ### 1.2. Control for the random effect
 
 Since we observed several huge purity values, which are caused by 
@@ -58,6 +53,7 @@ To solve that, we considered
 * Use outcome as the distribution, instead of coefficient
 
 
+<a name="d121"></a>
 #### 1.2.1. Penalty in random effect 
 
 With the penalty, the estimation of purity can be more smooth (the plot of theta v.s. purity becomes more smooth)
