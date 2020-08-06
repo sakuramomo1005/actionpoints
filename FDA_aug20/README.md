@@ -25,7 +25,11 @@ Note:
 
 [more details in result file](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/purityvslikelihood0711.pdf) 
 
-### 2. Distribution for purity calculation (coefficient/outcome)
+### 2. Control for the random effect
+
+#### Penalty in random effect 
+
+#### Change estimation distribution (coefficient/outcome)
 
 
 ## Treatment Decision 
@@ -55,6 +59,18 @@ Note:
 
 ## Optimization based on likelihood 
 
-
 ## GEM model hypothesis test 
 
+
+
+
+
+## Result type 
+
+* proportion of correct decision PCD
+* IPWE
+* Ellipse movement 
+* Trajectory 
+   + assignment of the trajectories
+   + individual trajectory estimation
+ 
