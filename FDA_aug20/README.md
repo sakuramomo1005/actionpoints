@@ -129,7 +129,24 @@ Results
 
 ### 3.1. stepwise selection 
 
+
+[forward](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/forwardselection.pdf)
+
+[backward](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/backward.pdf)
+
+[simulation](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/results20205021.pdf)
+
+<p align="center">
+  <img width="600" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/boxplot.png">
+</p>
+
+
 ### 3.2. LASSO
+
+We use LASSO for the linear change score method, and use the selected vaiable to work on the ..... the IPWE is not very good. 
+
+[lasso](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/lassoselection.pdf)
+
 
 #### 3.2.1. Iteration by hand
 
