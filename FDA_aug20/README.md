@@ -10,8 +10,8 @@ Table of contents
 
    * [Purity calculation ](#Results-Summary)
    * [Usage](#usage)
-      * [STDIN](#stdin)
-      * [Local files](#local-files)
+      * [STDIN](#Check-the-optimization )
+      * [Local files](#Penalty-in-random-effect )
       * [Remote files](#remote-files)
       * [Multiple files](#multiple-files)
       * [Combo](#combo)
