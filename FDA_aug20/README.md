@@ -231,6 +231,22 @@ From simulation,
 <a name="d5"></a>
 ## 5. GEM model hypothesis test 
 
+
+
+
+<p align="center">
+  <img width="800" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/gem%20test%202.png">
+</p>
+
+
+<p align="center">
+  <img width="800" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/gem%20test%203.png">
+</p>
+
+<p align="center">
+  <img width="800" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/gem%20compare.png">
+</p>
+
 <p align="center">
   <img width="800" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/gemtest.png">
 </p>
