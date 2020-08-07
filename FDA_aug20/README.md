@@ -231,7 +231,7 @@ From simulation,
 
 
 <p align="center">
-  <img width="700" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/method%20compare.png">
+  <img width="800" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/method%20compare.png">
 </p>
 
 <a name="d5"></a>
