@@ -235,12 +235,12 @@ From simulation,
 
 
 <p align="center">
-  <img width="800" height="100" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/gem%20test%202.png">
+  <img width="700" height="100" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/gem%20test%202.png">
 </p>
 
 
 <p align="center">
-  <img width="800" height="100" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/gem%20test%203.png">
+  <img width="700" height="100" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/gem%20test%203.png">
 </p>
 
 <p align="center">
