@@ -228,6 +228,11 @@ From simulation,
 * We expect that: 
    + when the GEM model is not true, i.e. the drug group and placebo group have different alpha value, the purity method should performance better than the likelihood method, since purity method does not depend on the structrue of model. 
 
+However, the results are usually different from our expectation. 
+
+```diff
++ The question is: when purity criterion can have better performance than likelihood criterion? 
+```
 
 
 <p align="center">
