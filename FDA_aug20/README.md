@@ -228,6 +228,12 @@ From simulation,
 * We expect that: 
    + when the GEM model is not true, i.e. the drug group and placebo group have different alpha value, the purity method should performance better than the likelihood method, since purity method does not depend on the structrue of model. 
 
+
+
+<p align="center">
+  <img width="700" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/method%20compare.png">
+</p>
+
 <a name="d5"></a>
 ## 5. GEM model hypothesis test 
 
