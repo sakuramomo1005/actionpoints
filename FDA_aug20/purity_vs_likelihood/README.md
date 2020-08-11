@@ -12,16 +12,18 @@ Besides the optimization that maximizes the purity, we also consider another met
 
 * i.e. maximizes the loglikelihood function
 
-![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/likelihood.png)
-
 #### Two different alpha for drug group and placebo group
 
 ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/largegamma.gif)
 
 #### Likelihood method 
 
+![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/likelihood.png)
 
-## Comparison between purity method and likelihood method 
+[more derivation is here](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/penalized_loglikelihood_20200622.pdf) 
+
+
+#### Comparison between purity method and likelihood method 
 
 <p align="center">
   <img width="600" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/anglevsresplot1.png">
@@ -37,8 +39,25 @@ Besides the optimization that maximizes the purity, we also consider another met
 [plot of angle vs purity, with large covariance matrix](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/purityvslikelihood0709.pdf)
 
 
+## Criteria 
 
+Firstly we considered using the mean change score as the criterion. 
 
-# Criteria 
+Calculating the weighted intergal value, or weighted ATS (average tangent slope) may catch more information for the trajectories. 
+
+Therefore, we set the following criteria for IPWE comparison. 
 
 ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/criteria.png)
+
+
+## EMBARC data estimation (compare purity / likelihood, different criteria)
+
+
+
+
+
+
+
+
+
+
