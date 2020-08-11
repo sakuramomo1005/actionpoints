@@ -12,7 +12,7 @@ Besides the optimization that maximizes the purity, we also consider another met
 
 * i.e. maximizes the loglikelihood function
 
-
+![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/likelihood.png)
 
 #### Two different alpha for drug group and placebo group
 
