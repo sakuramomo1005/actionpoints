@@ -55,7 +55,7 @@ We conduct several simulation to compare the performance of purity method and li
   <img width="600" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/sim1.png">
 </p>
 
-Likelihood and 
+Likelihood and purity methods have quite similar IPWE and PCD
 
 
 * In simulation 2 
@@ -64,9 +64,22 @@ Likelihood and
   <img width="600" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/sim2.png">
 </p>
 
+In this sceanrios the likelihood method performs better than purity. However, we expect purity to be better than likelihood method. 
 
 [more simulation settings and results](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/different_gamma_20200627.pdf)
 
+
+* Simulation 3: compare GEM and non GEM model. 
+
+GEM model has the same alpha in drug and placebo group. Non-GEM model has different alpha in drug and placebo group data generation. 
+
+<p align="center">
+  <img width="600" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/sim3.png">
+</p>
+
+[more results](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/gem-and-non-gem-model-20200628.pdf)
+
+The likelihood and purity have similar results no matter whether the GEM model is true or not. 
 
 
 
