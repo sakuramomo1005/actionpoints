@@ -23,7 +23,7 @@ Besides the optimization that maximizes the purity, we also consider another met
 ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/likelihood.png)
 
 [more derivation is here](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/penalized_loglikelihood_20200622.pdf) 
-
+ 
 
 #### Comparison between purity method and likelihood method 
 
