@@ -18,12 +18,13 @@ Besides the optimization that maximizes the purity, we also consider another met
 
 ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/largegamma.gif)
 
+
+
 #### Likelihood method 
 
 ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/likelihood.png)
 
 [more derivation is here](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/penalized_loglikelihood_20200622.pdf) 
- 
 
 #### Comparison between purity method and likelihood method 
 
@@ -40,6 +41,27 @@ Besides the optimization that maximizes the purity, we also consider another met
 
 [plot of angle vs purity, with large covariance matrix](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/purityvslikelihood0709.pdf)
 
+#### Summary
+
+From simulation, 
+
+* likelihood method has quite similar performance as purity method
+* likelihood method is more stable than the purity method. 
+* We expect that: 
+   + when the GEM model is not true, i.e. the drug group and placebo group have different alpha value, the purity method should performance better than the likelihood method, since purity method does not depend on the structrue of model. 
+
+However, the results are usually different from our expectation. 
+
+```diff
++ The question is: when purity criterion can have better performance than likelihood criterion? 
+```
+
+
+<p align="center">
+  <img width="800" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/method%20compare.png">
+</p>
+
+<a name="d5"></a>
 
 ## Criteria 
 
