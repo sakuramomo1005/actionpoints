@@ -49,6 +49,10 @@ Calculating the weighted intergal value, or weighted ATS (average tangent slope)
 
 Therefore, we set the following criteria for IPWE comparison. 
 
+<p align="left">
+  <img width="800" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/criteria.png">
+</p>
+
 ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/criteria.png)
 
 #### Simulation results 1
@@ -56,6 +60,7 @@ Therefore, we set the following criteria for IPWE comparison.
 <p align="center">
   <img width="800" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/ipwe-criteria1.png">
 </p>
+
 <p align="center">
   <img width="800" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/ipwe-criteria2.png">
 </p>
