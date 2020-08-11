@@ -18,11 +18,10 @@ Besides the optimization that maximizes the purity, we also consider another met
 
 ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/largegamma.gif)
 
-<p align="center">
-  <img width="600" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/largegamma.gif">
-</p>
-
 #### Likelihood method 
+
+
+## Comparison between purity method and likelihood method 
 
 <p align="center">
   <img width="600" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/anglevsresplot1.png">
@@ -32,7 +31,6 @@ Besides the optimization that maximizes the purity, we also consider another met
   <img width="600" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/anglevsresplot2.png">
 </p>
 
-## Comparison between purity method and likelihood method 
 
 [plot of angle vs purity, with small covariance matrix](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/purityvslikelihood0709.pdf)
 
