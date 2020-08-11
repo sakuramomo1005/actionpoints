@@ -81,6 +81,33 @@ GEM model has the same alpha in drug and placebo group. Non-GEM model has differ
 
 The likelihood and purity have similar results no matter whether the GEM model is true or not. 
 
+The results are similar in some other simulation settings: 
+[more simulation](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/results-ipwe-0630.pdf)
+
+
+#### Criteria 
+
+Firstly we considered using the mean change score as the criterion. 
+
+Calculating the weighted intergal value, or weighted ATS (average tangent slope) may catch more information for the trajectories. 
+
+Therefore, we set the following criteria for IPWE comparison. 
+
+<p align="left">
+  <img width="800" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/criteria.png">
+</p>
+
+![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/criteria%20ipwe.png)
+
+#### Simulation results 1
+
+<p align="center">
+  <img width="800" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/ipwe-criteria1.png">
+</p>
+
+<p align="center">
+  <img width="800" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/ipwe-criteria2.png">
+</p>
 
 
 
@@ -105,30 +132,6 @@ However, the results are usually different from our expectation.
 </p>
 
 <a name="d5"></a>
-
-## Criteria 
-
-Firstly we considered using the mean change score as the criterion. 
-
-Calculating the weighted intergal value, or weighted ATS (average tangent slope) may catch more information for the trajectories. 
-
-Therefore, we set the following criteria for IPWE comparison. 
-
-<p align="left">
-  <img width="800" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/criteria.png">
-</p>
-
-![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/criteria%20ipwe.png)
-
-#### Simulation results 1
-
-<p align="center">
-  <img width="800" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/ipwe-criteria1.png">
-</p>
-
-<p align="center">
-  <img width="800" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/ipwe-criteria2.png">
-</p>
 
 
 
