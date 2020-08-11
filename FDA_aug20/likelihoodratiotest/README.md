@@ -47,15 +47,44 @@ The test statistic is
 
 ### Results
 
-* 
+* The distribution of test statistic and p value when H0 is true: 
 
 
+<p align="center">
+  <img width="700" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/6.png">
+</p>
+
+[more results](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/LRT-simulation-plots-setting1-0722.pdf)
+
+<p align="center">
+  <img width="700" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/7.png">
+</p>
+
+[more results](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/LRT-simulation-plots-setting2-0722.pdf)
+
+The likelihood method has better shape than the purity method.
+
+
+* The boxplot of the p values 
+
+(compare between GEM, multi-GEM and unrestrict)
+<p align="center">
+  <img width="800" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/gem%20compare.png">
+</p>
+
+(compare between GEM and unrestrict)
+<p align="center">
+  <img width="800" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/gemtest.png">
+</p>
+
+[more p-value plots](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/results20200722.pdf)
+
+
+* IPWE calculation based on different criteria
 
 <p align="center">
   <img width="700" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/3.png">
 </p>
-
-
 
 <p align="center">
   <img width="700" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/4.png">
@@ -65,40 +94,17 @@ The test statistic is
 </p>
 
 
-
-<p align="center">
-  <img width="700" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/6.png">
-</p>
-<p align="center">
-  <img width="700" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/7.png">
-</p>
+[IPWE under different crietria](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/IPWE-results-20200716.pdf)
 
 
 
+* Some other results 
 
-
-
-
-
-
-<p align="center">
-  <img width="800" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/gem%20compare.png">
-</p>
-
-<p align="center">
-  <img width="800" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/gemtest.png">
-</p>
-
-
+When multi GEM mode is generated, i.e., different alpha for two groups. 
 
 [different alpha](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/results20200528.pdf)
 
-[IPWE under different crietria](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/IPWE-results-20200716.pdf)
 
-[more results](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/LRT-simulation-plots-setting1-0722.pdf)
 
-[more results](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/LRT-simulation-plots-setting2-0722.pdf)
-
-[p-value plots](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/results20200722.pdf)
 
 
