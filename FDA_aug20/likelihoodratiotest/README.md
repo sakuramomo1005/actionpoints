@@ -67,18 +67,21 @@ The likelihood method has better shape than the purity method.
 
 * The boxplot of the p values 
 
+Parameter setting 1
+
 (compare between GEM, multi-GEM and unrestrict)
 <p align="center">
   <img width="900"  src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/gem%20compare.png">
 </p>
+[more p-value plots](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/results20200722.pdf)
+
+Parameter setting 2
 
 (compare between GEM and unrestrict)
 <p align="center">
   <img width="800" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/gemtest.png">
 </p>
-
-[more p-value plots](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/results20200722.pdf)
-
+[more results related to the plot](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/results20200728-2.pdf)
 
 * IPWE calculation based on different criteria
 
@@ -92,7 +95,6 @@ The likelihood method has better shape than the purity method.
 <p align="center">
   <img width="800" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/5.png">
 </p>
-
 
 [IPWE under different crietria](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/IPWE-results-20200716.pdf)
 
