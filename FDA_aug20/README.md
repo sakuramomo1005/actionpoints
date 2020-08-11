@@ -221,6 +221,7 @@ We use LASSO for the linear change score method, and use the selected vaiable to
 
 To maximize the purity, we use the Kullback Leibler divergence. We could also use likelihood function as the criterion. We then compare the two criteria, purity and likelihood function. 
 
+
 #### Likelihood method 
 
 ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/likelihood.png)
@@ -229,18 +230,91 @@ To maximize the purity, we use the Kullback Leibler divergence. We could also us
 
 #### Comparison between purity method and likelihood method 
 
+We simulation p = 2, with alpha = (cos(theta), sin(theta)). The plot with x-axis as the theta and y-axis as the purity or loglikelihood is drawn below: 
+
 <p align="center">
   <img width="600" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/anglevsresplot1.png">
 </p>
+
+[plot of angle vs purity, with small covariance matrix](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/purityvslikelihood0709.pdf)
+
+This plot doesn't have a good shape. This may be becasue the covariance matrix is relative small and have huge inverse matrix. If we change a covariance matrix and re-draw the plot, we have: 
 
 <p align="center">
   <img width="600" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/anglevsresplot2.png">
 </p>
 
-
-[plot of angle vs purity, with small covariance matrix](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/purityvslikelihood0709.pdf)
-
 [plot of angle vs purity, with large covariance matrix](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/purityvslikelihood0709.pdf)
+
+
+#### Simulation 
+
+We conduct several simulation to compare the performance of purity method and likelihood method. 
+
+* In simulation 1 
+
+<p align="center">
+  <img width="600" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/sim1.png">
+</p>
+
+Likelihood and purity methods have quite similar IPWE and PCD
+
+
+* In simulation 2 
+
+<p align="center">
+  <img width="600" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/sim2.png">
+</p>
+
+In this sceanrios the likelihood method performs better than purity. However, we expect purity to be better than likelihood method. 
+
+[more simulation settings and results](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/different_gamma_20200627.pdf)
+
+
+* Simulation 3: compare GEM and non GEM model. 
+
+GEM model has the same alpha in drug and placebo group. Non-GEM model has different alpha in drug and placebo group data generation. 
+
+<p align="center">
+  <img width="600" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/sim3.png">
+</p>
+
+[more results](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/gem-and-non-gem-model-20200628.pdf)
+
+The likelihood and purity have similar results no matter whether the GEM model is true or not. 
+
+The results are similar in some other simulation settings: 
+[more simulation](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/results-ipwe-0630.pdf)
+
+
+#### Criteria 
+
+Firstly we considered using the mean change score as the criterion. 
+
+Calculating the weighted intergal value, or weighted ATS (average tangent slope) may catch more information for the trajectories. 
+
+Therefore, we set the following criteria for IPWE comparison. 
+
+<p align="left">
+  <img width="800" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/criteria.png">
+</p>
+
+![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/criteria%20ipwe.png)
+
+#### Simulation results
+
+With different IPWEs, the performances are quite similar 
+
+<p align="center">
+  <img width="800" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/ipwe-criteria1.png">
+</p>
+
+<p align="center">
+  <img width="800" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/ipwe-criteria2.png">
+</p>
+
+[more results are here](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/IPWE-results-20200712.pdf)
+
 
 #### Summary
 
@@ -263,6 +337,12 @@ However, the results are usually different from our expectation.
 </p>
 
 <a name="d5"></a>
+
+
+
+
+
+
 ## 5. GEM model hypothesis test 
 
 
