@@ -8,12 +8,6 @@ In terms of the misspecified longitudinal single index model, there are two ways
 * The drug group and placebo group have different alpha value 
 * They do not have alpha x structrue at all
 
+### Two different alpha for drug group and placebo group
 
-latexImg = function(latex){
-
-    link = paste0('http://latex.codecogs.com/gif.latex?',
-           gsub('\\=','%3D',URLencode(latex)))
-
-    link = gsub("(%..)","\\U\\1",link,perl=TRUE)
-    return(paste0('![](',link,')'))
-}
+![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/largegamma.gif)
