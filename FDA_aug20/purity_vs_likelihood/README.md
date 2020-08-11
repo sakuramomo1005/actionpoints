@@ -99,7 +99,9 @@ Therefore, we set the following criteria for IPWE comparison.
 
 ![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/criteria%20ipwe.png)
 
-#### Simulation results 1
+#### Simulation results
+
+With different IPWEs, the performances are quite similar 
 
 <p align="center">
   <img width="800" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/ipwe-criteria1.png">
@@ -109,6 +111,7 @@ Therefore, we set the following criteria for IPWE comparison.
   <img width="800" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/ipwe-criteria2.png">
 </p>
 
+[more results are here](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/IPWE-results-20200712.pdf)
 
 
 #### Summary
