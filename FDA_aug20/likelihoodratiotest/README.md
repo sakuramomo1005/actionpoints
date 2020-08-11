@@ -69,7 +69,7 @@ The likelihood method has better shape than the purity method.
 
 (compare between GEM, multi-GEM and unrestrict)
 <p align="center">
-  <img width="800" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/gem%20compare.png">
+  <img width="900"  src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/gem%20compare.png">
 </p>
 
 (compare between GEM and unrestrict)
@@ -83,14 +83,14 @@ The likelihood method has better shape than the purity method.
 * IPWE calculation based on different criteria
 
 <p align="center">
-  <img width="700" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/3.png">
+  <img width="800" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/3.png">
 </p>
 
 <p align="center">
-  <img width="700" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/4.png">
+  <img width="800" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/4.png">
 </p>
 <p align="center">
-  <img width="700" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/5.png">
+  <img width="800" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/5.png">
 </p>
 
 
