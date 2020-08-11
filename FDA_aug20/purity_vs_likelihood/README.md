@@ -3,6 +3,8 @@
 - How well does the model perform when the single index structure is invalid?  
 ```
 
+# Likelihood method and different criteria
+
 In terms of the misspecified longitudinal single index model, there are two ways of "misspecification"
 
 * The drug group and placebo group have different alpha value 
