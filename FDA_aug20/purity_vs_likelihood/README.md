@@ -28,18 +28,48 @@ Besides the optimization that maximizes the purity, we also consider another met
 
 #### Comparison between purity method and likelihood method 
 
+We simulation p = 2, with alpha = (cos(theta), sin(theta)). The plot with x-axis as the theta and y-axis as the purity or loglikelihood is drawn below: 
+
 <p align="center">
   <img width="600" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/anglevsresplot1.png">
 </p>
+
+[plot of angle vs purity, with small covariance matrix](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/purityvslikelihood0709.pdf)
+
+This plot doesn't have a good shape. This may be becasue the covariance matrix is relative small and have huge inverse matrix. If we change a covariance matrix and re-draw the plot, we have: 
 
 <p align="center">
   <img width="600" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/anglevsresplot2.png">
 </p>
 
-
-[plot of angle vs purity, with small covariance matrix](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/purityvslikelihood0709.pdf)
-
 [plot of angle vs purity, with large covariance matrix](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/purityvslikelihood0709.pdf)
+
+
+#### Simulation 
+
+We conduct several simulation to compare the performance of purity method and likelihood method. 
+
+* In simulation 1 
+
+<p align="center">
+  <img width="600" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/sim1.png">
+</p>
+
+Likelihood and 
+
+
+* In simulation 2 
+
+<p align="center">
+  <img width="600" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/sim2.png">
+</p>
+
+
+[more simulation settings and results](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/different_gamma_20200627.pdf)
+
+
+
+
 
 #### Summary
 
