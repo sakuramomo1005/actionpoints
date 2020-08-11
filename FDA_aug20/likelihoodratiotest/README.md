@@ -57,6 +57,19 @@ The test statistic is
 
 
 
+<p align="center">
+  <img width="800" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/gem%20compare.png">
+</p>
+
+<p align="center">
+  <img width="800" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/gemtest.png">
+</p>
+
+
+
+[different alpha](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/results20200528.pdf)
+
+
 
 
 
