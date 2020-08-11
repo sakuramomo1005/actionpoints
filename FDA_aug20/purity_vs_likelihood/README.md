@@ -73,15 +73,15 @@ Therefore, we set the following criteria for IPWE comparison.
 ## Simulations 
 
 
-[](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/different_gamma_20200627.pdf)
+[setting 1](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/different_gamma_20200627.pdf)
 
-[](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/gem-and-non-gem-model-20200628.pdf)
+[setting 2](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/gem-and-non-gem-model-20200628.pdf)
 
-[](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/results-ipwe-0630.pdf)
+[setting 3](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/results-ipwe-0630.pdf)
 
-[](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/results20200708.pdf)
+[setting 4, with more criteria](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/results20200708.pdf)
 
-[](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/IPWE-results-20200712.pdf)
+[setting 5, with weighted ATS](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/IPWE-results-20200712.pdf)
 
 
 
