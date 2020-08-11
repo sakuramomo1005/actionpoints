@@ -67,8 +67,21 @@ Therefore, we set the following criteria for IPWE comparison.
 
 ## EMBARC data estimation (compare purity / likelihood, different criteria)
 
+![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/embarc%20likelihood.png)
 
 
+## Simulations 
+
+
+[](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/different_gamma_20200627.pdf)
+
+[](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/gem-and-non-gem-model-20200628.pdf)
+
+[](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/results-ipwe-0630.pdf)
+
+[](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/results20200708.pdf)
+
+[](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/IPWE-results-20200712.pdf)
 
 
 
