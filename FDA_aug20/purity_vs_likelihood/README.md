@@ -53,8 +53,6 @@ Therefore, we set the following criteria for IPWE comparison.
   <img width="800" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/criteria.png">
 </p>
 
-![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/criteria.png)
-
 #### Simulation results 1
 
 <p align="center">
