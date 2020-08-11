@@ -221,6 +221,29 @@ We use LASSO for the linear change score method, and use the selected vaiable to
 
 To maximize the purity, we use the Kullback Leibler divergence. We could also use likelihood function as the criterion. We then compare the two criteria, purity and likelihood function. 
 
+#### Likelihood method 
+
+![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/likelihood.png)
+
+[more derivation is here](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/penalized_loglikelihood_20200622.pdf) 
+
+#### Comparison between purity method and likelihood method 
+
+<p align="center">
+  <img width="600" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/anglevsresplot1.png">
+</p>
+
+<p align="center">
+  <img width="600" height="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/anglevsresplot2.png">
+</p>
+
+
+[plot of angle vs purity, with small covariance matrix](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/purityvslikelihood0709.pdf)
+
+[plot of angle vs purity, with large covariance matrix](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/purityvslikelihood0709.pdf)
+
+#### Summary
+
 From simulation, 
 
 * likelihood method has quite similar performance as purity method
@@ -350,6 +373,9 @@ When multi GEM mode is generated, i.e., different alpha for two groups.
 
 [different alpha](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/results20200528.pdf)
 
+#### Two different alpha for drug group and placebo group
+
+![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/largegamma.gif)
 
 
 Other results: 
