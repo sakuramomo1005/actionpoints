@@ -51,6 +51,30 @@ The test statistic is
 
 
 
+<p align="center">
+  <img width="700" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/3.png">
+</p>
+
+
+
+<p align="center">
+  <img width="700" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/4.png">
+</p>
+<p align="center">
+  <img width="700" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/5.png">
+</p>
+
+
+
+<p align="center">
+  <img width="700" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/6.png">
+</p>
+<p align="center">
+  <img width="700" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/7.png">
+</p>
+
+
+
 
 
 
@@ -69,7 +93,12 @@ The test statistic is
 
 [different alpha](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/results20200528.pdf)
 
+[IPWE under different crietria](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/IPWE-results-20200716.pdf)
 
+[more results](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/LRT-simulation-plots-setting1-0722.pdf)
 
+[more results](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/LRT-simulation-plots-setting2-0722.pdf)
+
+[p-value plots](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/likelihoodratiotest/Files/results20200722.pdf)
 
 
