@@ -140,8 +140,6 @@ However, the results are usually different from our expectation.
 
 ## EMBARC data estimation (compare purity / likelihood, different criteria)
 
-![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/embarc%20likelihood.png)
-
 <p align="center">
   <img width="500" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/embarc%20likelihood.png">
 </p>
