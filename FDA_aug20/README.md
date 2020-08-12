@@ -161,10 +161,15 @@ Results
 <a name="d23"></a>
 ### 2.3 comparison with SIMML
 
+We simulate datasets with different dimension of covarites, p, different noises, sigma. 
+
+The longitudinal method has the highest PCD across different scenarios. 
+
 <p align="center">
   <img width="600" height="550" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/sim2.png">
 </p>
 
+The animations show the movement directions of the ellipses of those two groups: 
 
 <p align="center">
   <img width="600" height="550" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/cgif.gif">
@@ -177,12 +182,14 @@ Results
 <a name="d31"></a>
 ### 3.1. Stepwise selection 
 
+The EMBARC data has more than 200 covariates. We conducted forward selection and then backward selection. 
+We than get 13 covariates that make longitudinal single index method perform similar as SIMML. 
 
-[forward](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/forwardselection.pdf)
+* [forward selection results](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/forwardselection.pdf)
 
-[backward](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/backward.pdf)
+* [backward selection results](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/backward.pdf)
 
-[simulation](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/results20205021.pdf)
+* [simulation results](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/results20205021.pdf)
 
 <p align="center">
   <img width="600" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/boxplot.png">
@@ -194,14 +201,14 @@ Results
 <a name="d321"></a>
 #### 3.2.1 Variable selection based on linear change score model
 
-We use LASSO for the linear change score method, and use the selected vaiable to work on the ..... the IPWE is not very good. 
+We use LASSO for the linear change score method, and use the selected vaiable to work on the IPWE calculation. However, he IPWE is not very good. 
 
 <p align="center">
-  <img width="600" height="100" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/lasso_on_cs1.png">
+  <img width="600"  src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/lasso_on_cs1.png">
 </p>
 
 <p align="center">
-  <img width="600" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/lasso_on_cs2.png">
+  <img width="600" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/lasso_on_cs2.png">
 </p>
 
 [lasso](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/lassoselection.pdf)
@@ -447,8 +454,9 @@ When multi GEM mode is generated, i.e., different alpha for two groups.
 
 #### Two different alpha for drug group and placebo group
 
-![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/largegamma.gif)
-
+<p align="center">
+  <img width="700" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/largegamma.gif">
+</p>
 
 Other results: 
 
