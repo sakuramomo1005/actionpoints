@@ -332,17 +332,6 @@ However, the results are usually different from our expectation.
 ```
 
 
-<p align="center">
-  <img width="800" height="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/method%20compare.png">
-</p>
-
-<a name="d5"></a>
-
-
-
-
-
-
 ## 5. GEM model hypothesis test 
 
 
