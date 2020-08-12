@@ -466,11 +466,22 @@ Other results:
 
 ## EMBARC
 
+For EBMARC data, the purity method has a good performance, whenevr the IPWE is calculated with 
+
+* change score
+* integral
+* weighted integral
 
 <p align="center">
-  <img width="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/cs.png">
-  <img width="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/int.png">
-  <img width="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/wint.png">
+  <img width="500" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/cs.png">
+</p>
+
+<p align="center">
+  <img width="500" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/int.png">
+</p>
+
+<p align="center">
+  <img width="500" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/wint.png">
 </p>
 
 
