@@ -468,7 +468,9 @@ Other results:
 
 
 <p align="center">
-  <img width="500" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/embarc%20likelihood.png">
+  <img width="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/cs.png">
+  <img width="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/int.png">
+  <img width="300" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/wint.png">
 </p>
 
 
