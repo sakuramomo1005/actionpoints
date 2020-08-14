@@ -210,13 +210,11 @@ We use LASSO for the linear change score method, and use the selected vaiable to
 #### 3.2.2. Iteration by hand
 
 <p align="center">
-  <img width="600" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/plot2d.gif">
+  <img width="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/plot2d.gif">
+  <img width="400" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/counter.gif">
 </p>
 
 
-<p align="center">
-  <img width="600" src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Files/counter.gif">
-</p>
 
 <a name="d323"></a>
 #### 3.2.3. Optim function in R
