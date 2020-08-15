@@ -1,5 +1,13 @@
 
 
+## 2020-08-14
+
+
+* We selected 13 covariates before, try get 2 out of 13 and check them geometricly. (shape)
+* Time: add missing, all subjects have the same length of follow up times but some may missing some points. 
+* Toy example: when purity method is better than likelihood method? with only p = 2 dimensions? 
+
+
 ## 2020-07-17
 
 * p value calculation for likelihood ratio test (run more simulation times)
