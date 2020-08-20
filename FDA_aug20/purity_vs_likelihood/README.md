@@ -164,3 +164,40 @@ However, the results are usually different from our expectation.
 
 
 
+### Example 1 
+
+![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/example1.gif)
+
+
+### Example 2
+
+![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/example2.gif)
+
+
+### Example 3
+
+![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/example3.gif)
+
+
+### Example 4
+
+![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/example4.gif)
+
+
+### Example 5 
+
+![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/example5.gif)
+
+
+### Example 6
+
+![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/example6.gif)
+
+
+### Example 7
+
+![](https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/Files/example7.gif)
+
+
+
+
