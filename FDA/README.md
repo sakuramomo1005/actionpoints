@@ -1,5 +1,15 @@
 
 
+## 2020-08-20
+
+
+* draw the ellipse movement plots for purity and ellipse separately. 
+* check the parameter for the 2 of 13 covariats. 
+* nonGEM model, observe difference? 
+* new paper
+* calculate the ATS without using the test dataset
+* consider potentional weight function
+
 ## 2020-08-14
 
 
