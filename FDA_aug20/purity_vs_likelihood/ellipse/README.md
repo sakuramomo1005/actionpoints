@@ -25,7 +25,7 @@
         
         
         
-    
+### Scenario 2    
   
 * True data is generated from a GEM model
 * There is 30% MCAR missing
@@ -51,6 +51,8 @@
               
 <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/ellipse/file2/true_s2_180.gif" width="300"/> <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/ellipse/file2/pur_s2_180.gif" width="300"/> <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/ellipse/file2/like_s2_180.gif" width="300"/> 
                 
+
+### Scenario 3
 
 * True data is generated from a GEM model
 * There are drop-off subjects
