@@ -1,12 +1,33 @@
+### Scenario 1
 
-
+* True data is generated from a GEM model
+* There is no missing data
+* From left two right are: 
+   + the ellipses drawn with the true parameters
+   + the ellipses drawn with the parameters estimated with purity method
+   + the ellipses drawn with the parameters estimated with likelihood method
 
 <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/ellipse/file2/true_s1_0.gif" width="300"/> <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/ellipse/file2/pur_s1_0.gif" width="300"/> <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/ellipse/file2/like_s1_0.gif" width="300"/> 
   
   
   
+* True data is generated from a GEM model
+* There is 30% MCAR missing
+* From left two right are: 
+   + the ellipses drawn with the true parameters
+   + the ellipses drawn with the parameters estimated with purity method
+   + the ellipses drawn with the parameters estimated with likelihood method
+   
 <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/ellipse/file2/true_s1_60.gif" width="300"/> <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/ellipse/file2/pur_s1_60.gif" width="300"/> <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/ellipse/file2/like_s1_60.gif" width="300"/> 
     
+    
+    
+* True data is generated from a GEM model
+* There are drop-off subjects
+* From left two right are: 
+   + the ellipses drawn with the true parameters
+   + the ellipses drawn with the parameters estimated with purity method
+   + the ellipses drawn with the parameters estimated with likelihood method
     
     
 <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/ellipse/file2/true_s1_120.gif" width="300"/> <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/ellipse/file2/pur_s1_120.gif" width="300"/> <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/ellipse/file2/like_s1_120.gif" width="300"/> 
