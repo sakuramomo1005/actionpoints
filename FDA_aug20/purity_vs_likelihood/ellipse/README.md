@@ -1,4 +1,4 @@
 
 
 
-<img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig8.png" width="500"/> <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/Figures/fig9.png" width="500"/> 
+<img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/ellipse/file/like_s1_0.gif" width="300"/> <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/ellipse/file/like_s1_0.gif" width="300"/> <img src="https://github.com/sakuramomo1005/actionpoints/blob/master/FDA_aug20/purity_vs_likelihood/ellipse/file/like_s1_0.gif" width="300"/> 
