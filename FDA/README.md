@@ -1,4 +1,10 @@
 
+## 2020-09-03
+
+* dual optimzation 
+* add b, the random effect, in the equation
+* check the equation 
+* find the weight function that can optimize the equation
 
 ## 2020-08-20
 
