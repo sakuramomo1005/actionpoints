@@ -1,4 +1,21 @@
 
+
+## 2020-09-17
+
+* How method works under MNAR (simulate MNAR scenario)
+* check literature, how others extract scalar from a longitudinal data
+* Run simulation compare ATS and crude estimator when missing data is extix 
+* try different parameters, the result might be different
+* analyticly derive the bias of estimatro when there is a missing data
+* compare the stand error of the 4 estimatro 
+* if its not quadratic, can we use ATS?
+
+## 2020-09-10
+
+polish the results 
+
+weights 
+
 ## 2020-09-03
 
 * dual optimzation 
