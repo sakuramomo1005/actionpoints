@@ -1,5 +1,30 @@
 
 
+
+## 2020-10-23
+
+#### Proposal 
+
+* compare the quadratic trajectories from pain study and depression study
+* compare outcome, compare their placebo response
+* show extract scalar summary, ats, better than ....
+
+The dataset, eli lily website?
+
+convex based clustering method
+
+chaper 3, could be optimal weight
+
+variance decomposition to calculate the variance? 
+
+calculate the bias and variance for dropout scenario. 
+
+
+## 2020-10-16
+
+MAR missing scenario
+
+
 ## 2020-09-17
 
 * How method works under MNAR (simulate MNAR scenario)
