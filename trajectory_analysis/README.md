@@ -4,6 +4,7 @@ by Gueorguieva R
 
 Items 1-7 of 7 (Display the 7 citations in PubMed)
 
+
 1.
 Trajectories of relapse in randomised, placebo-controlled trials of treatment discontinuation in major depressive disorder: an individual patient-level data meta-analysis.
 Gueorguieva R, Chekroud AM, Krystal JH.
