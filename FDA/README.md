@@ -1,6 +1,18 @@
 
 
 
+
+## 2020-11-23
+
+Questions regarding to WATS
+
+1. in optimal weighted L2 paper, why chooes to minizing the coefficient of variation (CV) instead of maxmizing the L2 distance directly? 
+2. when we calculate the expectation and variance of WATS, should we treat the weight function as a known value or as a random variable? Since in the paper, the weighted is proposed as ....  
+
+
+1-1 correlation? 
+
+
 ## 2020-10-23
 
 #### Proposal 
